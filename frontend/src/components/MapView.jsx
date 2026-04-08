@@ -102,6 +102,11 @@ const MapViewContent = forwardRef(
       prevPredLen.current = predictions.length;
     }, [predictions.length]);
 
+    // Force re-render of GeoJSON styling when selectedGeoid changes
+    useEffect(() => {
+      setMapKey((k) => k + 1);
+    }, [selectedGeoid]);
+
     const predMap = useMemo(() => {
       const m = {};
       predictions.forEach((p) => {
