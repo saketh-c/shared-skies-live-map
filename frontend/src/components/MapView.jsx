@@ -102,11 +102,6 @@ const MapViewContent = forwardRef(
       prevPredLen.current = predictions.length;
     }, [predictions.length]);
 
-    // Force re-render of GeoJSON styling when selectedGeoid changes
-    useEffect(() => {
-      setMapKey((k) => k + 1);
-    }, [selectedGeoid]);
-
     const predMap = useMemo(() => {
       const m = {};
       predictions.forEach((p) => {
@@ -115,7 +110,7 @@ const MapViewContent = forwardRef(
       return m;
     }, [predictions]);
 
-    const styleFeature = (feature) => {
+    const styleFeature = useCallback((feature) => {
       const geoid = normGeoid(feature.properties?.GEOID);
       const pred = predMap[geoid];
       const isSelected = geoid === selectedGeoid;
@@ -127,7 +122,7 @@ const MapViewContent = forwardRef(
         lineCap: "round",
         lineJoin: "round",
       };
-    };
+    }, [predMap, selectedGeoid]);
 
     const onEachFeature = useCallback((feature, layer) => {
       const geoid = normGeoid(feature.properties?.GEOID);
