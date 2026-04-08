@@ -27,9 +27,9 @@ export default function AirQualityGuide() {
     {
       name: "Hazardous",
       range: "13+ µg/m³",
-      color: "#8B0000",
+      color: "#9d4edd",
       description:
-        "Health warnings of emergency conditions. Serious aggravation of heart and lung disease, premature mortality in sensitive groups, and respiratory effects in the general population.",
+        "Health warnings of emergency conditions. Serious aggravation of heart and lung disease, premature mortality in sensitive groups, and respiratory effects in the general population. Color intensifies (light purple to dark purple) as pollution increases.",
       who: "Everyone: avoid all outdoor physical activity. Sensitive groups: remain indoors.",
     },
   ];

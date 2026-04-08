@@ -27,18 +27,19 @@ function FlyToHandler({ target }) {
   return null;
 }
 
-function BackgroundClickHandler({ onBackgroundClick }) {
+function BackgroundClickHandler({ onBackgroundClick, lastClickedFeature, onResetFeatureClick }) {
   const map = useMap();
   useEffect(() => {
-    const handleClick = (e) => {
-      // Only trigger if clicking on empty space (not a feature)
-      if (e.target === map.getPane("tilePane") || e.target.tagName === "CANVAS") {
+    const handleMapClick = () => {
+      if (!lastClickedFeature) {
         onBackgroundClick?.();
       }
+      onResetFeatureClick?.();
     };
-    map.on("click", handleClick);
-    return () => map.off("click", handleClick);
-  }, [map, onBackgroundClick]);
+
+    map.on("click", handleMapClick);
+    return () => map.off("click", handleMapClick);
+  }, [map, onBackgroundClick, lastClickedFeature, onResetFeatureClick]);
   return null;
 }
 
@@ -90,7 +91,9 @@ function SmoothWheelZoom() {
 const MapViewContent = forwardRef(
   ({ geojson, predictions, onTractSelect, onBackgroundClick, selectedGeoid, searchMarker, statewide }, _ref) => {
     const [mapKey, setMapKey] = useState(0);
+    const [lastClickedFeature, setLastClickedFeature] = useState(false);
     const prevPredLen = useRef(0);
+    const mapRef = useRef(null);
 
     useEffect(() => {
       if (predictions.length > 0 && prevPredLen.current === 0) {
@@ -139,7 +142,11 @@ const MapViewContent = forwardRef(
       }
 
       layer.on({
-        click: () => onTractSelect(geoid),
+        click: (e) => {
+          setLastClickedFeature(true);
+          onTractSelect(geoid);
+          e.stopPropagation();
+        },
         mouseover: (e) => {
           e.target.setStyle({
             fillOpacity: 0.9,
@@ -169,7 +176,11 @@ const MapViewContent = forwardRef(
 
         <FlyToHandler target={searchMarker} />
         <SmoothWheelZoom />
-        <BackgroundClickHandler onBackgroundClick={onBackgroundClick} />
+        <BackgroundClickHandler 
+          onBackgroundClick={onBackgroundClick}
+          lastClickedFeature={lastClickedFeature}
+          onResetFeatureClick={() => setLastClickedFeature(false)}
+        />
 
         {hasPolygons && (
           <GeoJSON

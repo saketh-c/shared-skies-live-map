@@ -204,9 +204,11 @@ def pm25_color_gradient(pm25: float) -> str:
         factor = (pm25 - 9.0) / 3.9
         return interpolate_color("#FF6B6B", "#d63031", factor)
 
-    # Dark red: 13.0+
+    # Purple range: 13.0+
     else:
-        return "#8B0000"
+        # Gradient from bright purple to dark purple (13.0-25+)
+        factor = min(1.0, (pm25 - 13.0) / 12.0)
+        return interpolate_color("#9d4edd", "#3c096c", factor)
 
 
 def pm25_info(pm25: float) -> dict:
