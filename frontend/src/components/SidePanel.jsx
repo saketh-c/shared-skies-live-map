@@ -177,8 +177,16 @@ export default function SidePanel({
           <button className="back-btn" onClick={onDeselect}>← Back to {displayName}</button>
         )}
         <div className="brand">
-          <div className="brand-icon">✦</div>
-          <span className="brand-name">Shared Skies</span>
+          <div className="brand-left">
+            <div className="brand-icon">✦</div>
+            <span className="brand-name">Shared Skies Initiative</span>
+          </div>
+          {visitCount != null && (
+            <div className="visit-counter-header">
+              <span className="visit-counter-dot" />
+              <span><strong>{visitCount.toLocaleString()}</strong> users</span>
+            </div>
+          )}
         </div>
         <div className="brand-tagline">
           {selectedTract
@@ -243,17 +251,11 @@ export default function SidePanel({
       )}
 
       <div className="sidebar-footer">
-        {visitCount != null && (
-          <div className="visit-counter">
-            <span className="visit-counter-dot" />
-            <span><strong>{visitCount.toLocaleString()}</strong> visits</span>
-          </div>
-        )}
         {lastUpdated && (
           <div className="last-updated">Updated {timeAgo(lastUpdated)} · refreshes every 30 min</div>
         )}
         Data: EPA EJScreen · Open-Meteo · ML ensemble model<br />
-        Built by <a href="#" target="_blank" rel="noreferrer">Shared Skies</a> · Texas-wide Coverage
+        Built by <a href="#" target="_blank" rel="noreferrer">Shared Skies Initiative</a> · Texas-wide Coverage
       </div>
     </aside>
   );

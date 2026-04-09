@@ -63,8 +63,29 @@
 .brand {
   display: flex;
   align-items: center;
-  gap: 10px;
+  justify-content: space-between;
   margin-bottom: 4px;
+}
+
+.brand-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.visit-counter-header {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10px;
+  color: var(--text-muted);
+  letter-spacing: 0.2px;
+  flex-shrink: 0;
+}
+
+.visit-counter-header strong {
+  color: var(--text);
+  font-weight: 600;
 }
 
 .brand-icon {
@@ -372,6 +393,7 @@
   font-size: 10px;
   color: var(--text-dim);
   line-height: 1.8;
+  text-align: center;
 }
 
 .visit-counter {
@@ -453,7 +475,7 @@
 
 /* ── Last updated chip ───────────────────────────────────────────────────── */
 .last-updated {
-  padding: 0 24px 16px;
+  margin-bottom: 6px;
   font-size: 10px;
   color: var(--text-dim);
 }
