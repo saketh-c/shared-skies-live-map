@@ -137,9 +137,13 @@
   font-weight: 800;
   line-height: 1;
   letter-spacing: -3px;
-  transition: color 0.4s;
+  transition: color 0.18s, transform 0.12s;
   -webkit-text-stroke: 1px rgba(0,0,0,0.5);
   text-shadow: none;
+}
+
+.tract-tooltip {
+  transition: transform 0.12s ease, font-size 0.12s ease, padding 0.12s ease !important;
 }
 
 .pm25-unit {

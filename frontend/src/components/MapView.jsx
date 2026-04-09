@@ -63,28 +63,36 @@ function SmoothWheelZoom() {
 
     const onWheel = (e) => {
       e.preventDefault();
-      accDelta += e.deltaY < 0 ? 0.5 : -0.5;
+      // Make wheel less sensitive: smaller increments and clamped accumulation
+      accDelta += e.deltaY < 0 ? 0.25 : -0.25;
+      accDelta = Math.max(-2, Math.min(2, accDelta));
+
       lastMousePoint = map.mouseEventToContainerPoint(e);
       lastMouseLatLng = map.containerPointToLatLng(lastMousePoint);
 
       if (timer) clearTimeout(timer);
+      // Slightly larger debounce so multiple wheel ticks aggregate smoothly
       timer = setTimeout(() => {
-        const newZoom = Math.max(1, Math.min(18, map.getZoom() + accDelta));
+        // Use discrete zoom steps to avoid fast fractional jumps
+        const targetZoom = Math.round(map.getZoom() + accDelta);
+        const newZoom = Math.max(1, Math.min(18, targetZoom));
+
         const mouseNewPx = map.project(lastMouseLatLng, newZoom);
         const newCenterPx = mouseNewPx
           .subtract(lastMousePoint)
           .add(map.getSize().divideBy(2));
         const newCenter = map.unproject(newCenterPx, newZoom);
 
+        // Slower, smoother animation to give tiles time to load
         map.flyTo(newCenter, newZoom, {
           animate: true,
-          duration: 0.6,
-          easeLinearity: 0.15,
+          duration: 0.9,
+          easeLinearity: 0.2,
         });
 
         accDelta = 0;
         timer = null;
-      }, 40);
+      }, 60);
     };
 
     map.getContainer().addEventListener("wheel", onWheel, { passive: false });
@@ -218,10 +226,15 @@ const MapViewContent = forwardRef(
         preferCanvas={true}
         touchZoom={true}
         tap={true}
+        zoomAnimation={true}
+        fadeAnimation={true}
+        inertia={true}
+        inertiaDeceleration={3000}
+        inertiaMaxSpeed={1500}
         maxZoom={13}
         minZoom={4}
       >
-        <TileLayer url={CARTO_LIGHT_NOLABELS} attribution={ATTRIBUTION} zIndex={1} keepBuffer={8} updateWhenZooming={false} updateWhenIdle={true} />
+        <TileLayer url={CARTO_LIGHT_NOLABELS} attribution={ATTRIBUTION} zIndex={1} keepBuffer={16} updateWhenZooming={false} updateWhenIdle={true} />
 
         <FlyToHandler target={searchMarker} />
         <SmoothWheelZoom />
@@ -251,7 +264,7 @@ const MapViewContent = forwardRef(
           />
         )}
 
-        <TileLayer url={CARTO_LIGHT_LABELS} zIndex={650} pane="shadowPane" keepBuffer={8} updateWhenZooming={false} updateWhenIdle={true} />
+        <TileLayer url={CARTO_LIGHT_LABELS} zIndex={650} pane="shadowPane" keepBuffer={16} updateWhenZooming={false} updateWhenIdle={true} />
 
         <div className="map-legend">
           <div className="legend-title">PM2.5 µg/m³</div>
