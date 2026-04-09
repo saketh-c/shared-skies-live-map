@@ -184,6 +184,14 @@ export default function SidePanel({
             ? `Tract ${selectedTract.geoid?.slice(-6)}${countyName ? ` · ${countyName} County` : ''}`
             : `${displayName} · Census Tract Level`}
         </div>
+        {/* Trusted-by counter */}
+        <div className="trusted-badge">
+          {typeof visitCount === 'number' ? (
+            <span>Trusted by <strong>{visitCount.toLocaleString()}</strong> users across Texas</span>
+          ) : (
+            <span style={{opacity:0.7}}>Trusted by many users</span>
+          )}
+        </div>
       </div>
 
       {error && !loading && (

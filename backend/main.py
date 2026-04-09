@@ -17,6 +17,7 @@ import httpx
 import joblib
 import numpy as np
 import pandas as pd
+import sqlite3
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
@@ -28,6 +29,7 @@ STATIC_DIR = os.path.join(ROOT, "backend", "static")
 MODEL_PATH = os.path.join(ROOT, "models", "ensemble.joblib")
 LOOKUP_PATH = os.path.join(STATIC_DIR, "tract_lookup.parquet")
 TEXAS_GEOJSON_PATH = os.path.join(STATIC_DIR, "texas_all_tracts.geojson")
+VISITS_DB = os.path.join(ROOT, "backend", "visits.sqlite")
 
 # ── City Configuration (Generic, extensible design) ─────────────────────────
 CITIES = {
@@ -172,6 +174,20 @@ async def lifespan(app: FastAPI):
         asyncio.create_task(_keepalive_loop())
     except Exception:
         pass
+
+    # Initialize a simple SQLite visits DB for a persistent visit counter.
+    try:
+        def _init_visits_db():
+            conn = sqlite3.connect(VISITS_DB, timeout=5)
+            cur = conn.cursor()
+            cur.execute("CREATE TABLE IF NOT EXISTS visits (id INTEGER PRIMARY KEY CHECK (id = 1), count INTEGER)")
+            cur.execute("INSERT OR IGNORE INTO visits (id, count) VALUES (1, 0)")
+            conn.commit()
+            conn.close()
+        await asyncio.to_thread(_init_visits_db)
+        print(f"Visits DB initialized at {VISITS_DB}")
+    except Exception as e:
+        print(f"Failed to initialize visits DB: {e}")
 
     yield
 
@@ -412,6 +428,28 @@ async def get_city_predictions(city: str):
     return result
 
 
+# ── Persistent visits counter helpers
+
+def _get_visit_count_sync():
+    conn = sqlite3.connect(VISITS_DB, timeout=5)
+    cur = conn.cursor()
+    cur.execute("SELECT count FROM visits WHERE id=1")
+    row = cur.fetchone()
+    conn.close()
+    return int(row[0]) if row else 0
+
+
+def _inc_visit_sync():
+    conn = sqlite3.connect(VISITS_DB, timeout=5)
+    cur = conn.cursor()
+    cur.execute("UPDATE visits SET count = count + 1 WHERE id = 1")
+    conn.commit()
+    cur.execute("SELECT count FROM visits WHERE id=1")
+    row = cur.fetchone()
+    conn.close()
+    return int(row[0]) if row else 0
+
+
 # ── Routes ────────────────────────────────────────────────────────────────────
 
 @app.get("/api/health")
@@ -438,6 +476,28 @@ async def list_cities():
             for city_id, config in CITIES.items()
         ]
     }
+
+
+@app.post("/api/visit")
+async def record_visit():
+    """Increment a persistent visit counter and return the updated count."""
+    try:
+        new_count = await asyncio.to_thread(_inc_visit_sync)
+        return {"visits": new_count}
+    except Exception as e:
+        print(f"Visit increment error: {e}")
+        raise HTTPException(500, "Visit increment failed")
+
+
+@app.get("/api/metrics")
+async def get_metrics():
+    """Return simple application metrics such as total visits."""
+    try:
+        count = await asyncio.to_thread(_get_visit_count_sync)
+        return {"visits": count}
+    except Exception as e:
+        print(f"Metrics read error: {e}")
+        raise HTTPException(500, "Metrics read failed")
 
 
 @app.get("/api/texas/predictions")

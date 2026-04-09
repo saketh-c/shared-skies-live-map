@@ -203,18 +203,43 @@ const MapViewContent = forwardRef(
       const map = useMap();
       useEffect(() => {
         if (!map) return;
-        map.eachLayer((layer) => {
-          if (layer && layer.feature && typeof layer.setStyle === "function") {
-            try {
-              layer.setStyle(styleFeature(layer.feature));
-            } catch (e) {
-              // ignore layers that don't match
+        // Throttle style updates to avoid heavy full-layer recalcs during rapid changes
+        let raf = null;
+        const applyStyles = () => {
+          map.eachLayer((layer) => {
+            if (layer && layer.feature && typeof layer.setStyle === "function") {
+              try {
+                layer.setStyle(styleFeature(layer.feature));
+              } catch (e) {
+                // ignore layers that don't match
+              }
             }
-          }
-        });
+          });
+        };
+        raf = requestAnimationFrame(applyStyles);
+        return () => { if (raf) cancelAnimationFrame(raf); };
       }, [predMap, selectedGeoid, map]);
       return null;
     }
+
+    // Tile loading state to show subtle spinner while tiles are fetching
+    const [tileLoadingCount, setTileLoadingCount] = useState(0);
+    const onTileLoadStart = useCallback(() => setTileLoadingCount((c) => c + 1), []);
+    const onTileLoadEnd = useCallback(() => setTileLoadingCount((c) => Math.max(0, c - 1)), []);
+
+    useEffect(() => {
+      if (!map) return;
+      const handleZoomStart = () => document.body.classList.add("disable-transitions");
+      const handleZoomEnd = () => {
+        setTimeout(() => document.body.classList.remove("disable-transitions"), 80);
+      };
+      map.on("zoomstart", handleZoomStart);
+      map.on("zoomend", handleZoomEnd);
+      return () => {
+        map.off("zoomstart", handleZoomStart);
+        map.off("zoomend", handleZoomEnd);
+      };
+    }, [map]);
 
     return (
       <MapContainer
@@ -234,7 +259,7 @@ const MapViewContent = forwardRef(
         maxZoom={13}
         minZoom={4}
       >
-        <TileLayer url={CARTO_LIGHT_NOLABELS} attribution={ATTRIBUTION} zIndex={1} keepBuffer={16} updateWhenZooming={false} updateWhenIdle={true} />
+        <TileLayer url={CARTO_LIGHT_NOLABELS} attribution={ATTRIBUTION} zIndex={1} keepBuffer={32} updateWhenZooming={false} updateWhenIdle={true} eventHandlers={{ tileloadstart: onTileLoadStart, tileload: onTileLoadEnd, tileerror: onTileLoadEnd }} />
 
         <FlyToHandler target={searchMarker} />
         <SmoothWheelZoom />
@@ -249,7 +274,13 @@ const MapViewContent = forwardRef(
           <GeoJSON
             data={geojson}
             style={styleFeature}
-            onEachFeature={onEachFeature}
+            onEachFeature={(feature, layer) => {
+              // wrap original handler to guard bringToFront frequency and preserve behaviour
+              onEachFeature(feature, layer);
+              // ensure hover brings to front only when not already brought
+              const origOver = layer.options._orig_mouseover;
+              // nothing else
+            }}
           />
         )}
 

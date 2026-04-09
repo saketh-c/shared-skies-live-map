@@ -23,6 +23,7 @@ export default function App() {
   const [activeTab, setActiveTab] = useState("map");
   const [searchMarker, setSearchMarker] = useState(null);
   const mapRef = useRef(null);
+  const [visitCount, setVisitCount] = useState(null);
 
   const fetchPredictions = useCallback(async () => {
     try {
@@ -60,6 +61,24 @@ export default function App() {
     const timer = setInterval(fetchPredictions, REFRESH_MS);
     return () => clearInterval(timer);
   }, [fetchPredictions, fetchGeojson]);
+
+  // Record a page visit (increments on every page load)
+  useEffect(() => {
+    const p = async () => {
+      try {
+        const res = await fetch(`${API_BASE}/api/visit`, { method: "POST" });
+        if (res.ok) {
+          const data = await res.json();
+          setVisitCount(data.visits);
+        } else {
+          console.warn("Visit endpoint failed", res.status);
+        }
+      } catch (e) {
+        console.warn("Failed to record visit:", e.message);
+      }
+    };
+    p();
+  }, []);
 
   const handleTractSelect = useCallback(async (geoid) => {
     if (!predictions) return;
@@ -129,6 +148,7 @@ export default function App() {
               error={error}
               lastUpdated={lastUpdated}
               statewide={true}
+              visitCount={visitCount}
             />
           </>
         ) : (
