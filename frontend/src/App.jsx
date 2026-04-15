@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useState, useCallback, useRef, createContext } from "react";
 import MapView from "./components/MapView.jsx";
 import SidePanel from "./components/SidePanel.jsx";
 import SearchBar from "./components/SearchBar.jsx";
@@ -10,6 +10,8 @@ import { findNearestTract } from "./utils/geo.js";
 const API_BASE = import.meta.env.VITE_API_URL || "";
 
 const REFRESH_MS = 30 * 60 * 1000; // 30 min
+
+export const LanguageContext = createContext({ lang: 'en', setLang: () => {} });
 
 export default function App() {
   const [predictions, setPredictions] = useState(null);
@@ -24,6 +26,11 @@ export default function App() {
   const [searchMarker, setSearchMarker] = useState(null);
   const mapRef = useRef(null);
   const [visitCount, setVisitCount] = useState(null);
+
+  // language state (persisted in localStorage)
+  const [lang, setLang] = useState(() => {
+    try { return localStorage.getItem('ssi_lang') || 'en'; } catch (e) { return 'en'; }
+  });
 
   const fetchPredictions = useCallback(async () => {
     try {
@@ -118,59 +125,61 @@ export default function App() {
   }, [predictions, handleTractSelect]);
 
   return (
-    <div className="app-layout">
-      <div className="sidebar">
-        {/* Tab bar */}
-        <div className="sidebar-tabs">
-          <button
-            className={`sidebar-tab${activeTab === "map" ? " active" : ""}`}
-            onClick={() => setActiveTab("map")}
-          >
-            Map
-          </button>
-          <button
-            className={`sidebar-tab${activeTab === "guide" ? " active" : ""}`}
-            onClick={() => setActiveTab("guide")}
-          >
-            Air Quality Guide
-          </button>
+    <LanguageContext.Provider value={{ lang, setLang }}>
+      <div className="app-layout">
+        <div className="sidebar">
+          {/* Tab bar */}
+          <div className="sidebar-tabs">
+            <button
+              className={`sidebar-tab${activeTab === "map" ? " active" : ""}`}
+              onClick={() => setActiveTab("map")}
+            >
+              Map
+            </button>
+            <button
+              className={`sidebar-tab${activeTab === "guide" ? " active" : ""}`}
+              onClick={() => setActiveTab("guide")}
+            >
+              Air Quality Guide
+            </button>
+          </div>
+
+          {activeTab === "map" ? (
+            <>
+              <SidePanel
+                predictions={predictions}
+                selectedTract={selectedTract}
+                localWeather={localWeather}
+                onDeselect={handleDeselect}
+                loading={loading}
+                weatherLoading={weatherLoading}
+                error={error}
+                lastUpdated={lastUpdated}
+                statewide={true}
+                visitCount={visitCount}
+              />
+            </>
+          ) : (
+            <AirQualityGuide />
+          )}
         </div>
 
-        {activeTab === "map" ? (
-          <>
-            <SidePanel
-              predictions={predictions}
-              selectedTract={selectedTract}
-              localWeather={localWeather}
-              onDeselect={handleDeselect}
-              loading={loading}
-              weatherLoading={weatherLoading}
-              error={error}
-              lastUpdated={lastUpdated}
-              statewide={true}
-              visitCount={visitCount}
-            />
-          </>
-        ) : (
-          <AirQualityGuide />
-        )}
-      </div>
-
-      <div className="map-wrapper">
-        <div className="map-search-overlay">
-          <SearchBar onSearch={handleSearch} loading={loading} />
+        <div className="map-wrapper">
+          <div className="map-search-overlay">
+            <SearchBar onSearch={handleSearch} loading={loading} />
+          </div>
+          <MapView
+            ref={mapRef}
+            geojson={geojson}
+            predictions={predictions?.tracts ?? []}
+            onTractSelect={handleTractSelect}
+            onBackgroundClick={handleDeselect}
+            selectedGeoid={selectedTract?.geoid ?? null}
+            searchMarker={searchMarker}
+            statewide={true}
+          />
         </div>
-        <MapView
-          ref={mapRef}
-          geojson={geojson}
-          predictions={predictions?.tracts ?? []}
-          onTractSelect={handleTractSelect}
-          onBackgroundClick={handleDeselect}
-          selectedGeoid={selectedTract?.geoid ?? null}
-          searchMarker={searchMarker}
-          statewide={true}
-        />
       </div>
-    </div>
+    </LanguageContext.Provider>
   );
 }

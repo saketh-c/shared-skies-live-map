@@ -114,6 +114,34 @@
   padding-left: 42px;
 }
 
+/* Language toggle (EN | ES) */
+.lang-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: 12px;
+}
+
+.lang-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-weight: 700;
+  padding: 4px 6px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s;
+}
+
+.lang-btn.active {
+  color: var(--text);
+  background: rgba(255,255,255,0.03);
+}
+
+.lang-btn:hover { color: var(--text); }
+
+.lang-toggle .sep { color: var(--text-dim); }
+
 /* ── Back button ─────────────────────────────────────────────────────────── */
 .back-btn {
   background: none;
