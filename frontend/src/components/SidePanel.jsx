@@ -57,7 +57,7 @@ function WeatherWidget({ weather, isLoading, lang }) {
     <>
       <div className="section-header">
         {t(lang, 'current_conditions')}
-        {isLoading && <span className="weather-loading-badge">Updating...</span>}
+        {isLoading && <span className="weather-loading-badge">{t(lang, 'tooltip.updating')}</span>}
       </div>
       <div className="weather-grid">
         <div className="weather-item">

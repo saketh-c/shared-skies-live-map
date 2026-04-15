@@ -1,6 +1,8 @@
-import { useMemo, useRef, useEffect, useState, forwardRef, useCallback } from "react";
+import { useMemo, useRef, useEffect, useState, forwardRef, useCallback, useContext } from "react";
 import { MapContainer, TileLayer, GeoJSON, useMap, Circle } from "react-leaflet";
 import { BREAKPOINTS } from "../utils/aqi.js";
+import { LanguageContext } from '../App';
+import { t, translateCategory } from '../i18n';
 
 const CARTO_LIGHT_NOLABELS =
   "https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png";
@@ -105,6 +107,7 @@ function MapLifecycle() {
 
 const MapViewContent = forwardRef(
   ({ geojson, predictions, onTractSelect, onBackgroundClick, selectedGeoid, searchMarker }, _ref) => {
+    const { lang } = useContext(LanguageContext);
     const justClickedRef = useRef(false);
     const onTractSelectRef = useRef(onTractSelect);
     const selectedGeoidRef = useRef(selectedGeoid);
@@ -147,7 +150,7 @@ const MapViewContent = forwardRef(
       layer.options.bubblingMouseEvents = false;
 
       const rawName = feature.properties?.NAME ?? geoid;
-      const displayName = rawName.startsWith("Census Tract") ? rawName : `Census Tract ${rawName}`;
+      const displayName = rawName.startsWith(t(lang, 'census_tract_prefix')) ? rawName : `${t(lang, 'census_tract_prefix')} ${rawName}`;
 
       layer.on({
         click: () => {
@@ -361,7 +364,7 @@ const MapViewContent = forwardRef(
             {BREAKPOINTS.map((b) => (
               <div className="legend-row" key={b.category}>
                 <div className="legend-swatch" style={{ background: b.color }} />
-                <span>{b.label}</span>
+                <span>{translateCategory(lang, b.category)}</span>
               </div>
             ))}
           </div>
@@ -378,9 +381,9 @@ const MapViewContent = forwardRef(
             <div className="ctt-pm25" style={{ color: tooltipData.color }}>
               {tooltipData.pm25} <span className="ctt-unit">µg/m³</span>
             </div>
-            <div className="ctt-cat">{tooltipData.category}</div>
+            <div className="ctt-cat">{translateCategory(lang, tooltipData.category)}</div>
             {tooltipData.county && (
-              <div className="ctt-county">{tooltipData.county} County</div>
+              <div className="ctt-county">{tooltipData.county} {t(lang, 'tooltip.county_suffix')}</div>
             )}
           </div>
         )}

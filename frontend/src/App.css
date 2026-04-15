@@ -142,6 +142,12 @@
 
 .lang-toggle .sep { color: var(--text-dim); }
 
+/* Make language toggle use same font as rest of app */
+.lang-btn {
+  font-family: inherit;
+  font-size: 13px;
+}
+
 /* ── Back button ─────────────────────────────────────────────────────────── */
 .back-btn {
   background: none;

@@ -1,7 +1,10 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useContext } from 'react';
 import './SearchBar.css';
+import { LanguageContext } from '../App';
+import { t } from '../i18n';
 
 export default function SearchBar({ onSearch, loading }) {
+  const { lang } = useContext(LanguageContext);
   const [searchInput, setSearchInput] = useState('');
   const [searchType, setSearchType] = useState('address');
   const [suggestions, setSuggestions] = useState([]);
@@ -60,7 +63,7 @@ export default function SearchBar({ onSearch, loading }) {
 
       // Validate Texas bounds
       if (lat < 25.8 || lat > 36.5 || lon < -106.6 || lon > -93.5) {
-        setError('Address is outside Texas. Please enter a Texas address.');
+        setError(t(lang, 'search.errors.address_outside'));
         setIsSearching(false);
         return;
       }
@@ -69,7 +72,7 @@ export default function SearchBar({ onSearch, loading }) {
       setSuggestions([]);
       setShowSuggestions(false);
     } catch (err) {
-      setError('Could not geocode address. Please try again.');
+      setError(t(lang, 'search.errors.search_failed'));
       console.error(err);
     } finally {
       setIsSearching(false);
@@ -90,7 +93,7 @@ export default function SearchBar({ onSearch, loading }) {
 
     if (searchType === 'address') {
       if (!searchInput.trim()) {
-        setError('Please enter an address');
+        setError(t(lang, 'search.errors.enter_address'));
         return;
       }
       if (suggestions.length > 0) {
@@ -109,10 +112,10 @@ export default function SearchBar({ onSearch, loading }) {
             const r = results[0];
             geocodeAddress(r.display_name, parseFloat(r.lat), parseFloat(r.lon));
           } else {
-            setError('Address not found. Try a more specific Texas address.');
+            setError(t(lang, 'search.errors.address_not_found'));
           }
         } catch (err) {
-          setError('Search failed. Please try again.');
+          setError(t(lang, 'search.errors.search_failed'));
         } finally {
           setIsSearching(false);
         }
@@ -121,7 +124,7 @@ export default function SearchBar({ onSearch, loading }) {
       // Coordinates mode
       const coords = searchInput.trim().split(',');
       if (coords.length !== 2) {
-        setError('Please enter coordinates as: latitude, longitude');
+        setError(t(lang, 'search.errors.coords_format'));
         return;
       }
 
@@ -129,12 +132,12 @@ export default function SearchBar({ onSearch, loading }) {
       const lon = parseFloat(coords[1].trim());
 
       if (isNaN(lat) || isNaN(lon)) {
-        setError('Please enter valid numbers for latitude and longitude');
+        setError(t(lang, 'search.errors.coords_invalid'));
         return;
       }
 
       if (lat < 25.8 || lat > 36.5 || lon < -106.6 || lon > -93.5) {
-        setError('Coordinates must be within Texas bounds');
+        setError(t(lang, 'search.errors.coords_out_of_bounds'));
         return;
       }
 
@@ -157,7 +160,7 @@ export default function SearchBar({ onSearch, loading }) {
               setError('');
             }}
           >
-            📍 Address
+            {t(lang, 'search.address_tab')}
           </button>
           <button
             type="button"
@@ -169,7 +172,7 @@ export default function SearchBar({ onSearch, loading }) {
               setError('');
             }}
           >
-            🧭 Coordinates
+            {t(lang, 'search.coordinates_tab')}
           </button>
         </div>
 
@@ -179,8 +182,8 @@ export default function SearchBar({ onSearch, loading }) {
               type="text"
               placeholder={
                 searchType === 'address'
-                  ? 'Enter address (e.g., Austin, TX)'
-                  : 'Latitude, Longitude (e.g., 30.2672, -97.7431)'
+                  ? t(lang, 'search.placeholder_address')
+                  : t(lang, 'search.placeholder_coords')
               }
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
@@ -206,7 +209,7 @@ export default function SearchBar({ onSearch, loading }) {
           </div>
 
           <button type="submit" disabled={loading || isSearching}>
-            {isSearching ? 'Searching...' : loading ? 'Loading...' : 'Search'}
+            {isSearching ? t(lang, 'search.searching') : loading ? t(lang, 'search.loading') : t(lang, 'search.search_button')}
           </button>
         </div>
 
@@ -214,7 +217,7 @@ export default function SearchBar({ onSearch, loading }) {
       </form>
 
       <div className="search-hint">
-        {searchType === 'coordinates' ? 'Enter latitude and longitude separated by comma' : ''}
+        {searchType === 'coordinates' ? t(lang, 'search.hint_coords') : ''}
       </div>
     </div>
   );
