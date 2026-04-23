@@ -117,6 +117,7 @@ const MapViewContent = forwardRef(
     const hoveredGeoidRef = useRef(null);
     const lastMouseLatLngRef = useRef(null);
     const [tooltipData, setTooltipData] = useState(null);
+    const [legendExpanded, setLegendExpanded] = useState(false);
 
     useEffect(() => { onTractSelectRef.current = onTractSelect; }, [onTractSelect]);
     useEffect(() => { selectedGeoidRef.current = selectedGeoid; }, [selectedGeoid]);
@@ -359,12 +360,35 @@ const MapViewContent = forwardRef(
             updateWhenIdle={true}
           />
 
-          <div className="map-legend">
+          <button
+            type="button"
+            className="mobile-legend-toggle"
+            aria-label={legendExpanded
+              ? (lang === 'es' ? 'Cerrar leyenda' : 'Close legend')
+              : (lang === 'es' ? 'Abrir leyenda' : 'Open legend')}
+            aria-expanded={legendExpanded}
+            onClick={() => setLegendExpanded(v => !v)}
+          >
+            {legendExpanded ? (
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            ) : (
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="9" />
+                <line x1="12" y1="11" x2="12" y2="17" />
+                <circle cx="12" cy="7.5" r="0.9" fill="currentColor" stroke="none" />
+              </svg>
+            )}
+          </button>
+          <div className={`map-legend${legendExpanded ? ' expanded' : ''}`}>
             <div className="legend-title">PM2.5 µg/m³</div>
             {BREAKPOINTS.map((b) => (
               <div className="legend-row" key={b.category}>
                 <div className="legend-swatch" style={{ background: b.color }} />
-                <span>{translateCategory(lang, b.category)}</span>
+                <span className="legend-category">{translateCategory(lang, b.category)}</span>
+                <span className="legend-range">{b.label}</span>
               </div>
             ))}
           </div>

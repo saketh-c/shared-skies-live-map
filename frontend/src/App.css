@@ -662,6 +662,7 @@
   align-items: center;
   gap: 8px;
   margin-bottom: 5px;
+  min-width: 140px;
 }
 
 .legend-swatch {
@@ -669,6 +670,18 @@
   height: 10px;
   border-radius: 2px;
   flex-shrink: 0;
+}
+
+.legend-category {
+  flex: 1;
+}
+
+.legend-range {
+  font-size: 10px;
+  color: var(--text-dim);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  margin-left: 8px;
 }
 
 
@@ -828,8 +841,9 @@
   margin: 0 0 8px;
 }
 
-/* Mobile-only search toggle button (hidden on desktop) */
-.mobile-search-toggle { display: none; }
+/* Mobile-only toggle buttons (hidden on desktop) */
+.mobile-search-toggle,
+.mobile-legend-toggle { display: none; }
 
 /* ── Responsive ──────────────────────────────────────────────────────────── */
 @media (max-width: 700px) {
@@ -837,15 +851,15 @@
   .sidebar {
     width: 100%;
     min-width: unset;
-    height: 45vh;
+    height: 35vh;
     border-right: none;
     border-bottom: 1px solid var(--glass-border);
   }
-  .map-wrapper { height: 55vh; }
+  .map-wrapper { height: 65vh; }
 
   /* ── Compact header: drop brand/back/tagline, keep user count + EN|ES ── */
   .sidebar-header {
-    padding: 10px 14px 8px;
+    padding: 8px 14px 2px;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -878,7 +892,7 @@
     column-gap: 12px;
     row-gap: 2px;
     align-items: center;
-    padding: 14px 16px 8px;
+    padding: 6px 16px 6px;
   }
   .pm25-label {
     grid-column: 1 / -1;
@@ -902,8 +916,8 @@
   }
 
   /* ── Tighten padding everywhere else on mobile ── */
-  .gauge-wrap          { padding: 0 16px 12px; }
-  .health-card         { margin: 0 16px 12px; padding: 10px 12px; font-size: 12.5px; }
+  .gauge-wrap          { padding: 0 16px 8px; }
+  .health-card         { display: none; } /* "Air quality is…" text hidden on mobile */
   .section-header      { padding: 0 16px 6px; }
   .weather-grid        { padding: 0 16px 14px; gap: 6px; }
   .weather-item        { padding: 10px 12px; }
@@ -951,4 +965,41 @@
     outline: none;
   }
   .mobile-search-toggle:active { transform: scale(0.94); }
+
+  /* ── Legend: collapsed by default on mobile, shown when toggle is tapped ── */
+  .map-legend {
+    display: none;
+    bottom: 74px;            /* sit above the toggle button */
+    right: 16px;
+  }
+  .map-legend.expanded { display: block; }
+
+  /* Floating info button at bottom-right of map that opens the legend */
+  .mobile-legend-toggle {
+    position: absolute;
+    bottom: 20px;
+    right: 16px;
+    z-index: 1100;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(9, 13, 32, 0.92);
+    color: #f0f4ff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    padding: 0;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    transition: background 0.18s, transform 0.12s;
+  }
+  .mobile-legend-toggle:hover,
+  .mobile-legend-toggle:focus {
+    background: rgba(255, 255, 255, 0.1);
+    outline: none;
+  }
+  .mobile-legend-toggle:active { transform: scale(0.94); }
 }
