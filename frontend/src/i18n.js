@@ -24,25 +24,25 @@ const TRANSLATIONS = {
       levels: {
         good: {
           name: "Good",
-          range: "0 – 3.9 µg/m³",
+          range: "0 – 8.9 µg/m³",
           description: "Air quality is excellent. No health concerns for anyone. Ideal for outdoor activities and extended time outside.",
           who: "Safe for everyone",
         },
         moderate: {
           name: "Moderate",
-          range: "4 – 8.9 µg/m³",
+          range: "9 – 12.9 µg/m³",
           description: "Air quality is acceptable. The vast majority of people will not experience effects. A very small number of unusually sensitive individuals may notice minor symptoms.",
           who: "Unusually sensitive people: consider reducing prolonged outdoor exertion",
         },
         unhealthy: {
           name: "Unhealthy",
-          range: "9 – 12.9 µg/m³",
+          range: "13 – 17.9 µg/m³",
           description: "Everyone may begin to experience health effects. Sensitive groups — people with asthma, heart disease, the elderly, and children — are at greater risk.",
           who: "Sensitive groups: limit prolonged outdoor exertion. Everyone: reduce extended heavy outdoor activity.",
         },
         hazardous: {
           name: "Hazardous",
-          range: "13+ µg/m³",
+          range: "18+ µg/m³",
           description: "Health warnings of emergency conditions. Serious aggravation of heart and lung disease, premature mortality in sensitive groups, and respiratory effects in the general population.",
           who: "Everyone: avoid all outdoor physical activity. Sensitive groups: remain indoors.",
         },
@@ -140,25 +140,25 @@ const TRANSLATIONS = {
       levels: {
         good: {
           name: "Bueno",
-          range: "0 – 3.9 µg/m³",
+          range: "0 – 8.9 µg/m³",
           description: "La calidad del aire es excelente. No hay preocupaciones de salud para nadie. Ideal para actividades al aire libre.",
           who: "Seguro para todos",
         },
         moderate: {
           name: "Moderado",
-          range: "4 – 8.9 µg/m³",
+          range: "9 – 12.9 µg/m³",
           description: "La calidad del aire es aceptable. La gran mayoría de las personas no experimentará efectos. Un pequeño número de individuos inusualmente sensibles puede notar síntomas menores.",
           who: "Personas sensibles: considere reducir el esfuerzo prolongado al aire libre",
         },
         unhealthy: {
           name: "Insalubre",
-          range: "9 – 12.9 µg/m³",
+          range: "13 – 17.9 µg/m³",
           description: "Todas las personas pueden comenzar a experimentar efectos en la salud. Grupos sensibles — personas con asma, enfermedades cardíacas, ancianos y niños — tienen mayor riesgo.",
           who: "Grupos sensibles: limitar el esfuerzo prolongado al aire libre. Todos: reducir actividad física intensa y prolongada.",
         },
         hazardous: {
           name: "Peligroso",
-          range: "13+ µg/m³",
+          range: "18+ µg/m³",
           description: "Avisos de salud por condiciones de emergencia. Agravamiento serio de enfermedades cardíacas y pulmonares, mortalidad prematura en grupos sensibles y efectos respiratorios en la población general.",
           who: "Todos: eviten actividad física al aire libre. Grupos sensibles: permanezcan en interiores.",
         },

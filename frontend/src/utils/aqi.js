@@ -1,47 +1,46 @@
 /**
  * PM2.5 → AQI category utilities with custom gradient color scale.
- * Safety threshold: 9.0 µg/m³ (federal limit for good air quality)
  *
  * Scale:
- * 0.0-3.9:   Green gradient (light → dark)
- * 4.0-8.9:   Yellow gradient (light → dark)
- * 9.0-12.9:  Red gradient (light → dark)
- * 13.0+:     Dark red (hazardous)
+ * 0.0-8.9:   Green gradient (light → dark)
+ * 9.0-12.9:  Yellow gradient (light → dark)
+ * 13.0-17.9: Red gradient (light → dark)
+ * 18.0+:     Dark red → near-black (darker as pollution rises)
  */
 
 // Color gradients with smooth transitions
 const COLOR_SCALE = {
   goodRange: {
     min: 0.0,
-    max: 3.9,
+    max: 8.9,
     colorMin: "#90EE90",  // Light green
     colorMax: "#00b894",  // Darker green
     category: "Good",
-    label: "0–3.9 µg/m³"
+    label: "0–8.9 µg/m³"
   },
   moderateRange: {
-    min: 4.0,
-    max: 8.9,
+    min: 9.0,
+    max: 12.9,
     colorMin: "#FFFF99",  // Light yellow
     colorMax: "#FFD700",  // Darker yellow/gold
     category: "Moderate",
-    label: "4–8.9 µg/m³"
+    label: "9–12.9 µg/m³"
   },
   unhealthyRange: {
-    min: 9.0,
-    max: 12.9,
+    min: 13.0,
+    max: 17.9,
     colorMin: "#FF6B6B",  // Light red
     colorMax: "#d63031",  // Darker red
     category: "Unhealthy",
-    label: "9–12.9 µg/m³"
+    label: "13–17.9 µg/m³"
   },
   hazardousRange: {
-    min: 13.0,
+    min: 18.0,
     max: Infinity,
     colorMin: "#8b0000",   // Dark red
     colorMax: "#1a0000",   // Near-black dark red (gets darker as pollution rises)
     category: "Hazardous",
-    label: "13+ µg/m³"
+    label: "18+ µg/m³"
   }
 };
 
@@ -123,8 +122,9 @@ export function pm25Color(pm25) {
     );
   }
 
-  // Hazardous (13+) - dark red that gets darker as pollution increases
-  const hazardousFactor = Math.min(1.0, (pm25 - 13.0) / 12.0);
+  // Hazardous (18+) - dark red that gets darker as pollution increases
+  // Fully saturates (near-black) at ~30 µg/m³ and above
+  const hazardousFactor = Math.min(1.0, (pm25 - 18.0) / 12.0);
   return interpolateColor(
     COLOR_SCALE.hazardousRange.colorMin,
     COLOR_SCALE.hazardousRange.colorMax,
@@ -181,10 +181,10 @@ export function getAQIInfo(pm25) {
 }
 
 /**
- * Returns 0-100 gauge fill for a given PM2.5 value (using 15 as max for better scale)
+ * Returns 0-100 gauge fill for a given PM2.5 value (using 20 as max for better scale)
  */
 export function pm25ToGaugePct(pm25) {
-  return Math.min(100, (pm25 / 15) * 100);
+  return Math.min(100, (pm25 / 20) * 100);
 }
 
 /**
@@ -204,8 +204,8 @@ export function healthIcon(category) {
  * Export breakpoints for legend display
  */
 export const BREAKPOINTS = [
-  { max: 3.9,   category: "Good",      color: "#00b894", label: "0–3.9" },
-  { max: 8.9,   category: "Moderate",  color: "#FFD700", label: "4–8.9" },
-  { max: 12.9,  category: "Unhealthy", color: "#d63031", label: "9–12.9" },
-  { max: Infinity, category: "Hazardous", color: "#8b0000", label: "13+" },
+  { max: 8.9,   category: "Good",      color: "#00b894", label: "0–8.9" },
+  { max: 12.9,  category: "Moderate",  color: "#FFD700", label: "9–12.9" },
+  { max: 17.9,  category: "Unhealthy", color: "#d63031", label: "13–17.9" },
+  { max: Infinity, category: "Hazardous", color: "#8b0000", label: "18+" },
 ];

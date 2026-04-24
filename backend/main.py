@@ -438,24 +438,24 @@ def pm25_color_gradient(pm25: float) -> str:
     if pm25 < 0:
         pm25 = 0
 
-    # Green range: 0.0-3.9
-    if pm25 <= 3.9:
-        factor = pm25 / 3.9
+    # Green range: 0.0-8.9
+    if pm25 <= 8.9:
+        factor = pm25 / 8.9
         return interpolate_color("#90EE90", "#00b894", factor)
 
-    # Yellow range: 4.0-8.9
-    elif pm25 <= 8.9:
-        factor = (pm25 - 4.0) / 4.9
-        return interpolate_color("#FFFF99", "#FFD700", factor)
-
-    # Red range: 9.0-12.9
+    # Yellow range: 9.0-12.9
     elif pm25 <= 12.9:
         factor = (pm25 - 9.0) / 3.9
+        return interpolate_color("#FFFF99", "#FFD700", factor)
+
+    # Red range: 13.0-17.9
+    elif pm25 <= 17.9:
+        factor = (pm25 - 13.0) / 4.9
         return interpolate_color("#FF6B6B", "#d63031", factor)
 
-    # Dark red range: 13.0+ (gets darker as pollution increases)
+    # Dark red range: 18.0+ (gets darker as pollution rises, fully saturates at ~30)
     else:
-        factor = min(1.0, (pm25 - 13.0) / 12.0)
+        factor = min(1.0, (pm25 - 18.0) / 12.0)
         return interpolate_color("#8b0000", "#1a0000", factor)
 
 
@@ -463,32 +463,32 @@ def pm25_info(pm25: float) -> dict:
     """Get AQI info with custom gradient scale."""
     color = pm25_color_gradient(pm25)
 
-    if pm25 <= 3.9:
+    if pm25 <= 8.9:
         return {
             "category": "Good",
             "color": color,
-            "aqi_range": "0–3.9",
+            "aqi_range": "0–8.9",
             "health_msg": "Air quality is good. Enjoy outdoor activities.",
-        }
-    elif pm25 <= 8.9:
-        return {
-            "category": "Moderate",
-            "color": color,
-            "aqi_range": "4–8.9",
-            "health_msg": "Air quality is acceptable. Sensitive individuals should take precautions.",
         }
     elif pm25 <= 12.9:
         return {
-            "category": "Unhealthy",
+            "category": "Moderate",
             "color": color,
             "aqi_range": "9–12.9",
+            "health_msg": "Air quality is acceptable. Sensitive individuals should take precautions.",
+        }
+    elif pm25 <= 17.9:
+        return {
+            "category": "Unhealthy",
+            "color": color,
+            "aqi_range": "13–17.9",
             "health_msg": "Air quality is unhealthy. Everyone should limit outdoor exposure.",
         }
     else:
         return {
             "category": "Hazardous",
             "color": color,
-            "aqi_range": "13+",
+            "aqi_range": "18+",
             "health_msg": "⚠️ Air quality is hazardous. Avoid all outdoor activities.",
         }
 
