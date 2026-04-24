@@ -153,15 +153,18 @@ def load_data():
 
 
 def train_ensemble(X_train, y_train, verbose=True):
-    """Train RF + LightGBM + XGBoost with optimized hyperparameters."""
+    """Train RF + LightGBM + XGBoost tuned to fit Render free tier 512MB RAM.
+    RF uses shallow trees (depth=12, 250 trees) — RF memory scales with 2^depth, so
+    depth=20 trees were ~100MB each. LGBM/XGB kept at 800 rounds (cheap in memory).
+    """
     models = {}
 
     if verbose:
-        print("\nTraining Random Forest (500 trees, optimized)...")
+        print("\nTraining Random Forest (250 trees, depth=12 for memory)...")
     models["rf"] = RandomForestRegressor(
-        n_estimators=500,
+        n_estimators=250,
         max_features="sqrt",
-        max_depth=20,
+        max_depth=12,
         min_samples_leaf=5,
         n_jobs=-1,
         random_state=42,
