@@ -1,5 +1,6 @@
 import { useMemo, useRef, useEffect, useState, forwardRef, useCallback, useContext } from "react";
-import { MapContainer, TileLayer, GeoJSON, useMap, Circle, CircleMarker, Tooltip } from "react-leaflet";
+import { MapContainer, TileLayer, GeoJSON, useMap, Circle, CircleMarker, Tooltip, Pane } from "react-leaflet";
+import L from "leaflet";
 import { BREAKPOINTS } from "../utils/aqi.js";
 import { LanguageContext } from '../App';
 import { t, translateCategory } from '../i18n';
@@ -106,7 +107,7 @@ function MapLifecycle() {
 }
 
 const MapViewContent = forwardRef(
-  ({ geojson, predictions, onTractSelect, onBackgroundClick, selectedGeoid, searchMarker, sensorMarkers, existingSensors }, _ref) => {
+  ({ geojson, predictions, onTractSelect, onBackgroundClick, selectedGeoid, searchMarker, sensorMarkers, existingSensors, activeTab = "map" }, _ref) => {
     const { lang } = useContext(LanguageContext);
     const justClickedRef = useRef(false);
     const onTractSelectRef = useRef(onTractSelect);
@@ -116,11 +117,50 @@ const MapViewContent = forwardRef(
     const hoveredLayerRef = useRef(null);
     const hoveredGeoidRef = useRef(null);
     const lastMouseLatLngRef = useRef(null);
+    // Polygon hover/preview/click is only enabled on the Map tab. We use a ref
+    // so the long-lived layer.on() handlers always read the *current* tab
+    // (their useCallback has empty deps to keep handler identity stable).
+    const activeTabRef = useRef(activeTab);
     const [tooltipData, setTooltipData] = useState(null);
     const [legendExpanded, setLegendExpanded] = useState(false);
 
     useEffect(() => { onTractSelectRef.current = onTractSelect; }, [onTractSelect]);
     useEffect(() => { selectedGeoidRef.current = selectedGeoid; }, [selectedGeoid]);
+    useEffect(() => { activeTabRef.current = activeTab; }, [activeTab]);
+
+    // When the user leaves the Map tab, kill any in-flight hover state so it
+    // doesn't visually persist (mouseout won't fire because the cursor isn't
+    // moving off the polygon — the tab is just being switched).
+    useEffect(() => {
+      if (activeTab === "map") return;
+      setTooltipData(null);
+      const layer = hoveredLayerRef.current;
+      const geoid = hoveredGeoidRef.current;
+      if (layer && geoid) {
+        const isSelected = geoid === selectedGeoidRef.current;
+        const pred = predMapRef.current[geoid];
+        try {
+          layer.setStyle({
+            fillColor: pred ? pred.color : "#2d3436",
+            fillOpacity: isSelected ? 0.95 : 0.80,
+            color: isSelected ? "#ffffff" : (pred ? pred.color : "rgba(0,0,0,0.08)"),
+            weight: isSelected ? 2.5 : 1.0,
+          });
+        } catch (_) {}
+      }
+      hoveredLayerRef.current = null;
+      hoveredGeoidRef.current = null;
+      lastMouseLatLngRef.current = null;
+    }, [activeTab]);
+
+    // Dedicated SVG renderer for the quantum-sensor markers so they live in
+    // their own high-z-index pane and never get hidden by polygon
+    // bringToFront(). SVG (not canvas) is critical here — a canvas in a
+    // top-of-stack pane would swallow clicks across the whole map area.
+    const sensorSvgRenderer = useMemo(
+      () => L.svg({ pane: "quantumSensorsPane" }),
+      []
+    );
 
     const predMap = useMemo(() => {
       const m = {};
@@ -155,11 +195,18 @@ const MapViewContent = forwardRef(
 
       layer.on({
         click: () => {
+          // Polygon clicks are only meaningful on the Map tab. On the Sensors
+          // tab the polygons are a passive backdrop — only blue dots are
+          // interactive. Skipping this also prevents handleDeselect from
+          // running (justClickedRef stays false but we don't want any
+          // selection-mutating side effects either).
+          if (activeTabRef.current !== "map") return;
           justClickedRef.current = true;
           onTractSelectRef.current?.(geoid);
         },
 
         mouseover: (e) => {
+          if (activeTabRef.current !== "map") return;
           hoveredLayerRef.current = e.target;
           hoveredGeoidRef.current = geoid;
           lastMouseLatLngRef.current = e.latlng;
@@ -180,6 +227,7 @@ const MapViewContent = forwardRef(
 
         // Update tooltip position directly on DOM — no React re-render on every mouse move
         mousemove: (e) => {
+          if (activeTabRef.current !== "map") return;
           lastMouseLatLngRef.current = e.latlng;
           const el = tooltipDomRef.current;
           if (!el) return;
@@ -194,6 +242,8 @@ const MapViewContent = forwardRef(
         },
 
         mouseout: (e) => {
+          // mouseout always runs to keep style state clean (it's a no-op if
+          // mouseover was suppressed — the polygon is already in default style).
           hoveredLayerRef.current = null;
           hoveredGeoidRef.current = null;
           lastMouseLatLngRef.current = null;
@@ -368,42 +418,50 @@ const MapViewContent = forwardRef(
             />
           ))}
 
-          {/* Quantum sensor placement markers */}
-          {sensorMarkers && sensorMarkers.map((s, i) => (
-            <CircleMarker
-              key={`sensor-${s.geoid}`}
-              center={[s.lat, s.lon]}
-              radius={7}
-              pathOptions={{
-                color: "#fff",
-                weight: 2,
-                fillColor: "#00b4d8",
-                fillOpacity: 0.95,
-              }}
-              eventHandlers={{
-                click: () => {
-                  justClickedRef.current = true;
-                  onTractSelectRef.current?.(s.geoid);
-                },
-              }}
-            >
-              <Tooltip
-                direction="top"
-                offset={[0, -10]}
-                opacity={0.95}
-                className="sensor-tooltip"
+          {/* Quantum sensor placement markers — rendered as SVG (not canvas)
+              in their OWN pane with z-index above overlayPane so polygon
+              bringToFront() calls can never push them behind. The pane DIV
+              itself has pointer-events:none so empty space passes clicks
+              through; only the SVG paths (with their default
+              pointer-events:visiblePainted) capture clicks on the actual dots. */}
+          <Pane name="quantumSensorsPane" style={{ zIndex: 600, pointerEvents: "none" }}>
+            {sensorMarkers && sensorMarkers.map((s, i) => (
+              <CircleMarker
+                key={`sensor-${s.geoid}`}
+                center={[s.lat, s.lon]}
+                radius={7}
+                pathOptions={{
+                  renderer: sensorSvgRenderer,
+                  color: "#fff",
+                  weight: 2,
+                  fillColor: "#00b4d8",
+                  fillOpacity: 0.95,
+                }}
+                eventHandlers={{
+                  click: () => {
+                    justClickedRef.current = true;
+                    onTractSelectRef.current?.(s.geoid);
+                  },
+                }}
               >
-                <span style={{ fontWeight: 700 }}>#{s.placement_rank}</span>
-                {" "}{lang === "es" ? "Sensor Recomendado" : "Recommended Sensor"}
-                <br />
-                <span style={{ fontSize: 10, opacity: 0.7 }}>
-                  EJ: {((s.ej_priority || 0) * 100).toFixed(0)}%
-                  {" | "}
-                  {lang === "es" ? "Cob" : "Cov"}: {((s.coverage_need || 0) * 100).toFixed(0)}%
-                </span>
-              </Tooltip>
-            </CircleMarker>
-          ))}
+                <Tooltip
+                  direction="top"
+                  offset={[0, -10]}
+                  opacity={0.95}
+                  className="sensor-tooltip"
+                >
+                  <span style={{ fontWeight: 700 }}>#{s.placement_rank}</span>
+                  {" "}{lang === "es" ? "Sensor Recomendado" : "Recommended Sensor"}
+                  <br />
+                  <span style={{ fontSize: 10, opacity: 0.7 }}>
+                    EJ: {((s.ej_priority || 0) * 100).toFixed(0)}%
+                    {" | "}
+                    {lang === "es" ? "Cob" : "Cov"}: {((s.coverage_need || 0) * 100).toFixed(0)}%
+                  </span>
+                </Tooltip>
+              </CircleMarker>
+            ))}
+          </Pane>
 
           <TileLayer
             url={CARTO_LIGHT_LABELS}

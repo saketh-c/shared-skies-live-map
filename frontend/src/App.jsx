@@ -158,9 +158,10 @@ export default function App() {
 
   const handleViewSensor = useCallback((sensor) => {
     if (sensor?.lat && sensor?.lon) {
+      // Fly the map to this sensor's location and highlight its tract,
+      // but stay on whatever tab the user is currently on (e.g. Sensors).
       setSearchMarker({ lat: sensor.lat, lon: sensor.lon });
       handleTractSelect(sensor.geoid);
-      setActiveTab("map");
     }
   }, [handleTractSelect]);
 
@@ -261,6 +262,7 @@ export default function App() {
             statewide={true}
             sensorMarkers={activeTab === "quantum" ? quantumSensors : null}
             existingSensors={activeTab === "quantum" ? existingSensors : null}
+            activeTab={activeTab}
           />
         </div>
       </div>
