@@ -51,7 +51,7 @@
 
 /* ── Header ─────────────────────────────────────────────────────────────── */
 .sidebar-header {
-  padding: 28px 24px 20px;
+  padding: 22px 24px 14px;
   border-bottom: 1px solid var(--glass-border);
   position: sticky;
   top: 0;
@@ -116,7 +116,7 @@
 
 /* Language toggle wrapper — matches prior inline padding so desktop is unchanged */
 .lang-toggle-wrap {
-  padding-top: 8px;
+  padding-top: 4px;
   padding-left: 24px;
 }
 
@@ -173,7 +173,7 @@
 
 /* ── PM2.5 hero display ─────────────────────────────────────────────────── */
 .pm25-hero {
-  padding: 28px 24px 20px;
+  padding: 14px 24px 16px;
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -1017,7 +1017,7 @@
 
 /* ── Header ── */
 .qm-header {
-  padding: 24px 24px 0;
+  padding: 14px 24px 0;
 }
 
 .qm-title {
