@@ -278,6 +278,24 @@ const MapViewContent = forwardRef(
               try { layer.setStyle(styleFeature(layer.feature)); } catch (_) {}
             }
           });
+          // Bring the SELECTED polygon to the front so its full white border
+          // renders cleanly above neighbour polygons. Without this, neighbours
+          // that happen to be drawn later in the canvas can clip the border
+          // and leave the visible "gap" the user sees when a sensor is
+          // clicked on the Sensors tab (where mouseover.bringToFront() is
+          // gated off).
+          const sg = selectedGeoidRef.current;
+          if (sg) {
+            map.eachLayer((layer) => {
+              if (
+                layer?.feature &&
+                normGeoid(layer.feature.properties?.GEOID) === sg &&
+                typeof layer.bringToFront === "function"
+              ) {
+                try { layer.bringToFront(); } catch (_) {}
+              }
+            });
+          }
           // After resetting all layers, re-apply hover style so it is never wiped.
           // (StyleUpdater re-mounts on every render because it's defined inside the
           // render function — its useEffect always fires, which would otherwise clear

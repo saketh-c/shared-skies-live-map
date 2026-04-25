@@ -15,7 +15,7 @@ const TRANSLATIONS = {
     tract_distribution: "Tract Distribution",
     loading_predictions: "Generating predictions for all Texas tracts...",
     // Air Quality Guide
-    guide_intro: "PM2.5 refers to fine particulate matter — tiny particles 2.5 micrometers or smaller. They can penetrate deep into the lungs and enter the bloodstream.",
+    guide_intro: "PM2.5 refers to fine particulate matter, tiny particles 2.5 micrometers or smaller. They can penetrate deep into the lungs and enter the bloodstream.",
     guide: {
       why_title: "Why PM2.5 Matters",
       why_body: "Particles this small bypass the nose and throat and lodge deep in lung tissue. Short-term exposure causes coughing and irritation. Long-term exposure is linked to heart disease, stroke, lung cancer, and reduced life expectancy.",
@@ -37,7 +37,7 @@ const TRANSLATIONS = {
         unhealthy: {
           name: "Unhealthy",
           range: "13 – 17.9 µg/m³",
-          description: "Everyone may begin to experience health effects. Sensitive groups — people with asthma, heart disease, the elderly, and children — are at greater risk.",
+          description: "Everyone may begin to experience health effects. Sensitive groups (people with asthma, heart disease, the elderly, and children) are at greater risk.",
           who: "Sensitive groups: limit prolonged outdoor exertion. Everyone: reduce extended heavy outdoor activity.",
         },
         hazardous: {
@@ -105,10 +105,12 @@ const TRANSLATIONS = {
       county: "County",
       composite: "Score",
       view_on_map: "View on Map",
+      tab_intro_title: "About this tab",
+      tab_intro_body: "This tab proposes 25 strategic locations for new PM2.5 sensors across Texas. The optimizer balances three signals: distance to the existing 240-sensor PurpleAir network (gray dots), predicted pollution at each of 6,896 census tracts, and the EPA EJSCREEN environmental-justice burden index. The result is a deployment plan that maximizes new monitoring coverage while concentrating sensors in the communities carrying the heaviest pollution load. Each blue dot is a recommended placement. Click one to inspect the underlying tract data.",
       what_is: "What is Quantum Annealing?",
-      what_is_body: "Quantum annealing uses principles from quantum mechanics — superposition and tunneling — to explore vast solution spaces for combinatorial optimization problems. Sensor placement is NP-hard: choosing 25 locations from 6,900+ tracts yields more combinations than atoms in the universe. The quantum approach formulates this as a QUBO (Quadratic Unconstrained Binary Optimization) and explores solutions via simulated quantum tunneling, escaping local optima that trap classical methods.",
+      what_is_body: "Sensor placement is an NP-hard combinatorial problem. Selecting 25 sites from 6,896 candidate tracts produces roughly 10^77 possible arrangements, far beyond what brute-force enumeration can reach. We encode the task as a QUBO (Quadratic Unconstrained Binary Optimization) and solve it with simulated quantum annealing. The solver evolves a population of candidate placements across a quantum-inspired energy landscape and uses tunneling dynamics to escape local minima that trap classical greedy and gradient methods. Each run draws thousands of low-energy samples and consensus-ranks the most consistently optimal sites.",
       why_ej: "Why EJ-Weighted Placement?",
-      why_ej_body: "Environmental justice communities bear disproportionate pollution burdens. By weighting sensor placement toward high-EJ tracts (45% of the objective), we ensure monitoring infrastructure prioritizes the communities that need it most — not just the areas easiest to cover.",
+      why_ej_body: "PM2.5 exposure is not evenly distributed. Communities of color and low-income neighborhoods systematically face higher pollution levels with fewer monitoring resources. Our objective function reserves 45% of its weight for EJSCREEN burden indicators, steering new infrastructure toward the populations that need it most instead of only filling the spatial gaps that happen to be easiest to cover.",
       show_quantum: "Quantum",
       show_greedy: "Greedy",
       show_classical: "Classical",
@@ -131,7 +133,7 @@ const TRANSLATIONS = {
     tract_distribution: "Distribución de tractos",
     loading_predictions: "Generando predicciones para todos los tractos de Texas...",
     // Air Quality Guide (Spanish)
-    guide_intro: "PM2.5 se refiere a las partículas finas — diminutas partículas de 2.5 micrómetros o menos. Pueden penetrar profundamente en los pulmones y entrar al torrente sanguíneo.",
+    guide_intro: "PM2.5 se refiere a las partículas finas, diminutas partículas de 2.5 micrómetros o menos. Pueden penetrar profundamente en los pulmones y entrar al torrente sanguíneo.",
     guide: {
       why_title: "Por qué importa PM2.5",
       why_body: "Partículas tan pequeñas evitan la nariz y la garganta y se alojan en el tejido pulmonar. La exposición a corto plazo causa tos e irritación. La exposición a largo plazo se relaciona con enfermedades cardíacas, accidente cerebrovascular, cáncer de pulmón y menor esperanza de vida.",
@@ -153,7 +155,7 @@ const TRANSLATIONS = {
         unhealthy: {
           name: "Insalubre",
           range: "13 – 17.9 µg/m³",
-          description: "Todas las personas pueden comenzar a experimentar efectos en la salud. Grupos sensibles — personas con asma, enfermedades cardíacas, ancianos y niños — tienen mayor riesgo.",
+          description: "Todas las personas pueden comenzar a experimentar efectos en la salud. Grupos sensibles (personas con asma, enfermedades cardíacas, ancianos y niños) tienen mayor riesgo.",
           who: "Grupos sensibles: limitar el esfuerzo prolongado al aire libre. Todos: reducir actividad física intensa y prolongada.",
         },
         hazardous: {
@@ -221,10 +223,12 @@ const TRANSLATIONS = {
       county: "Condado",
       composite: "Puntaje",
       view_on_map: "Ver en Mapa",
+      tab_intro_title: "Sobre esta pestaña",
+      tab_intro_body: "Esta pestaña propone 25 ubicaciones estratégicas para nuevos sensores PM2.5 en Texas. El optimizador equilibra tres señales: la distancia a la red existente de 240 sensores PurpleAir (puntos grises), la contaminación pronosticada en cada uno de los 6,896 tractos censales, y el índice de carga ambiental EPA EJSCREEN del tracto. El resultado es un plan de despliegue que maximiza la cobertura de monitoreo y concentra sensores en las comunidades que cargan con la mayor contaminación. Cada punto azul es una ubicación recomendada. Haz clic en uno para inspeccionar los datos del tracto.",
       what_is: "¿Qué es el Recocido Cuántico?",
-      what_is_body: "El recocido cuántico utiliza principios de la mecánica cuántica — superposición y efecto túnel — para explorar vastos espacios de soluciones en problemas de optimización combinatoria. La ubicación de sensores es NP-difícil: elegir 25 ubicaciones entre más de 6,900 tractos produce más combinaciones que átomos en el universo. El enfoque cuántico formula esto como un QUBO (Optimización Binaria Cuadrática Sin Restricciones) y explora soluciones mediante efecto túnel cuántico simulado.",
+      what_is_body: "La ubicación de sensores es un problema combinatorio NP-difícil. Seleccionar 25 sitios entre 6,896 tractos candidatos produce aproximadamente 10^77 configuraciones posibles, mucho más allá de lo que la enumeración exhaustiva puede alcanzar. Codificamos la tarea como un QUBO (Optimización Binaria Cuadrática Sin Restricciones) y la resolvemos con recocido cuántico simulado. El solver hace evolucionar una población de configuraciones candidatas a través de un paisaje de energía inspirado en la mecánica cuántica, y usa dinámicas de efecto túnel para escapar de mínimos locales donde los métodos voraces y de gradiente clásicos se quedan atascados. Cada ejecución extrae miles de muestras de baja energía y clasifica por consenso los sitios más consistentemente óptimos.",
       why_ej: "¿Por Qué Ubicación Ponderada por EJ?",
-      why_ej_body: "Las comunidades de justicia ambiental soportan cargas desproporcionadas de contaminación. Al ponderar la ubicación de sensores hacia tractos de alto EJ (45% del objetivo), aseguramos que la infraestructura de monitoreo priorice las comunidades que más lo necesitan.",
+      why_ej_body: "La exposición a PM2.5 no se distribuye uniformemente. Las comunidades de color y los vecindarios de bajos ingresos enfrentan sistemáticamente niveles más altos de contaminación con menos recursos de monitoreo. Nuestra función objetivo reserva el 45% de su peso para los indicadores de carga de EJSCREEN, dirigiendo la nueva infraestructura hacia las poblaciones que más la necesitan, en lugar de solo llenar los vacíos espaciales que resultan más fáciles de cubrir.",
       show_quantum: "Cuántico",
       show_greedy: "Voraz",
       show_classical: "Clásico",

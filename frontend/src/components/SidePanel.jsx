@@ -2,6 +2,7 @@ import { BREAKPOINTS, pm25ToGaugePct, getAQIInfo } from "../utils/aqi.js";
 import { useContext } from "react";
 import { LanguageContext } from "../App";
 import { t, translateCategory, translateHealth } from "../i18n";
+import SidebarHeader from "./SidebarHeader.jsx";
 
 function fmt(val, decimals = 1) {
   if (val == null || isNaN(val)) return "—";
@@ -184,43 +185,12 @@ export default function SidePanel({
 
   return (
     <aside className="sidebar">
-      <div className="sidebar-header">
-        {selectedTract && (
-          <button className="back-btn" onClick={onDeselect}>← {t(lang, 'back_to', displayName)}</button>
-        )}
-        <div className="brand">
-          <div className="brand-left">
-            <div className="brand-icon">✦</div>
-            <span className="brand-name">Shared Skies Initiative</span>
-          </div>
-          {visitCount != null && (
-            <div className="visit-counter-header">
-              <span className="visit-counter-dot" />
-              <span><strong>{visitCount.toLocaleString()}</strong> {lang === 'es' ? 'usuarios' : 'users'}</span>
-            </div>
-          )}
-        </div>
-        <div className="brand-tagline">
-          {selectedTract
-            ? `Tract ${selectedTract.geoid?.slice(-6)}${countyName ? ` · ${countyName} County` : ''}`
-            : t(lang, 'brand_tagline_all')}
-        </div>
-
-        {/* Language toggle next to brand */}
-        <div className="lang-toggle-wrap">
-          <div className="lang-toggle" role="tablist" aria-label="Language selector">
-            <button
-              className={`lang-btn ${lang === 'en' ? 'active' : ''}`}
-              onClick={() => toggleLang('en')}
-            >EN</button>
-            <span className="sep">|</span>
-            <button
-              className={`lang-btn ${lang === 'es' ? 'active' : ''}`}
-              onClick={() => toggleLang('es')}
-            >ES</button>
-          </div>
-        </div>
-      </div>
+      <SidebarHeader
+        selectedTract={selectedTract}
+        visitCount={visitCount}
+        onDeselect={onDeselect}
+        statewide={statewide}
+      />
 
       {error && !loading && (
         <div className="error-wrap">

@@ -1,6 +1,7 @@
 import { useContext } from "react";
 import { LanguageContext } from "../App";
 import { t } from "../i18n";
+import SidebarHeader from "./SidebarHeader.jsx";
 
 function MetricCard({ label, value, sub, accent }) {
   return (
@@ -33,36 +34,62 @@ function EJQuartileBar({ label, data }) {
   );
 }
 
-export default function SensorPlacement({ quantumData, loading, error, onViewSensor }) {
+export default function SensorPlacement({
+  quantumData,
+  loading,
+  error,
+  onViewSensor,
+  selectedTract,
+  onDeselect,
+  visitCount,
+}) {
   const { lang } = useContext(LanguageContext);
+
+  // Render the same header that the Map tab uses, so the brand, visit
+  // counter, language toggle, and the selected-tract tagline are present
+  // here too.
+  const sharedHeader = (
+    <SidebarHeader
+      selectedTract={selectedTract}
+      visitCount={visitCount}
+      onDeselect={onDeselect}
+      statewide={true}
+    />
+  );
 
   if (loading) {
     return (
-      <div className="qm-loading">
-        <div className="qm-loading-icon">
-          <div className="qm-atom">
-            <div className="qm-orbit qm-orbit-1" />
-            <div className="qm-orbit qm-orbit-2" />
-            <div className="qm-orbit qm-orbit-3" />
-            <div className="qm-nucleus" />
+      <>
+        {sharedHeader}
+        <div className="qm-loading">
+          <div className="qm-loading-icon">
+            <div className="qm-atom">
+              <div className="qm-orbit qm-orbit-1" />
+              <div className="qm-orbit qm-orbit-2" />
+              <div className="qm-orbit qm-orbit-3" />
+              <div className="qm-nucleus" />
+            </div>
           </div>
+          <div className="qm-loading-text">{t(lang, "quantum.loading")}</div>
+          <div className="qm-loading-detail">{t(lang, "quantum.loading_detail")}</div>
         </div>
-        <div className="qm-loading-text">{t(lang, "quantum.loading")}</div>
-        <div className="qm-loading-detail">{t(lang, "quantum.loading_detail")}</div>
-      </div>
+      </>
     );
   }
 
   if (error) {
     return (
-      <div className="qm-error">
-        <strong>{t(lang, "quantum.error")}</strong>
-        <code>{error}</code>
-      </div>
+      <>
+        {sharedHeader}
+        <div className="qm-error">
+          <strong>{t(lang, "quantum.error")}</strong>
+          <code>{error}</code>
+        </div>
+      </>
     );
   }
 
-  if (!quantumData?.methods) return null;
+  if (!quantumData?.methods) return sharedHeader;
 
   const quantum = quantumData.methods.quantum_annealing;
   const quantumCov = quantum.coverage;
@@ -72,6 +99,8 @@ export default function SensorPlacement({ quantumData, loading, error, onViewSen
 
   return (
     <div className="qm-container">
+      {sharedHeader}
+
       {/* Header */}
       <div className="qm-header">
         <div className="qm-title">{t(lang, "quantum.title")}</div>
@@ -180,6 +209,11 @@ export default function SensorPlacement({ quantumData, loading, error, onViewSen
       </div>
 
       {/* Explainers */}
+      <div className="guide-explainer">
+        <h4>{t(lang, "quantum.tab_intro_title")}</h4>
+        {t(lang, "quantum.tab_intro_body")}
+      </div>
+
       <div className="guide-explainer">
         <h4>{t(lang, "quantum.what_is")}</h4>
         {t(lang, "quantum.what_is_body")}

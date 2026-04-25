@@ -222,6 +222,9 @@ export default function App() {
               loading={quantumLoading}
               error={quantumError}
               onViewSensor={handleViewSensor}
+              selectedTract={selectedTract}
+              onDeselect={handleDeselect}
+              visitCount={visitCount}
             />
           ) : (
             <AirQualityGuide />
