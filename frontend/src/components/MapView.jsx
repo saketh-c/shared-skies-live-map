@@ -60,8 +60,8 @@ function SmoothWheelZoom() {
 
     const onWheel = (e) => {
       e.preventDefault();
-      accDelta += e.deltaY < 0 ? 0.25 : -0.25;
-      accDelta = Math.max(-2, Math.min(2, accDelta));
+      accDelta += e.deltaY < 0 ? 0.3 : -0.3;
+      accDelta = Math.max(-2.5, Math.min(2.5, accDelta));
       lastMousePoint = map.mouseEventToContainerPoint(e);
       lastMouseLatLng = map.containerPointToLatLng(lastMousePoint);
       if (timer) clearTimeout(timer);
@@ -73,10 +73,10 @@ function SmoothWheelZoom() {
           .subtract(lastMousePoint)
           .add(map.getSize().divideBy(2));
         const newCenter = map.unproject(newCenterPx, newZoom);
-        map.flyTo(newCenter, newZoom, { animate: true, duration: 0.9, easeLinearity: 0.2 });
+        map.flyTo(newCenter, newZoom, { animate: true, duration: 0.45, easeLinearity: 0.25 });
         accDelta = 0;
         timer = null;
-      }, 60);
+      }, 35);
     };
 
     map.getContainer().addEventListener("wheel", onWheel, { passive: false });
@@ -94,7 +94,9 @@ function MapLifecycle() {
     if (!map) return;
     const onZoomStart = () => document.body.classList.add("disable-transitions");
     const onZoomEnd = () => {
-      setTimeout(() => document.body.classList.remove("disable-transitions"), 80);
+      // Strip the no-transitions guard immediately so labels/polys snap to the new
+      // zoom in the same frame the tiles arrive — no lingering "stale text" pause.
+      document.body.classList.remove("disable-transitions");
     };
     map.on("zoomstart", onZoomStart);
     map.on("zoomend", onZoomEnd);
@@ -387,9 +389,13 @@ const MapViewContent = forwardRef(
             url={CARTO_LIGHT_NOLABELS}
             attribution={ATTRIBUTION}
             zIndex={1}
-            keepBuffer={32}
-            updateWhenZooming={false}
-            updateWhenIdle={true}
+            keepBuffer={64}
+            updateWhenZooming={true}
+            updateWhenIdle={false}
+            updateInterval={40}
+            crossOrigin="anonymous"
+            noWrap={true}
+            maxNativeZoom={19}
             eventHandlers={{ tileloadstart: onTileLoadStart, tileload: onTileLoadEnd, tileerror: onTileLoadEnd }}
           />
 
@@ -443,51 +449,59 @@ const MapViewContent = forwardRef(
               through; only the SVG paths (with their default
               pointer-events:visiblePainted) capture clicks on the actual dots. */}
           <Pane name="quantumSensorsPane" style={{ zIndex: 600, pointerEvents: "none" }}>
-            {sensorMarkers && sensorMarkers.map((s, i) => (
-              <CircleMarker
-                key={`sensor-${s.geoid}`}
-                center={[s.lat, s.lon]}
-                radius={7}
-                pathOptions={{
-                  renderer: sensorSvgRenderer,
-                  color: "#fff",
-                  weight: 2,
-                  fillColor: "#00b4d8",
-                  fillOpacity: 0.95,
-                }}
-                eventHandlers={{
-                  click: () => {
-                    justClickedRef.current = true;
-                    onTractSelectRef.current?.(s.geoid);
-                  },
-                }}
-              >
-                <Tooltip
-                  direction="top"
-                  offset={[0, -10]}
-                  opacity={0.95}
-                  className="sensor-tooltip"
+            {sensorMarkers && sensorMarkers.map((s) => {
+              const isTop3 = (s.placement_rank ?? 99) <= 3;
+              return (
+                <CircleMarker
+                  key={`sensor-${s.geoid}`}
+                  center={[s.lat, s.lon]}
+                  radius={isTop3 ? 8 : 7}
+                  pathOptions={{
+                    renderer: sensorSvgRenderer,
+                    color: "#ffffff",
+                    weight: isTop3 ? 2.5 : 2,
+                    fillColor: isTop3 ? "#fbbf24" : "#38bdf8",
+                    fillOpacity: 0.96,
+                    className: isTop3 ? "ssi-sensor-top" : "ssi-sensor",
+                  }}
+                  eventHandlers={{
+                    click: () => {
+                      justClickedRef.current = true;
+                      onTractSelectRef.current?.(s.geoid);
+                    },
+                  }}
                 >
-                  <span style={{ fontWeight: 700 }}>#{s.placement_rank}</span>
-                  {" "}{lang === "es" ? "Sensor Recomendado" : "Recommended Sensor"}
-                  <br />
-                  <span style={{ fontSize: 10, opacity: 0.7 }}>
-                    EJ: {((s.ej_priority || 0) * 100).toFixed(0)}%
-                    {" | "}
-                    {lang === "es" ? "Cob" : "Cov"}: {((s.coverage_need || 0) * 100).toFixed(0)}%
-                  </span>
-                </Tooltip>
-              </CircleMarker>
-            ))}
+                  <Tooltip
+                    direction="top"
+                    offset={[0, -10]}
+                    opacity={0.95}
+                    className="sensor-tooltip"
+                  >
+                    <span style={{ fontWeight: 700 }}>#{s.placement_rank}</span>
+                    {" "}{lang === "es" ? "Sensor Recomendado" : "Recommended Sensor"}
+                    <br />
+                    <span style={{ fontSize: 10, opacity: 0.7 }}>
+                      EJ: {((s.ej_priority || 0) * 100).toFixed(0)}%
+                      {" | "}
+                      {lang === "es" ? "Cob" : "Cov"}: {((s.coverage_need || 0) * 100).toFixed(0)}%
+                    </span>
+                  </Tooltip>
+                </CircleMarker>
+              );
+            })}
           </Pane>
 
           <TileLayer
             url={CARTO_LIGHT_LABELS}
             zIndex={650}
             pane="shadowPane"
-            keepBuffer={16}
-            updateWhenZooming={false}
-            updateWhenIdle={true}
+            keepBuffer={48}
+            updateWhenZooming={true}
+            updateWhenIdle={false}
+            updateInterval={40}
+            crossOrigin="anonymous"
+            noWrap={true}
+            maxNativeZoom={19}
           />
 
           <button

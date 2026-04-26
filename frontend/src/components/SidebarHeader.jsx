@@ -25,23 +25,41 @@ export default function SidebarHeader({ selectedTract, visitCount, onDeselect, s
   return (
     <div className="sidebar-header">
       {selectedTract && onDeselect && (
-        <button className="back-btn" onClick={onDeselect}>← {t(lang, "back_to", displayName)}</button>
+        <button className="back-btn" onClick={onDeselect} aria-label={t(lang, "back_to", displayName)}>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <line x1="19" y1="12" x2="5" y2="12" />
+            <polyline points="12 19 5 12 12 5" />
+          </svg>
+          <span>{t(lang, "back_to", displayName)}</span>
+        </button>
       )}
       <div className="brand">
         <div className="brand-left">
-          <div className="brand-icon">✦</div>
+          <div className="brand-icon" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 2v4" />
+              <path d="M12 18v4" />
+              <path d="M4.93 4.93l2.83 2.83" />
+              <path d="M16.24 16.24l2.83 2.83" />
+              <path d="M2 12h4" />
+              <path d="M18 12h4" />
+              <path d="M4.93 19.07l2.83-2.83" />
+              <path d="M16.24 7.76l2.83-2.83" />
+              <circle cx="12" cy="12" r="3.5" fill="currentColor" stroke="none" />
+            </svg>
+          </div>
           <span className="brand-name">Shared Skies Initiative</span>
         </div>
         {visitCount != null && (
-          <div className="visit-counter-header">
-            <span className="visit-counter-dot" />
-            <span><strong>{visitCount.toLocaleString()}</strong> {lang === "es" ? "usuarios" : "users"}</span>
+          <div className="visit-counter-header" title={lang === "es" ? "Usuarios" : "Live users"}>
+            <span className="visit-counter-dot" aria-hidden="true" />
+            <span><strong data-num>{visitCount.toLocaleString()}</strong> {lang === "es" ? "usuarios" : "users"}</span>
           </div>
         )}
       </div>
       <div className="brand-tagline">
         {selectedTract
-          ? `Tract ${selectedTract.geoid?.slice(-6)}${countyName ? ` · ${countyName} County` : ""}`
+          ? `${lang === "es" ? "Tracto" : "Tract"} ${selectedTract.geoid?.slice(-6)}${countyName ? ` · ${countyName}` : ""}`
           : t(lang, "brand_tagline_all")}
       </div>
 
@@ -50,11 +68,12 @@ export default function SidebarHeader({ selectedTract, visitCount, onDeselect, s
           <button
             className={`lang-btn ${lang === "en" ? "active" : ""}`}
             onClick={() => toggleLang("en")}
+            aria-pressed={lang === "en"}
           >EN</button>
-          <span className="sep">|</span>
           <button
             className={`lang-btn ${lang === "es" ? "active" : ""}`}
             onClick={() => toggleLang("es")}
+            aria-pressed={lang === "es"}
           >ES</button>
         </div>
       </div>

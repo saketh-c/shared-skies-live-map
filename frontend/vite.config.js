@@ -12,4 +12,19 @@ export default defineConfig({
       },
     },
   },
+  build: {
+    target: "es2022",
+    cssCodeSplit: true,
+    sourcemap: false,
+    minify: "esbuild",
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes("node_modules/leaflet") || id.includes("node_modules/react-leaflet")) {
+            return "leaflet-vendor";
+          }
+        },
+      },
+    },
+  },
 });

@@ -10,3 +10,5 @@ build/
 .vite/
 backend/static/state_*_tracts.geojson
 backend/static/us_all_tracts.geojson
+.claude/
+

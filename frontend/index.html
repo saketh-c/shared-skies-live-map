@@ -2,18 +2,58 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Shared Skies — Hyperlocal Air Quality</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#050810" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="description" content="Hyperlocal PM2.5 air-quality predictions across all 6,900+ Texas census tracts, with quantum-optimized sensor placement weighted toward environmental-justice burden." />
+    <title>Shared Skies Initiative — Hyperlocal Air Quality for Texas</title>
+
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://a.basemaps.cartocdn.com" crossorigin />
+    <link rel="preconnect" href="https://b.basemaps.cartocdn.com" crossorigin />
+    <link rel="preconnect" href="https://c.basemaps.cartocdn.com" crossorigin />
+    <link rel="preconnect" href="https://d.basemaps.cartocdn.com" crossorigin />
+    <link rel="dns-prefetch" href="https://nominatim.openstreetmap.org" />
+
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
       rel="stylesheet"
     />
+
     <style>
-      * { margin: 0; padding: 0; box-sizing: border-box; }
-      html, body, #root { height: 100%; overflow: hidden; }
-      body { font-family: 'Inter', sans-serif; background: #0a0f1e; color: #fff; }
+      *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body, #root { height: 100%; }
+      html { scroll-behavior: smooth; }
+      body {
+        font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+        background: #050810;
+        color: #e2e8f0;
+        overflow: hidden;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        text-rendering: optimizeLegibility;
+        font-feature-settings: 'cv11', 'ss01', 'ss03';
+      }
+      /* Initial paint shell — visible before React mounts */
+      #root::before {
+        content: '';
+        position: fixed;
+        inset: 0;
+        background:
+          radial-gradient(1200px 800px at 70% 20%, rgba(56,189,248,0.06), transparent 60%),
+          radial-gradient(900px 600px at 20% 90%, rgba(129,140,248,0.05), transparent 60%),
+          #050810;
+        z-index: -1;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        html { scroll-behavior: auto; }
+        *, *::before, *::after {
+          animation-duration: 0.001ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.001ms !important;
+        }
+      }
     </style>
   </head>
   <body>

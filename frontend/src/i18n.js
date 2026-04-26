@@ -50,8 +50,8 @@ const TRANSLATIONS = {
     },
     // Search / UI
     search: {
-      address_tab: "📍 Address",
-      coordinates_tab: "🧭 Coordinates",
+      address_tab: "Address",
+      coordinates_tab: "Coordinates",
       placeholder_address: "Enter address (e.g., Austin, TX)",
       placeholder_coords: "Latitude, Longitude (e.g., 30.2672, -97.7431)",
       search_button: "Search",
@@ -168,8 +168,8 @@ const TRANSLATIONS = {
     },
     // Search / UI (Spanish)
     search: {
-      address_tab: "📍 Dirección",
-      coordinates_tab: "🧭 Coordenadas",
+      address_tab: "Dirección",
+      coordinates_tab: "Coordenadas",
       placeholder_address: "Introduce dirección (p. ej., Austin, TX)",
       placeholder_coords: "Latitud, Longitud (p. ej., 30.2672, -97.7431)",
       search_button: "Buscar",
