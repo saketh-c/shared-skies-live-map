@@ -10,6 +10,7 @@ build/
 .vite/
 backend/static/state_*_tracts.geojson
 backend/static/us_all_tracts.geojson
+backend/static/snapshots/
 .claude/
 .DS_Store
 

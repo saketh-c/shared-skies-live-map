@@ -31,6 +31,9 @@ LOOKUP_PATH = os.path.join(STATIC_DIR, "tract_lookup.parquet")
 TEXAS_GEOJSON_PATH = os.path.join(STATIC_DIR, "texas_all_tracts.geojson")
 VISIT_COUNT_PATH = os.path.join(ROOT, "backend", "visit_count.json")
 VISITS_DB = os.path.join(ROOT, "backend", "visits.sqlite")
+SNAPSHOTS_DIR = os.path.join(STATIC_DIR, "snapshots")
+TEXAS_SNAPSHOT_PATH = os.path.join(SNAPSHOTS_DIR, "texas_predictions_latest.json")
+QUANTUM_SNAPSHOT_PATH = os.path.join(SNAPSHOTS_DIR, "quantum_latest.json")
 
 # Upstash Redis REST — set these env vars in Render for persistent visit counts.
 # If not set, falls back to SQLite (resets on every server restart).
@@ -81,6 +84,33 @@ DEFAULT_CITY = "dallas"
 # ── Shared state ──────────────────────────────────────────────────────────────
 state: dict = {}
 
+# Flags so we never run more than one background recompute of the same thing
+_revalidating: dict = {"texas": False, "quantum": False}
+
+
+def _save_snapshot(path: str, data: dict) -> None:
+    """Write a cached API response to disk so cold starts can serve it instantly."""
+    try:
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        tmp = path + ".tmp"
+        with open(tmp, "w") as f:
+            json.dump(data, f, default=str)
+        os.replace(tmp, path)
+    except Exception as e:
+        print(f"Snapshot save failed ({path}): {e}")
+
+
+def _load_snapshot(path: str) -> dict | None:
+    """Load a previously persisted API response (returns None if missing/corrupt)."""
+    if not os.path.exists(path):
+        return None
+    try:
+        with open(path) as f:
+            return json.load(f)
+    except Exception as e:
+        print(f"Snapshot load failed ({path}): {e}")
+        return None
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -127,6 +157,26 @@ async def lifespan(app: FastAPI):
     # Statewide cache
     state["cache_texas"] = {"data": None, "expires": datetime.min.replace(tzinfo=timezone.utc)}
 
+    # Hydrate caches from disk snapshots so cold-start users get an instant response.
+    # We mark them as already-expired so the first request triggers a fresh recompute
+    # in the background (stale-while-revalidate) — the user just doesn't have to wait.
+    texas_snap = _load_snapshot(TEXAS_SNAPSHOT_PATH)
+    if texas_snap is not None:
+        state["cache_texas"] = {
+            "data": texas_snap,
+            "expires": datetime.min.replace(tzinfo=timezone.utc),
+        }
+        print(f"Loaded Texas predictions snapshot ({len(texas_snap.get('tracts', []))} tracts)")
+
+    quantum_snap = _load_snapshot(QUANTUM_SNAPSHOT_PATH)
+    if quantum_snap is not None:
+        global _quantum_cache
+        _quantum_cache = {
+            "data": quantum_snap,
+            "expires": datetime.min.replace(tzinfo=timezone.utc),
+        }
+        print("Loaded quantum sensor-placement snapshot")
+
     # Kick off background precompute to warm the Texas predictions cache so
     # initial requests from the frontend don't time out when computing all tracts.
     async def _precompute_texas():
@@ -142,13 +192,21 @@ async def lifespan(app: FastAPI):
 
             # Defer full Texas precompute so startup stays responsive
             async def _deferred_full_texas():
-                await asyncio.sleep(10)
+                await asyncio.sleep(5)
                 try:
                     print("Background: computing full Texas predictions (deferred)...")
-                    await texas_predictions()
+                    await _compute_texas_predictions()
                     print("Background: Texas precompute complete.")
                 except Exception as e:
                     print(f"Background Texas precompute failed: {e}")
+
+                # Warm quantum cache too so the first Sensors-tab visitor gets it
+                # in <1s instead of waiting ~95s for the annealing run.
+                try:
+                    print("Background: warming quantum sensor placement...")
+                    await _revalidate_quantum_background()
+                except Exception as e:
+                    print(f"Background quantum precompute failed: {e}")
 
             asyncio.create_task(_deferred_full_texas())
         except Exception as e:
@@ -161,32 +219,36 @@ async def lifespan(app: FastAPI):
         # In some environments create_task must be called differently; ignore failures
         pass
 
-    # Keepalive loop: periodically ping an external URL (KEEPALIVE_URL)
-    # or call the internal health() endpoint to keep the process warm.
+    # Keepalive loop: pings an external URL every ~14 min so Render's free tier
+    # never spins us down. Internal health() calls do NOT count as external traffic
+    # to Render — we must actually hit the public URL.
     async def _keepalive_loop():
-        url = os.environ.get("KEEPALIVE_URL")
+        # Prefer explicit override, otherwise auto-detect Render's public URL.
+        url = (
+            os.environ.get("KEEPALIVE_URL")
+            or os.environ.get("RENDER_EXTERNAL_URL")
+        )
+        if url:
+            url = url.rstrip("/") + "/api/health"
         try:
-            interval = int(os.environ.get("KEEPALIVE_INTERVAL", "840"))  # seconds (14 minutes)
+            interval = int(os.environ.get("KEEPALIVE_INTERVAL", "840"))  # 14 min
         except Exception:
             interval = 840
 
+        if not url:
+            print("Keepalive: no KEEPALIVE_URL or RENDER_EXTERNAL_URL set — disabled. "
+                  "Cold starts will happen after 15 min of inactivity.")
+            return
+
+        print(f"Keepalive: will self-ping {url} every {interval}s")
         async with httpx.AsyncClient(timeout=10.0) as client:
             while True:
                 try:
-                    if url:
-                        try:
-                            resp = await client.get(url)
-                            print(f"Keepalive: pinged {url} status={resp.status_code}")
-                        except Exception as e:
-                            print(f"Keepalive HTTP error pinging {url}: {e}")
-                    else:
-                        # Fallback: call internal health() so FastAPI handlers run briefly
-                        try:
-                            await health()
-                            print("Keepalive: called internal health()")
-                        except Exception as e:
-                            print(f"Keepalive internal health() error: {e}")
-
+                    try:
+                        resp = await client.get(url)
+                        print(f"Keepalive: pinged {url} status={resp.status_code}")
+                    except Exception as e:
+                        print(f"Keepalive HTTP error pinging {url}: {e}")
                     await asyncio.sleep(interval)
                 except asyncio.CancelledError:
                     break
@@ -726,21 +788,8 @@ async def get_metrics():
         return {"visits": 0}
 
 
-@app.get("/api/texas/predictions")
-async def texas_predictions():
-    """
-    Returns PM2.5 predictions for all Texas census tracts.
-    Results are cached for 30 minutes.
-    MUST be before /api/{city}/predictions to match correctly.
-    """
-    cache_key = "cache_texas"
-    cache = state.get(cache_key, {})
-    now = datetime.now(timezone.utc)
-
-    # Check cache
-    if cache.get("data") and now < cache.get("expires", datetime.min.replace(tzinfo=timezone.utc)):
-        return cache["data"]
-
+async def _compute_texas_predictions() -> dict:
+    """Heavy path: actually compute predictions for every TX tract, update cache + snapshot."""
     if state.get("bundle") is None:
         raise HTTPException(503, "Model not loaded. Run pipeline/02_train_model.py first.")
     if state.get("tract_lookup") is None:
@@ -748,6 +797,7 @@ async def texas_predictions():
 
     lookup = state["tract_lookup"]
     tracts = []
+    now = datetime.now(timezone.utc)
 
     print(f"Generating predictions for all {len(lookup)} Texas tracts (vectorized)...")
     # Use Austin as default weather location (central Texas)
@@ -799,9 +849,45 @@ async def texas_predictions():
         "tracts":       tracts,
     }
 
-    state[cache_key] = {"data": result, "expires": now + timedelta(minutes=30)}
+    state["cache_texas"] = {"data": result, "expires": now + timedelta(minutes=30)}
+    _save_snapshot(TEXAS_SNAPSHOT_PATH, result)
     print(f"✓ Texas predictions complete: {len(tracts)} tracts")
     return result
+
+
+async def _revalidate_texas_background():
+    """Recompute Texas predictions in the background without blocking any request."""
+    if _revalidating.get("texas"):
+        return
+    _revalidating["texas"] = True
+    try:
+        await _compute_texas_predictions()
+    except Exception as e:
+        print(f"Texas revalidation failed: {e}")
+    finally:
+        _revalidating["texas"] = False
+
+
+@app.get("/api/texas/predictions")
+async def texas_predictions():
+    """
+    Returns PM2.5 predictions for all Texas census tracts.
+    Stale-while-revalidate: cached data (incl. disk snapshot) is served instantly,
+    and a background refresh kicks off when it's older than 30 min. Only the very
+    first request after a clean deploy (no snapshot yet) waits for the compute.
+    """
+    cache = state.get("cache_texas", {})
+    now = datetime.now(timezone.utc)
+    cached_data = cache.get("data")
+    expires_at = cache.get("expires", datetime.min.replace(tzinfo=timezone.utc))
+
+    if cached_data is not None:
+        if now >= expires_at:
+            asyncio.create_task(_revalidate_texas_background())
+        return cached_data
+
+    # No cache, no snapshot — must compute synchronously (first request after clean deploy).
+    return await _compute_texas_predictions()
 
 
 @app.get("/api/{city}/predictions")
@@ -1098,27 +1184,52 @@ async def _run_quantum_placement():
     return result
 
 
+async def _revalidate_quantum_background():
+    """Recompute quantum placement off the request path; updates cache + disk snapshot."""
+    global _quantum_cache
+    if _revalidating.get("quantum"):
+        return
+    _revalidating["quantum"] = True
+    try:
+        result = await _run_quantum_placement()
+        _quantum_cache = {
+            "data": result,
+            "expires": datetime.now(timezone.utc) + timedelta(minutes=QUANTUM_CACHE_TTL_MIN),
+        }
+        _save_snapshot(QUANTUM_SNAPSHOT_PATH, result)
+        print("✓ Quantum placement revalidated")
+    except Exception as e:
+        print(f"Quantum revalidation failed: {e}")
+    finally:
+        _revalidating["quantum"] = False
+
+
 @app.get("/api/quantum/sensor-placement")
 async def quantum_sensor_placement():
     """
     Returns quantum-optimized sensor placement recommendations.
-    Compares three methods: Quantum Annealing, Greedy, Classical SA.
-    Uses real PurpleAir sensor locations + ensemble model disagreement.
-    Results are cached for 1 hour.
+    Stale-while-revalidate: cached/snapshot data is served instantly; a background
+    refresh kicks off when older than 60 min. The 94s annealing run never blocks
+    a user-facing request once the snapshot exists.
     """
     global _quantum_cache
     now = datetime.now(timezone.utc)
+    cached_data = _quantum_cache.get("data")
+    expires_at = _quantum_cache.get("expires", datetime.min.replace(tzinfo=timezone.utc))
 
-    if (_quantum_cache.get("data") and
-        now < _quantum_cache.get("expires", datetime.min.replace(tzinfo=timezone.utc))):
-        return _quantum_cache["data"]
+    if cached_data is not None:
+        if now >= expires_at:
+            asyncio.create_task(_revalidate_quantum_background())
+        return cached_data
 
+    # No cache, no snapshot — must compute synchronously (first request ever).
     try:
         result = await _run_quantum_placement()
         _quantum_cache = {
             "data": result,
             "expires": now + timedelta(minutes=QUANTUM_CACHE_TTL_MIN),
         }
+        _save_snapshot(QUANTUM_SNAPSHOT_PATH, result)
         return result
     except HTTPException:
         raise
