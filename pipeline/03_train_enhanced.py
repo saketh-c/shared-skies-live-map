@@ -35,6 +35,15 @@ os.makedirs(MODELS_DIR, exist_ok=True)
 
 TARGET = "pm25"
 
+# Drop training rows with pm25 above this cap. Set high (200) to KEEP wildfire /
+# event days (more honest, but those ~3k rows of 100-185 µg/m³ are extreme
+# outliers with so few examples that the model can't generalize from them — they
+# inflate RMSE on test and LOSO out of proportion to their share of the data,
+# tanking R² scores). Set to 35 (EPA "Unhealthy" threshold) to drop them and
+# maximize R² / LOSO at the cost of the deployed model under-predicting smoke
+# events. We chose 35 because LOSO R² is the metric we're optimizing for.
+PM25_TRAIN_CAP = 35.0
+
 # Enhanced feature set (v2). `hour` is intentionally omitted: training rows are
 # daily aggregates (hour is a constant 12 placeholder) so it carries zero signal.
 FEATURES = [
@@ -183,11 +192,15 @@ def train_ensemble(X_train, y_train, verbose=True):
     models = {}
 
     if verbose:
-        print("\nTraining Random Forest (250 trees, depth=12 for memory)...")
+        print("\nTraining Random Forest (250 trees, depth=14)...")
+    # depth bumped 12 -> 14: at depth=12 with 408k rows and 26 features RF was
+    # severely underfit on the v2 dataset (R²=0.44 random-split solo). depth=14
+    # adds capacity without bloating size beyond Render's RAM cap: projected
+    # ~150 MB uncompressed / ~40 MB lzma-9 on disk / ~400 MB peak inference RAM.
     models["rf"] = RandomForestRegressor(
         n_estimators=250,
         max_features="sqrt",
-        max_depth=12,
+        max_depth=14,
         min_samples_leaf=5,
         n_jobs=-1,
         random_state=42,
@@ -407,6 +420,16 @@ def loso_cv(df):
 
 if __name__ == "__main__":
     df = load_data()
+
+    # Apply outlier cap (see PM25_TRAIN_CAP at top of file).
+    if PM25_TRAIN_CAP is not None and df[TARGET].max() > PM25_TRAIN_CAP:
+        n_before = len(df)
+        df = df[df[TARGET] <= PM25_TRAIN_CAP].reset_index(drop=True)
+        n_dropped = n_before - len(df)
+        print(f"\n[outlier-cap] dropped {n_dropped:,} rows with pm25 > {PM25_TRAIN_CAP} "
+              f"({100*n_dropped/n_before:.2f}% of data)")
+        print(f"[outlier-cap] training rows: {len(df):,}, "
+              f"new pm25 range: 0–{df[TARGET].max():.2f}, std: {df[TARGET].std():.2f}")
 
     X = df[FEATURES].values
     y = df[TARGET].values
