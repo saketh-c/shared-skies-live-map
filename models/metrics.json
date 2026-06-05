@@ -1,33 +1,38 @@
 {
   "random_split": {
-    "test_size": 12245,
-    "train_size": 48979,
+    "test_size": 80142,
+    "train_size": 320568,
     "rf": {
-      "rmse": 3.1888,
-      "r2": 0.653,
-      "mae": 2.17
+      "rmse": 3.8796,
+      "r2": 0.7552,
+      "mae": 2.4702
     },
     "lgbm": {
-      "rmse": 1.9783,
-      "r2": 0.8664,
-      "mae": 1.2063
+      "rmse": 2.9798,
+      "r2": 0.8556,
+      "mae": 1.6067
     },
     "xgb": {
-      "rmse": 1.9632,
-      "r2": 0.8685,
-      "mae": 1.201
+      "rmse": 2.9922,
+      "r2": 0.8544,
+      "mae": 1.6306
+    },
+    "cat": {
+      "rmse": 3.2258,
+      "r2": 0.8307,
+      "mae": 1.812
     },
     "ensemble": {
-      "rmse": 2.0776,
-      "r2": 0.8527,
-      "mae": 1.2919
+      "rmse": 3.0891,
+      "r2": 0.8448,
+      "mae": 1.7204
     }
   },
   "loso_cv": {
-    "rmse": 3.415,
-    "mae": 2.0253,
-    "r2": 0.6043,
-    "n_sites": 240
+    "rmse": 4.3462,
+    "mae": 2.7353,
+    "r2": 0.6881,
+    "n_sites": 427
   },
   "features": [
     "humidity",
@@ -45,8 +50,13 @@
     "pct_ling_isolated",
     "latitude",
     "longitude",
+    "dist_to_nearest_sensor",
+    "dist_to_coast",
+    "dist_to_urban",
+    "nbr_pm25_50km",
+    "nbr_count_50km",
+    "nbr_std_50km",
     "month",
-    "hour",
     "dow",
     "day_of_year",
     "month_sin",
@@ -58,5 +68,7 @@
     "temp_x_humidity",
     "wind_x_temp"
   ],
-  "n_features": 27
+  "n_features": 32,
+  "target_transform": null,
+  "pm25_train_cap": 75.0
 }
