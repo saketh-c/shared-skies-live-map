@@ -15,6 +15,19 @@ const ATTRIBUTION =
 const TEXAS_CENTER = [31.5, -99.0];
 const TEXAS_ZOOM = 6;
 
+// API base — matches App.jsx convention.
+const API_BASE = import.meta.env.VITE_API_URL || "";
+
+// NOAA HMS smoke polygon styling by density tier.
+const HMS_STYLE = {
+  Light:   { fillColor: "#ffeb99", color: "#caa84a", fillOpacity: 0.32, weight: 1 },
+  Medium:  { fillColor: "#ff9933", color: "#cc6600", fillOpacity: 0.42, weight: 1.2 },
+  Heavy:   { fillColor: "#cc3300", color: "#80190f", fillOpacity: 0.55, weight: 1.4 },
+  Unknown: { fillColor: "#888888", color: "#555555", fillOpacity: 0.30, weight: 1 },
+};
+// Refresh HMS once an hour to match the cache TTL.
+const HMS_REFRESH_MS = 60 * 60 * 1000;
+
 function normGeoid(val) {
   if (!val) return "";
   return String(val).padStart(11, "0");
@@ -125,6 +138,30 @@ const MapViewContent = forwardRef(
     const activeTabRef = useRef(activeTab);
     const [tooltipData, setTooltipData] = useState(null);
     const [legendExpanded, setLegendExpanded] = useState(false);
+
+    // NOAA HMS smoke polygon layer state. Hidden by default; toggle via legend.
+    const [hmsData, setHmsData] = useState(null);
+    const [showHmsSmoke, setShowHmsSmoke] = useState(false);
+
+    // Fetch the HMS smoke layer once on mount and refresh every hour. Survives
+    // when toggled off because the cached feature collection is cheap to keep.
+    useEffect(() => {
+      let alive = true;
+      const fetchHms = async () => {
+        try {
+          const res = await fetch(`${API_BASE}/api/live/hms-smoke`);
+          if (!res.ok) return;
+          const data = await res.json();
+          if (alive) setHmsData(data);
+        } catch (e) {
+          // Network failures are non-fatal — the layer just won't render.
+          console.warn("HMS fetch failed:", e?.message);
+        }
+      };
+      fetchHms();
+      const id = setInterval(fetchHms, HMS_REFRESH_MS);
+      return () => { alive = false; clearInterval(id); };
+    }, []);
 
     useEffect(() => { onTractSelectRef.current = onTractSelect; }, [onTractSelect]);
     useEffect(() => { selectedGeoidRef.current = selectedGeoid; }, [selectedGeoid]);
@@ -414,6 +451,22 @@ const MapViewContent = forwardRef(
             />
           )}
 
+          {/* NOAA HMS smoke polygons — own pane between choropleth (z=400) and
+              sensor markers (z=600). Pointer-events:none so the smoke overlay
+              never steals clicks from the choropleth underneath. */}
+          {showHmsSmoke && hmsData?.features?.length > 0 && (
+            <Pane name="hmsSmokePane" style={{ zIndex: 450, pointerEvents: "none" }}>
+              <GeoJSON
+                key={`hms-${hmsData.data_date}-${hmsData.count}`}
+                data={hmsData}
+                style={(feat) => {
+                  const d = feat?.properties?.density || "Unknown";
+                  return HMS_STYLE[d] || HMS_STYLE.Unknown;
+                }}
+              />
+            </Pane>
+          )}
+
           {searchMarker && (
             <Circle
               center={[searchMarker.lat, searchMarker.lon]}
@@ -535,6 +588,40 @@ const MapViewContent = forwardRef(
                 <span className="legend-range">{b.label}</span>
               </div>
             ))}
+
+            {/* NOAA HMS smoke polygon layer toggle + density legend */}
+            <div className="legend-divider" />
+            <label className="legend-row legend-toggle" style={{ cursor: hmsData?.features?.length ? "pointer" : "not-allowed", opacity: hmsData?.features?.length ? 1 : 0.55 }}>
+              <input
+                type="checkbox"
+                checked={showHmsSmoke}
+                disabled={!hmsData?.features?.length}
+                onChange={(e) => setShowHmsSmoke(e.target.checked)}
+                style={{ marginRight: 8 }}
+              />
+              <span className="legend-category">
+                {lang === "es" ? "Humo (NOAA HMS)" : "Smoke (NOAA HMS)"}
+              </span>
+              <span className="legend-range">
+                {hmsData?.count ? `${hmsData.count} ${hmsData.count === 1 ? "plume" : "plumes"}` : (lang === "es" ? "ninguno" : "none")}
+              </span>
+            </label>
+            {showHmsSmoke && hmsData?.features?.length > 0 && (
+              <>
+                {["Light", "Medium", "Heavy"].map((d) => (
+                  <div className="legend-row legend-sub" key={`hms-${d}`}>
+                    <div className="legend-swatch" style={{ background: HMS_STYLE[d].fillColor, opacity: HMS_STYLE[d].fillOpacity + 0.2 }} />
+                    <span className="legend-category">{d}</span>
+                    <span className="legend-range">{hmsData?.density_counts?.[d] || 0}</span>
+                  </div>
+                ))}
+                <div className="legend-row legend-source">
+                  <span className="legend-range" style={{ fontSize: "0.72em", opacity: 0.75 }}>
+                    {hmsData?.data_date && `${lang === "es" ? "Fecha" : "Date"}: ${hmsData.data_date}`}
+                  </span>
+                </div>
+              </>
+            )}
           </div>
         </MapContainer>
 

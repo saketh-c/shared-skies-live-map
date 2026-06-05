@@ -34,6 +34,7 @@ VISITS_DB = os.path.join(ROOT, "backend", "visits.sqlite")
 SNAPSHOTS_DIR = os.path.join(STATIC_DIR, "snapshots")
 TEXAS_SNAPSHOT_PATH = os.path.join(SNAPSHOTS_DIR, "texas_predictions_latest.json")
 QUANTUM_SNAPSHOT_PATH = os.path.join(SNAPSHOTS_DIR, "quantum_latest.json")
+HMS_SNAPSHOT_PATH = os.path.join(SNAPSHOTS_DIR, "hms_smoke_latest.json")
 
 # Upstash Redis REST — set these env vars in Render for persistent visit counts.
 # If not set, falls back to SQLite (resets on every server restart).
@@ -85,7 +86,11 @@ DEFAULT_CITY = "dallas"
 state: dict = {}
 
 # Flags so we never run more than one background recompute of the same thing
-_revalidating: dict = {"texas": False, "quantum": False}
+_revalidating: dict = {"texas": False, "quantum": False, "hms": False}
+
+# NOAA HMS smoke polygon live cache (refreshed by background task every HMS_CACHE_TTL_MIN).
+_hms_cache: dict = {"data": None, "expires": datetime.min.replace(tzinfo=timezone.utc)}
+HMS_CACHE_TTL_MIN = 60  # HMS analysts publish daily and re-draw a few times/day
 
 
 # ── Spatial-context reference points (kept in sync with pipeline/03_train_enhanced.py) ──
@@ -305,6 +310,17 @@ async def lifespan(app: FastAPI):
         }
         print("Loaded quantum sensor-placement snapshot")
 
+    # NOAA HMS smoke polygon cache — hydrate from disk snapshot so cold-start
+    # users get an instant red-polygon overlay (stale-while-revalidate).
+    hms_snap = _load_snapshot(HMS_SNAPSHOT_PATH)
+    if hms_snap is not None:
+        global _hms_cache
+        _hms_cache = {
+            "data": hms_snap,
+            "expires": datetime.min.replace(tzinfo=timezone.utc),
+        }
+        print(f"Loaded HMS snapshot ({hms_snap.get('count', 0)} polygons)")
+
     # Kick off background precompute to warm the Texas predictions cache so
     # initial requests from the frontend don't time out when computing all tracts.
     async def _precompute_texas():
@@ -335,6 +351,13 @@ async def lifespan(app: FastAPI):
                     await _revalidate_quantum_background()
                 except Exception as e:
                     print(f"Background quantum precompute failed: {e}")
+
+                # Warm NOAA HMS smoke layer (small fetch, daily-cadence data).
+                try:
+                    print("Background: warming NOAA HMS smoke layer...")
+                    await _revalidate_hms_background()
+                except Exception as e:
+                    print(f"Background HMS precompute failed: {e}")
 
             asyncio.create_task(_deferred_full_texas())
         except Exception as e:
@@ -1370,3 +1393,72 @@ async def quantum_sensor_placement():
     except Exception as e:
         print(f"Quantum placement error: {e}")
         raise HTTPException(500, f"Quantum solver failed: {str(e)}")
+
+
+# ── NOAA HMS smoke polygon live layer ─────────────────────────────────────────
+
+async def _revalidate_hms_background():
+    """Fetch the most recent HMS smoke polygons from NOAA, clip to TX bbox,
+    cache + snapshot. Runs in background so a request never waits on the
+    NOAA round-trip."""
+    global _hms_cache
+    if _revalidating.get("hms"):
+        return
+    _revalidating["hms"] = True
+    try:
+        from backend.hms import fetch_latest_hms
+
+        result = await fetch_latest_hms()
+        _hms_cache = {
+            "data": result,
+            "expires": datetime.now(timezone.utc) + timedelta(minutes=HMS_CACHE_TTL_MIN),
+        }
+        _save_snapshot(HMS_SNAPSHOT_PATH, result)
+        print(
+            f"✓ HMS revalidated: {result.get('count', 0)} polygons "
+            f"(data_date={result.get('data_date')})"
+        )
+    except Exception as e:
+        print(f"HMS revalidation failed: {e}")
+    finally:
+        _revalidating["hms"] = False
+
+
+@app.get("/api/live/hms-smoke")
+async def hms_smoke():
+    """Returns the most recent NOAA HMS smoke polygons clipped to Texas, as a
+    GeoJSON FeatureCollection. Stale-while-revalidate: cached/snapshot data is
+    served instantly; a background refresh kicks off when older than 60 min."""
+    global _hms_cache
+    now = datetime.now(timezone.utc)
+    cached_data = _hms_cache.get("data")
+    expires_at = _hms_cache.get("expires", datetime.min.replace(tzinfo=timezone.utc))
+
+    if cached_data is not None:
+        if now >= expires_at:
+            asyncio.create_task(_revalidate_hms_background())
+        return cached_data
+
+    # No cache, no snapshot — fetch synchronously (first request ever).
+    try:
+        from backend.hms import fetch_latest_hms
+
+        result = await fetch_latest_hms()
+        _hms_cache = {
+            "data": result,
+            "expires": now + timedelta(minutes=HMS_CACHE_TTL_MIN),
+        }
+        _save_snapshot(HMS_SNAPSHOT_PATH, result)
+        return result
+    except Exception as e:
+        print(f"HMS endpoint error: {e}")
+        # Don't 500 the frontend just because NOAA is down — return empty FC.
+        return {
+            "type": "FeatureCollection",
+            "features": [],
+            "fetched_at": now.isoformat(),
+            "data_date": None,
+            "count": 0,
+            "density_counts": {},
+            "error": str(e),
+        }

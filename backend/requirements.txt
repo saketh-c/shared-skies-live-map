@@ -5,6 +5,7 @@ numpy
 scikit-learn
 lightgbm
 xgboost
+catboost
 joblib
 pyarrow
 httpx
@@ -13,3 +14,6 @@ xlrd
 dwave-neal
 dimod
 networkx
+# NOAA HMS smoke polygon parsing — pure-Python (no GDAL dependency)
+pyshp
+shapely

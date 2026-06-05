@@ -913,6 +913,30 @@ button { font-family: inherit; }
   margin-bottom: 6px;
 }
 .legend-row:last-child { margin-bottom: 0; }
+.legend-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.08);
+  margin: 10px 0 8px;
+}
+.legend-toggle {
+  cursor: pointer;
+  grid-template-columns: auto 1fr auto;
+}
+.legend-toggle input[type="checkbox"] {
+  accent-color: var(--primary, #38bdf8);
+  width: 14px;
+  height: 14px;
+  margin: 0;
+}
+.legend-sub {
+  margin-left: 22px;
+  margin-bottom: 4px;
+}
+.legend-source {
+  margin-left: 22px;
+  margin-top: 2px;
+  margin-bottom: 0;
+}
 .legend-swatch {
   width: 10px;
   height: 10px;
