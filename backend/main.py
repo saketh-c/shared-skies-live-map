@@ -35,6 +35,7 @@ SNAPSHOTS_DIR = os.path.join(STATIC_DIR, "snapshots")
 TEXAS_SNAPSHOT_PATH = os.path.join(SNAPSHOTS_DIR, "texas_predictions_latest.json")
 QUANTUM_SNAPSHOT_PATH = os.path.join(SNAPSHOTS_DIR, "quantum_latest.json")
 HMS_SNAPSHOT_PATH = os.path.join(SNAPSHOTS_DIR, "hms_smoke_latest.json")
+MODELS_DIR = os.path.join(ROOT, "models")
 
 # Upstash Redis REST — set these env vars in Render for persistent visit counts.
 # If not set, falls back to SQLite (resets on every server restart).
@@ -599,8 +600,17 @@ def run_predictions_batch(df: pd.DataFrame, weather: dict, temporal: dict) -> np
 
     shared = _compute_v3_shared(weather, temporal)
 
-    # Add spatial features to df if v3 model needs them
-    if any(f in features for f in ["elevation", "dist_to_coast", "urban_index"]):
+    # Add v3 spatial features only if the model needs them AND they're not
+    # already present in the enriched tract_lookup. The lifespan call to
+    # _enrich_tract_lookup_with_distances populates dist_to_coast etc. on
+    # startup, so this legacy path is a no-op for v3b. The `f not in df.columns`
+    # guard also keeps us safe from latent bugs inside _add_v3_spatial (e.g.
+    # the now-fixed MODELS_DIR NameError) when the columns are already there.
+    needs_v3_spatial = any(
+        f in features and f not in df.columns
+        for f in ["elevation", "dist_to_coast", "urban_index", "dist_to_border", "dist_to_cluster_center"]
+    )
+    if needs_v3_spatial:
         df = _add_v3_spatial(df)
 
     # Lookup uses lat/lon; v2 model was trained with latitude/longitude column names
