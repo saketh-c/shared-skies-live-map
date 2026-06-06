@@ -13,16 +13,16 @@ const COLOR_SCALE = {
   goodRange: {
     min: 0.0,
     max: 8.9,
-    colorMin: "#00838f",  // Deep teal (pristine)
-    colorMax: "#c0ca33",  // Lime-green (approaching moderate)
+    colorMin: "#90EE90",  // Light green
+    colorMax: "#00b894",  // Darker green
     category: "Good",
     label: "0–8.9 µg/m³"
   },
   moderateRange: {
     min: 9.0,
     max: 12.9,
-    colorMin: "#FFEB3B",  // Bright yellow
-    colorMax: "#FFB300",  // Amber/gold
+    colorMin: "#FFFF99",  // Light yellow
+    colorMax: "#FFD700",  // Darker yellow/gold
     category: "Moderate",
     label: "9–12.9 µg/m³"
   },
@@ -90,12 +90,9 @@ export function pm25Color(pm25) {
   }
 
   if (pm25 <= COLOR_SCALE.goodRange.max) {
-    // Interpolate within the Good range with a power<1 curve so the dense
-    // 1-6 µg/m³ clean-day band spreads across the teal->lime gradient (matches
-    // backend pm25_color_gradient). Without the curve, clean days look flat.
-    const linear = (pm25 - COLOR_SCALE.goodRange.min) /
+    // Interpolate within green range
+    const factor = (pm25 - COLOR_SCALE.goodRange.min) /
                    (COLOR_SCALE.goodRange.max - COLOR_SCALE.goodRange.min);
-    const factor = Math.pow(linear, 0.65);
     return interpolateColor(
       COLOR_SCALE.goodRange.colorMin,
       COLOR_SCALE.goodRange.colorMax,
@@ -207,9 +204,8 @@ export function healthIcon(category) {
  * Export breakpoints for legend display
  */
 export const BREAKPOINTS = [
-  // Good swatch is a teal->lime gradient to signal the wider in-bucket resolution.
-  { max: 8.9,   category: "Good",      color: "linear-gradient(90deg,#00838f,#7ab056,#c0ca33)", label: "0–8.9" },
-  { max: 12.9,  category: "Moderate",  color: "#FFB300", label: "9–12.9" },
+  { max: 8.9,   category: "Good",      color: "#00b894", label: "0–8.9" },
+  { max: 12.9,  category: "Moderate",  color: "#FFD700", label: "9–12.9" },
   { max: 17.9,  category: "Unhealthy", color: "#d63031", label: "13–17.9" },
   { max: Infinity, category: "Hazardous", color: "#8b0000", label: "18+" },
 ];
