@@ -35,7 +35,18 @@ SNAPSHOTS_DIR = os.path.join(STATIC_DIR, "snapshots")
 TEXAS_SNAPSHOT_PATH = os.path.join(SNAPSHOTS_DIR, "texas_predictions_latest.json")
 QUANTUM_SNAPSHOT_PATH = os.path.join(SNAPSHOTS_DIR, "quantum_latest.json")
 HMS_SNAPSHOT_PATH = os.path.join(SNAPSHOTS_DIR, "hms_smoke_latest.json")
+PURPLEAIR_SNAPSHOT_PATH = os.path.join(SNAPSHOTS_DIR, "purpleair_sensors_latest.json")
 MODELS_DIR = os.path.join(ROOT, "models")
+
+# Live PurpleAir: the model's dominant feature (nbr_pm25_50km) must be computed
+# from same-day live readings to match training. TTL is long (3h) because the
+# model is daily-granularity and the live API is points-billed — 8 pulls/day is
+# plenty fresh and stays cheap (~$13/mo). Set PURPLEAIR_API_KEY in Render env.
+PURPLEAIR_CACHE_TTL_MIN = int(os.environ.get("PURPLEAIR_CACHE_TTL_MIN", "180"))
+# Clip dist_to_nearest_sensor to the training-network max so rural tracts (which
+# can be 195km from any sensor vs the 164km training max) don't push the tree
+# models out of distribution.
+DIST_TO_SENSOR_MAX_KM = 164.4
 
 # Upstash Redis REST — set these env vars in Render for persistent visit counts.
 # If not set, falls back to SQLite (resets on every server restart).
@@ -87,11 +98,14 @@ DEFAULT_CITY = "dallas"
 state: dict = {}
 
 # Flags so we never run more than one background recompute of the same thing
-_revalidating: dict = {"texas": False, "quantum": False, "hms": False}
+_revalidating: dict = {"texas": False, "quantum": False, "hms": False, "purpleair": False}
 
 # NOAA HMS smoke polygon live cache (refreshed by background task every HMS_CACHE_TTL_MIN).
 _hms_cache: dict = {"data": None, "expires": datetime.min.replace(tzinfo=timezone.utc)}
 HMS_CACHE_TTL_MIN = 60  # HMS analysts publish daily and re-draw a few times/day
+
+# Live PurpleAir sensor cache (list of {lat, lon, pm25} for current TX air).
+_purpleair_cache: dict = {"data": None, "expires": datetime.min.replace(tzinfo=timezone.utc)}
 
 
 # ── Spatial-context reference points (kept in sync with pipeline/03_train_enhanced.py) ──
@@ -167,8 +181,14 @@ def _enrich_tract_lookup_with_distances(df: pd.DataFrame) -> None:
         s_lons = sensor_lons[start:start + chunk]
         for sl, slo in zip(s_lats, s_lons):
             nearest = np.minimum(nearest, _haversine_km_np(lats, lons, sl, slo))
+    # Clip to the training-network max. Training computed sensor->nearest-OTHER-
+    # sensor (max ~164km); tracts can be ~195km from any sensor. Clipping keeps
+    # rural tracts in the tree models' training distribution instead of
+    # extrapolating into never-seen feature space.
+    nearest = np.clip(nearest, 0.0, DIST_TO_SENSOR_MAX_KM)
     df["dist_to_nearest_sensor"] = nearest
-    print(f"  enriched lookup: dist_to_nearest_sensor median={np.median(nearest):.1f} km, "
+    print(f"  enriched lookup: dist_to_nearest_sensor median={np.median(nearest):.1f} km "
+          f"(clipped to {DIST_TO_SENSOR_MAX_KM}), "
           f"dist_to_coast median={np.median(df['dist_to_coast'].values):.1f} km, "
           f"dist_to_urban median={np.median(df['dist_to_urban'].values):.1f} km")
 
@@ -322,6 +342,24 @@ async def lifespan(app: FastAPI):
         }
         print(f"Loaded HMS snapshot ({hms_snap.get('count', 0)} polygons)")
 
+    # Live PurpleAir cache — hydrate from disk snapshot (already-expired) so the
+    # first prediction after cold start can use last-known-good live air rather
+    # than blocking on the PurpleAir round-trip.
+    pa_snap = _load_snapshot(PURPLEAIR_SNAPSHOT_PATH)
+    if pa_snap is not None:
+        global _purpleair_cache
+        _purpleair_cache = {
+            "data": pa_snap,
+            "expires": datetime.min.replace(tzinfo=timezone.utc),
+        }
+        print(f"Loaded PurpleAir snapshot ({pa_snap.get('count', 0)} live sensors)")
+    if os.environ.get("PURPLEAIR_API_KEY", "").strip():
+        print("PurpleAir: using PURPLEAIR_API_KEY from environment.")
+    else:
+        print("PurpleAir: PURPLEAIR_API_KEY not set — using committed fallback key. "
+              "Live same-day neighbor features are ACTIVE. Set/rotate the key in "
+              "Render env to override.")
+
     # Kick off background precompute to warm the Texas predictions cache so
     # initial requests from the frontend don't time out when computing all tracts.
     async def _precompute_texas():
@@ -361,6 +399,14 @@ async def lifespan(app: FastAPI):
                     print(f"Background HMS precompute failed: {e}")
 
             asyncio.create_task(_deferred_full_texas())
+
+            # Warm the live PurpleAir cache FIRST (before the deferred full-Texas
+            # recompute below) so the neighbor features reflect current air.
+            try:
+                print("Background: warming live PurpleAir sensors...")
+                await _revalidate_purpleair_background()
+            except Exception as e:
+                print(f"Background PurpleAir precompute failed: {e}")
         except Exception as e:
             print(f"Background Texas precompute failed: {e}")
 
@@ -974,8 +1020,39 @@ async def _compute_texas_predictions() -> dict:
 
     temporal = get_temporal("America/Chicago")
 
-    # Vectorized batch prediction — single model.predict() call for all 6,900+ tracts
+    # Work on a COPY so concurrent per-city requests never see half-updated columns.
     lookup_reset = lookup.reset_index(drop=True)
+
+    # ── Live neighbor-feature recompute (the fix for scrambled predictions) ──
+    # nbr_pm25_50km is ~37% of the model's importance and MUST reflect same-day
+    # air to match training. Recompute it from LIVE PurpleAir sensors here, every
+    # prediction cycle. If live data is unavailable (no key / API down), we leave
+    # the static climatological columns from _enrich_tract_lookup_with_distances
+    # in place — stable and non-scrambled, never worse than rollback.
+    live_sensor_count = 0
+    try:
+        live_sensors = get_live_purpleair_sensors()
+        if live_sensors:
+            from backend.purpleair import compute_neighbor_features
+            nbr_mean, nbr_count, nbr_std = await asyncio.to_thread(
+                compute_neighbor_features,
+                lookup_reset["lat"].values, lookup_reset["lon"].values, live_sensors,
+            )
+            if nbr_mean is not None:
+                lookup_reset = lookup_reset.copy()
+                lookup_reset["nbr_pm25_50km"] = nbr_mean
+                lookup_reset["nbr_count_50km"] = nbr_count
+                lookup_reset["nbr_std_50km"] = nbr_std
+                live_sensor_count = len(live_sensors)
+                print(f"Live neighbor features applied: {live_sensor_count} sensors, "
+                      f"nbr_pm25 mean={float(np.mean(nbr_mean)):.2f}, "
+                      f"coverage={(nbr_count>0).sum()/len(nbr_count)*100:.1f}%")
+        else:
+            print("No live PurpleAir data — using static climatological neighbor features.")
+    except Exception as e:
+        print(f"Live neighbor recompute failed ({e}); using static neighbor features.")
+
+    # Vectorized batch prediction — single model.predict() call for all 6,900+ tracts
     pm25_array = await asyncio.to_thread(run_predictions_batch, lookup_reset, weather, temporal)
 
     for i, (_, row) in enumerate(lookup.iterrows()):
@@ -1021,11 +1098,17 @@ async def _compute_texas_predictions() -> dict:
 
 
 async def _revalidate_texas_background():
-    """Recompute Texas predictions in the background without blocking any request."""
+    """Recompute Texas predictions in the background without blocking any request.
+    Refreshes the live PurpleAir cache first (if expired) so the neighbor
+    features reflect current air."""
     if _revalidating.get("texas"):
         return
     _revalidating["texas"] = True
     try:
+        # Refresh live air first if its cache has expired (cheap, ~1s, cached 3h).
+        pa_exp = _purpleair_cache.get("expires", datetime.min.replace(tzinfo=timezone.utc))
+        if datetime.now(timezone.utc) >= pa_exp:
+            await _revalidate_purpleair_background()
         await _compute_texas_predictions()
     except Exception as e:
         print(f"Texas revalidation failed: {e}")
@@ -1472,3 +1555,52 @@ async def hms_smoke():
             "density_counts": {},
             "error": str(e),
         }
+
+
+# ── Live PurpleAir layer (feeds the model's nbr_pm25_50km feature) ─────────────
+
+async def _revalidate_purpleair_background():
+    """Fetch current TX PurpleAir readings, cache + snapshot. Background so no
+    request waits on the PurpleAir round-trip."""
+    global _purpleair_cache
+    if _revalidating.get("purpleair"):
+        return
+    _revalidating["purpleair"] = True
+    try:
+        from backend.purpleair import fetch_live_snapshot
+
+        snap = await fetch_live_snapshot()
+        # Only overwrite the cache with a usable snapshot. A transient empty
+        # fetch (API hiccup) must not wipe a good prior snapshot.
+        if snap.get("usable"):
+            _purpleair_cache = {
+                "data": snap,
+                "expires": datetime.now(timezone.utc) + timedelta(minutes=PURPLEAIR_CACHE_TTL_MIN),
+            }
+            _save_snapshot(PURPLEAIR_SNAPSHOT_PATH, snap)
+            print(f"✓ PurpleAir revalidated: {snap['count']} live sensors, "
+                  f"statewide mean={snap.get('statewide_mean')}")
+        else:
+            print(f"PurpleAir fetch returned {snap.get('count', 0)} usable sensors "
+                  f"(<{20}); keeping prior cache")
+    except Exception as e:
+        print(f"PurpleAir revalidation failed: {e}")
+    finally:
+        _revalidating["purpleair"] = False
+
+
+def get_live_purpleair_sensors() -> list:
+    """Return the cached live sensor list (stale-while-revalidate). Kicks a
+    background refresh when the cache is expired. Returns [] if no usable data
+    (no key / API down) so the caller falls back to the static climatology."""
+    now = datetime.now(timezone.utc)
+    cached = _purpleair_cache.get("data")
+    expires_at = _purpleair_cache.get("expires", datetime.min.replace(tzinfo=timezone.utc))
+    if cached is not None:
+        if now >= expires_at:
+            try:
+                asyncio.create_task(_revalidate_purpleair_background())
+            except RuntimeError:
+                pass  # no running loop (called outside async context)
+        return cached.get("sensors", []) if cached.get("usable") else []
+    return []

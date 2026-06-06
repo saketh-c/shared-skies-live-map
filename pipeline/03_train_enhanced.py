@@ -665,29 +665,29 @@ if __name__ == "__main__":
         print(f"[cap] training rows: {len(df):,}, "
               f"pm25 range: 0–{df[TARGET].max():.2f}, std: {df[TARGET].std():.2f}")
 
-    # ── Export per-sensor recent PM2.5 means for backend inference ──
-    # The backend needs to know each sensor's recent average PM2.5 to compute
-    # the nbr_pm25_50km feature at inference time (it can't see same-day live
-    # data without a separate PurpleAir API integration). The last-30-days
-    # mean per sensor is a reasonable static proxy and only ~50 KB on disk.
-    print("\nExporting sensor recent-PM JSON for backend inference...")
+    # ── Export per-sensor CLIMATOLOGICAL PM2.5 means for backend inference ──
+    # The backend's PRIMARY neighbor-feature source is LIVE PurpleAir (same-day,
+    # matches training semantics exactly). This file is the FALLBACK used only
+    # when live data is unavailable (no API key / API down). We use the
+    # FULL-PERIOD mean (not last-30-days) because the 30-day window was biased
+    # high (~10 vs training median 6.7) and inflated fallback predictions. The
+    # full-period climatological mean matches the training distribution scale
+    # and preserves the real spatial pattern (urban vs rural). ~50 KB on disk.
+    print("\nExporting sensor climatological-PM JSON for backend fallback...")
     df_for_export = df.copy()
-    df_for_export["date"] = pd.to_datetime(df_for_export["date"], errors="coerce")
-    cutoff = df_for_export["date"].max() - pd.Timedelta(days=30)
-    recent = df_for_export[df_for_export["date"] >= cutoff]
     sensor_recent = (
-        recent.groupby("sensor_id")
+        df_for_export.groupby("sensor_id")
         .agg(
             lat=("latitude", "first"),
             lon=("longitude", "first"),
-            recent_mean_pm25=(TARGET, "mean"),
+            recent_mean_pm25=(TARGET, "mean"),   # full-period climatological mean
             recent_n_days=(TARGET, "count"),
         )
         .reset_index()
     )
     export_path = os.path.join(MODELS_DIR, "sensor_recent_pm.json")
     sensor_recent.to_json(export_path, orient="records", indent=2)
-    print(f"  saved {len(sensor_recent)} sensors → {export_path}")
+    print(f"  saved {len(sensor_recent)} sensors (climatological means) → {export_path}")
 
     X = df[FEATURES].values
     y_orig = df[TARGET].values  # always in µg/m³

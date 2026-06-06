@@ -3,2779 +3,2989 @@
     "sensor_id":2301,
     "lat":32.509113,
     "lon":-94.7108,
-    "recent_mean_pm25":9.2,
-    "recent_n_days":29
+    "recent_mean_pm25":12.3826293559,
+    "recent_n_days":1894
   },
   {
     "sensor_id":2386,
     "lat":29.532282,
     "lon":-95.07647,
-    "recent_mean_pm25":6.9548387097,
-    "recent_n_days":31
+    "recent_mean_pm25":9.55739,
+    "recent_n_days":1944
   },
   {
     "sensor_id":2796,
     "lat":30.276873,
     "lon":-97.83731,
-    "recent_mean_pm25":10.1709677419,
-    "recent_n_days":31
+    "recent_mean_pm25":8.4228946073,
+    "recent_n_days":1910
   },
   {
     "sensor_id":2800,
     "lat":36.4148,
     "lon":-105.577705,
-    "recent_mean_pm25":1.9129032258,
-    "recent_n_days":31
+    "recent_mean_pm25":7.0586772188,
+    "recent_n_days":1769
   },
   {
     "sensor_id":2806,
     "lat":30.483,
     "lon":-97.8485,
-    "recent_mean_pm25":10.1774193548,
-    "recent_n_days":31
+    "recent_mean_pm25":7.9502391223,
+    "recent_n_days":1880
   },
   {
     "sensor_id":2862,
     "lat":30.366156,
     "lon":-97.76529,
-    "recent_mean_pm25":10.0703703704,
-    "recent_n_days":27
+    "recent_mean_pm25":9.0909389254,
+    "recent_n_days":1703
   },
   {
     "sensor_id":2875,
     "lat":35.170044,
     "lon":-106.54009,
-    "recent_mean_pm25":16.8483870968,
-    "recent_n_days":31
+    "recent_mean_pm25":8.0228822314,
+    "recent_n_days":1936
   },
   {
     "sensor_id":3033,
     "lat":29.955063,
     "lon":-95.73739,
-    "recent_mean_pm25":5.9322580645,
-    "recent_n_days":31
+    "recent_mean_pm25":9.5040300696,
+    "recent_n_days":1940
   },
   {
     "sensor_id":3298,
     "lat":29.58335,
     "lon":-95.12009,
-    "recent_mean_pm25":9.2,
-    "recent_n_days":31
+    "recent_mean_pm25":11.1078361171,
+    "recent_n_days":1947
   },
   {
     "sensor_id":4301,
     "lat":29.853683,
     "lon":-96.52833,
-    "recent_mean_pm25":9.9322580645,
-    "recent_n_days":31
+    "recent_mean_pm25":10.3935718278,
+    "recent_n_days":1789
   },
   {
     "sensor_id":6752,
     "lat":29.71706,
     "lon":-95.30876,
-    "recent_mean_pm25":8.7,
-    "recent_n_days":31
+    "recent_mean_pm25":10.5961109302,
+    "recent_n_days":1919
   },
   {
     "sensor_id":7488,
     "lat":28.01262,
     "lon":-97.09614,
-    "recent_mean_pm25":8.2483870968,
-    "recent_n_days":31
+    "recent_mean_pm25":8.4842381786,
+    "recent_n_days":1713
   },
   {
     "sensor_id":7570,
     "lat":35.56759,
     "lon":-105.85306,
-    "recent_mean_pm25":3.1806451613,
-    "recent_n_days":31
+    "recent_mean_pm25":2.8010335917,
+    "recent_n_days":1935
   },
   {
     "sensor_id":8554,
     "lat":29.811457,
     "lon":-98.61121,
-    "recent_mean_pm25":12.9741935484,
-    "recent_n_days":31
+    "recent_mean_pm25":9.4770255864,
+    "recent_n_days":1876
   },
   {
     "sensor_id":8562,
     "lat":29.8115,
     "lon":-98.61182,
-    "recent_mean_pm25":9.4423076923,
-    "recent_n_days":26
+    "recent_mean_pm25":7.5115583075,
+    "recent_n_days":1938
   },
   {
     "sensor_id":12969,
     "lat":32.991665,
     "lon":-96.85915,
-    "recent_mean_pm25":4.3419354839,
-    "recent_n_days":31
+    "recent_mean_pm25":9.1679160645,
+    "recent_n_days":1799
   },
   {
     "sensor_id":13737,
     "lat":36.183777,
     "lon":-106.43512,
-    "recent_mean_pm25":0.3064516129,
-    "recent_n_days":31
+    "recent_mean_pm25":2.2113537118,
+    "recent_n_days":687
   },
   {
     "sensor_id":14391,
     "lat":36.391396,
     "lon":-105.280846,
-    "recent_mean_pm25":0.6129032258,
-    "recent_n_days":31
+    "recent_mean_pm25":2.5785500747,
+    "recent_n_days":1338
   },
   {
     "sensor_id":15025,
     "lat":29.546413,
     "lon":-98.55403,
-    "recent_mean_pm25":3.8193548387,
-    "recent_n_days":31
+    "recent_mean_pm25":8.1491736254,
+    "recent_n_days":1946
   },
   {
     "sensor_id":16271,
     "lat":32.882004,
     "lon":-97.08413,
-    "recent_mean_pm25":8.7129032258,
-    "recent_n_days":31
+    "recent_mean_pm25":9.5661376507,
+    "recent_n_days":1941
   },
   {
     "sensor_id":18585,
     "lat":35.929153,
     "lon":-94.96466,
-    "recent_mean_pm25":6.1709677419,
-    "recent_n_days":31
+    "recent_mean_pm25":7.4761769711,
+    "recent_n_days":1763
   },
   {
     "sensor_id":19699,
     "lat":36.124493,
     "lon":-97.04415,
-    "recent_mean_pm25":8.02,
-    "recent_n_days":30
+    "recent_mean_pm25":8.4707380457,
+    "recent_n_days":1924
   },
   {
     "sensor_id":20487,
     "lat":33.157124,
     "lon":-96.360146,
-    "recent_mean_pm25":11.7580645161,
-    "recent_n_days":31
+    "recent_mean_pm25":4.7617463617,
+    "recent_n_days":1924
   },
   {
     "sensor_id":22881,
     "lat":35.6653,
     "lon":-105.96892,
-    "recent_mean_pm25":0.6225806452,
-    "recent_n_days":31
+    "recent_mean_pm25":2.5814210526,
+    "recent_n_days":1900
   },
   {
     "sensor_id":26557,
     "lat":31.285906,
     "lon":-94.605705,
-    "recent_mean_pm25":11.7483870968,
-    "recent_n_days":31
+    "recent_mean_pm25":13.4303967027,
+    "recent_n_days":1941
   },
   {
     "sensor_id":27183,
     "lat":30.287216,
     "lon":-97.73697,
-    "recent_mean_pm25":6.1483870968,
-    "recent_n_days":31
+    "recent_mean_pm25":8.0956621928,
+    "recent_n_days":1872
   },
   {
     "sensor_id":27395,
     "lat":30.285069,
     "lon":-97.73288,
-    "recent_mean_pm25":12.9064516129,
-    "recent_n_days":31
+    "recent_mean_pm25":10.9208387494,
+    "recent_n_days":1931
   },
   {
     "sensor_id":27455,
     "lat":30.285181,
     "lon":-97.734985,
-    "recent_mean_pm25":7.0870967742,
-    "recent_n_days":31
+    "recent_mean_pm25":9.0758492445,
+    "recent_n_days":1820
   },
   {
     "sensor_id":27519,
     "lat":30.28559,
     "lon":-97.73693,
-    "recent_mean_pm25":4.7387096774,
-    "recent_n_days":31
+    "recent_mean_pm25":6.5502844669,
+    "recent_n_days":1904
   },
   {
     "sensor_id":27539,
     "lat":30.279041,
     "lon":-97.72593,
-    "recent_mean_pm25":11.6806451613,
-    "recent_n_days":31
+    "recent_mean_pm25":11.0404108696,
+    "recent_n_days":1725
   },
   {
     "sensor_id":27547,
     "lat":30.283525,
     "lon":-97.73466,
-    "recent_mean_pm25":12.5967741935,
-    "recent_n_days":31
+    "recent_mean_pm25":10.1336665327,
+    "recent_n_days":1866
   },
   {
     "sensor_id":27563,
     "lat":30.281025,
     "lon":-97.7371,
-    "recent_mean_pm25":6.4709677419,
-    "recent_n_days":31
+    "recent_mean_pm25":6.1342099571,
+    "recent_n_days":1514
   },
   {
     "sensor_id":27567,
     "lat":30.28941,
     "lon":-97.73661,
-    "recent_mean_pm25":8.1387096774,
-    "recent_n_days":31
+    "recent_mean_pm25":6.6818328189,
+    "recent_n_days":1944
   },
   {
     "sensor_id":27569,
     "lat":30.282122,
     "lon":-97.72687,
-    "recent_mean_pm25":13.1322580645,
-    "recent_n_days":31
+    "recent_mean_pm25":7.384639309,
+    "recent_n_days":1686
   },
   {
     "sensor_id":27573,
     "lat":30.277252,
     "lon":-97.73332,
-    "recent_mean_pm25":12.8709677419,
-    "recent_n_days":31
+    "recent_mean_pm25":11.0619034443,
+    "recent_n_days":1938
   },
   {
     "sensor_id":27821,
     "lat":29.77074,
     "lon":-95.370056,
-    "recent_mean_pm25":0.3161290323,
-    "recent_n_days":31
+    "recent_mean_pm25":5.709088669,
+    "recent_n_days":1882
   },
   {
     "sensor_id":27905,
     "lat":29.790651,
     "lon":-95.113846,
-    "recent_mean_pm25":10.2967741935,
-    "recent_n_days":31
+    "recent_mean_pm25":11.3219494295,
+    "recent_n_days":1928
   },
   {
     "sensor_id":28671,
     "lat":36.09469,
     "lon":-95.95382,
-    "recent_mean_pm25":2.7387096774,
-    "recent_n_days":31
+    "recent_mean_pm25":9.4154676259,
+    "recent_n_days":1946
   },
   {
     "sensor_id":28851,
     "lat":29.73305,
     "lon":-95.58551,
-    "recent_mean_pm25":11.035483871,
-    "recent_n_days":31
+    "recent_mean_pm25":11.4401988519,
+    "recent_n_days":1938
   },
   {
     "sensor_id":30327,
     "lat":33.3461,
     "lon":-96.35519,
-    "recent_mean_pm25":11.8967741935,
-    "recent_n_days":31
+    "recent_mean_pm25":11.421049754,
+    "recent_n_days":1829
   },
   {
     "sensor_id":30689,
     "lat":30.28345,
     "lon":-97.72317,
-    "recent_mean_pm25":13.6193548387,
-    "recent_n_days":31
+    "recent_mean_pm25":10.9608619029,
+    "recent_n_days":1947
   },
   {
     "sensor_id":33087,
     "lat":34.154007,
     "lon":-97.11285,
-    "recent_mean_pm25":8.6709677419,
-    "recent_n_days":31
+    "recent_mean_pm25":9.0776103896,
+    "recent_n_days":1925
   },
   {
     "sensor_id":33127,
     "lat":35.680393,
     "lon":-105.95171,
-    "recent_mean_pm25":0.6689655172,
-    "recent_n_days":29
+    "recent_mean_pm25":3.3691494982,
+    "recent_n_days":1893
   },
   {
     "sensor_id":34835,
     "lat":29.302658,
     "lon":-103.17785,
-    "recent_mean_pm25":5.3322580645,
-    "recent_n_days":31
+    "recent_mean_pm25":4.4783102144,
+    "recent_n_days":1586
   },
   {
     "sensor_id":36435,
     "lat":35.06074,
     "lon":-106.1962,
-    "recent_mean_pm25":1.4419354839,
-    "recent_n_days":31
+    "recent_mean_pm25":3.0302421432,
+    "recent_n_days":1941
   },
   {
     "sensor_id":39123,
     "lat":30.460455,
     "lon":-97.991196,
-    "recent_mean_pm25":9.6064516129,
-    "recent_n_days":31
+    "recent_mean_pm25":8.5851308133,
+    "recent_n_days":1918
   },
   {
     "sensor_id":39571,
     "lat":32.42492,
     "lon":-93.70468,
-    "recent_mean_pm25":9.1161290323,
-    "recent_n_days":31
+    "recent_mean_pm25":13.9281148429,
+    "recent_n_days":1846
   },
   {
     "sensor_id":39617,
     "lat":35.09155,
     "lon":-94.64485,
-    "recent_mean_pm25":8.7,
-    "recent_n_days":31
+    "recent_mean_pm25":11.4755995829,
+    "recent_n_days":1918
   },
   {
     "sensor_id":46237,
     "lat":29.70283,
     "lon":-95.443855,
-    "recent_mean_pm25":0.6677419355,
-    "recent_n_days":31
+    "recent_mean_pm25":2.7397313218,
+    "recent_n_days":870
+  },
+  {
+    "sensor_id":47879,
+    "lat":29.740562,
+    "lon":-95.39085,
+    "recent_mean_pm25":6.9131114458,
+    "recent_n_days":249
   },
   {
     "sensor_id":51821,
     "lat":32.86505,
     "lon":-97.248924,
-    "recent_mean_pm25":11.5161290323,
-    "recent_n_days":31
+    "recent_mean_pm25":14.3992076196,
+    "recent_n_days":1693
   },
   {
     "sensor_id":51959,
     "lat":29.797358,
     "lon":-95.48999,
-    "recent_mean_pm25":9.7483870968,
-    "recent_n_days":31
+    "recent_mean_pm25":11.3976530665,
+    "recent_n_days":1924
   },
   {
     "sensor_id":53193,
     "lat":33.452213,
     "lon":-96.700584,
-    "recent_mean_pm25":12.0290322581,
-    "recent_n_days":31
+    "recent_mean_pm25":11.8137634409,
+    "recent_n_days":1395
   },
   {
     "sensor_id":53365,
     "lat":33.05041,
     "lon":-96.937004,
-    "recent_mean_pm25":15.7419354839,
-    "recent_n_days":31
+    "recent_mean_pm25":12.3191476138,
+    "recent_n_days":1802
   },
   {
     "sensor_id":53389,
     "lat":33.06212,
     "lon":-96.99123,
-    "recent_mean_pm25":10.4870967742,
-    "recent_n_days":31
+    "recent_mean_pm25":10.9436298335,
+    "recent_n_days":1862
   },
   {
     "sensor_id":55967,
     "lat":35.226067,
     "lon":-106.64011,
-    "recent_mean_pm25":1.9806451613,
-    "recent_n_days":31
+    "recent_mean_pm25":3.8040105541,
+    "recent_n_days":1895
+  },
+  {
+    "sensor_id":56279,
+    "lat":35.08653,
+    "lon":-106.62877,
+    "recent_mean_pm25":6.4416799575,
+    "recent_n_days":1881
   },
   {
     "sensor_id":59801,
     "lat":33.22398,
     "lon":-97.15407,
-    "recent_mean_pm25":8.4258064516,
-    "recent_n_days":31
+    "recent_mean_pm25":10.1900965356,
+    "recent_n_days":1895
   },
   {
     "sensor_id":59903,
     "lat":33.112953,
     "lon":-97.12128,
-    "recent_mean_pm25":9.5838709677,
-    "recent_n_days":31
+    "recent_mean_pm25":9.6488002566,
+    "recent_n_days":1695
   },
   {
     "sensor_id":60707,
     "lat":34.91152,
     "lon":-95.73746,
-    "recent_mean_pm25":8.7633333333,
-    "recent_n_days":30
+    "recent_mean_pm25":10.6595389049,
+    "recent_n_days":1735
   },
   {
     "sensor_id":61011,
     "lat":36.145294,
     "lon":-106.08805,
-    "recent_mean_pm25":0.4580645161,
-    "recent_n_days":31
+    "recent_mean_pm25":3.7898979592,
+    "recent_n_days":980
+  },
+  {
+    "sensor_id":62063,
+    "lat":32.74241,
+    "lon":-94.94833,
+    "recent_mean_pm25":9.5981319323,
+    "recent_n_days":1713
   },
   {
     "sensor_id":68137,
     "lat":35.764,
     "lon":-105.947,
-    "recent_mean_pm25":0.8035714286,
-    "recent_n_days":28
+    "recent_mean_pm25":3.1451744186,
+    "recent_n_days":1720
   },
   {
     "sensor_id":68467,
     "lat":35.76624,
     "lon":-105.94579,
-    "recent_mean_pm25":0.7827586207,
-    "recent_n_days":29
+    "recent_mean_pm25":3.0838921762,
+    "recent_n_days":1521
   },
   {
     "sensor_id":69781,
     "lat":35.88908,
     "lon":-106.322495,
-    "recent_mean_pm25":0.5419354839,
-    "recent_n_days":31
+    "recent_mean_pm25":3.626848249,
+    "recent_n_days":1028
+  },
+  {
+    "sensor_id":73561,
+    "lat":35.09487,
+    "lon":-106.48217,
+    "recent_mean_pm25":3.1344386271,
+    "recent_n_days":1719
   },
   {
     "sensor_id":76047,
     "lat":30.177912,
     "lon":-97.78982,
-    "recent_mean_pm25":12.8225806452,
-    "recent_n_days":31
+    "recent_mean_pm25":8.3008662736,
+    "recent_n_days":1908
   },
   {
     "sensor_id":78309,
     "lat":32.751972,
     "lon":-97.36452,
-    "recent_mean_pm25":12.3333333333,
-    "recent_n_days":6
+    "recent_mean_pm25":3.9142629482,
+    "recent_n_days":1255
   },
   {
     "sensor_id":82585,
     "lat":35.634308,
     "lon":-105.88333,
-    "recent_mean_pm25":1.3741935484,
-    "recent_n_days":31
+    "recent_mean_pm25":2.4382934443,
+    "recent_n_days":1922
   },
   {
     "sensor_id":85175,
     "lat":30.586252,
     "lon":-97.77036,
-    "recent_mean_pm25":11.8580645161,
-    "recent_n_days":31
+    "recent_mean_pm25":9.6986960964,
+    "recent_n_days":1701
   },
   {
     "sensor_id":86183,
     "lat":35.59156,
     "lon":-105.9846,
-    "recent_mean_pm25":0.5838709677,
-    "recent_n_days":31
+    "recent_mean_pm25":2.8024697846,
+    "recent_n_days":1903
   },
   {
     "sensor_id":87019,
     "lat":32.520557,
     "lon":-96.945,
-    "recent_mean_pm25":13.935483871,
-    "recent_n_days":31
+    "recent_mean_pm25":12.500037699,
+    "recent_n_days":1382
   },
   {
     "sensor_id":87099,
     "lat":30.489218,
     "lon":-98.21518,
-    "recent_mean_pm25":14.364516129,
-    "recent_n_days":31
+    "recent_mean_pm25":11.3785230352,
+    "recent_n_days":1476
   },
   {
     "sensor_id":87111,
     "lat":35.098682,
     "lon":-106.483185,
-    "recent_mean_pm25":0.864516129,
-    "recent_n_days":31
+    "recent_mean_pm25":2.5604906054,
+    "recent_n_days":1916
   },
   {
     "sensor_id":87485,
     "lat":32.516285,
     "lon":-96.90497,
-    "recent_mean_pm25":11.2677419355,
-    "recent_n_days":31
+    "recent_mean_pm25":11.1048102109,
+    "recent_n_days":1849
   },
   {
     "sensor_id":87721,
     "lat":32.96388,
     "lon":-96.63465,
-    "recent_mean_pm25":9.3548387097,
-    "recent_n_days":31
+    "recent_mean_pm25":11.2430188599,
+    "recent_n_days":1899
   },
   {
     "sensor_id":89379,
     "lat":35.158676,
     "lon":-101.83544,
-    "recent_mean_pm25":1.5290322581,
-    "recent_n_days":31
+    "recent_mean_pm25":5.68101945,
+    "recent_n_days":1491
   },
   {
     "sensor_id":90785,
     "lat":32.81998,
     "lon":-96.466545,
-    "recent_mean_pm25":5.8,
-    "recent_n_days":31
+    "recent_mean_pm25":9.5985080308,
+    "recent_n_days":1818
+  },
+  {
+    "sensor_id":91067,
+    "lat":30.390285,
+    "lon":-97.80241,
+    "recent_mean_pm25":4.6333180117,
+    "recent_n_days":342
   },
   {
     "sensor_id":91101,
     "lat":30.254564,
     "lon":-97.771645,
-    "recent_mean_pm25":11.5967741935,
-    "recent_n_days":31
+    "recent_mean_pm25":9.9316513659,
+    "recent_n_days":1413
   },
   {
     "sensor_id":91983,
     "lat":30.297293,
     "lon":-98.85778,
-    "recent_mean_pm25":13.8481481481,
-    "recent_n_days":27
+    "recent_mean_pm25":9.2240944018,
+    "recent_n_days":1822
   },
   {
     "sensor_id":92075,
     "lat":26.24315,
     "lon":-98.21607,
-    "recent_mean_pm25":13.1225806452,
-    "recent_n_days":31
+    "recent_mean_pm25":12.9649717514,
+    "recent_n_days":1947
   },
   {
     "sensor_id":93029,
     "lat":36.491337,
     "lon":-97.075714,
-    "recent_mean_pm25":8.7387096774,
-    "recent_n_days":31
+    "recent_mean_pm25":8.922739726,
+    "recent_n_days":730
   },
   {
     "sensor_id":93107,
     "lat":30.513874,
     "lon":-97.66673,
-    "recent_mean_pm25":15.3032258065,
-    "recent_n_days":31
+    "recent_mean_pm25":12.0283055778,
+    "recent_n_days":1869
   },
   {
     "sensor_id":94865,
     "lat":30.214636,
     "lon":-98.08331,
-    "recent_mean_pm25":14.5580645161,
-    "recent_n_days":31
+    "recent_mean_pm25":10.6648648649,
+    "recent_n_days":1517
   },
   {
     "sensor_id":95481,
     "lat":32.495785,
     "lon":-96.96049,
-    "recent_mean_pm25":10.7032258065,
-    "recent_n_days":31
+    "recent_mean_pm25":10.219585494,
+    "recent_n_days":1832
   },
   {
     "sensor_id":96149,
     "lat":30.231272,
     "lon":-97.87447,
-    "recent_mean_pm25":10.5275862069,
-    "recent_n_days":29
+    "recent_mean_pm25":8.8659432032,
+    "recent_n_days":1767
   },
   {
     "sensor_id":96211,
     "lat":29.864767,
     "lon":-97.664856,
-    "recent_mean_pm25":13.9612903226,
-    "recent_n_days":31
+    "recent_mean_pm25":11.176323319,
+    "recent_n_days":1398
   },
   {
     "sensor_id":96293,
     "lat":35.63751,
     "lon":-105.894905,
-    "recent_mean_pm25":0.9290322581,
-    "recent_n_days":31
+    "recent_mean_pm25":2.4212244898,
+    "recent_n_days":1470
   },
   {
     "sensor_id":96843,
     "lat":35.13877,
     "lon":-106.50773,
-    "recent_mean_pm25":1.0322580645,
-    "recent_n_days":31
+    "recent_mean_pm25":3.0720571429,
+    "recent_n_days":1750
   },
   {
     "sensor_id":96937,
     "lat":30.250135,
     "lon":-97.720634,
-    "recent_mean_pm25":13.2,
-    "recent_n_days":31
+    "recent_mean_pm25":10.9522570225,
+    "recent_n_days":1869
   },
   {
     "sensor_id":96957,
     "lat":35.817,
     "lon":-106.209,
-    "recent_mean_pm25":0.5096774194,
-    "recent_n_days":31
+    "recent_mean_pm25":3.4154690071,
+    "recent_n_days":1823
   },
   {
     "sensor_id":97279,
     "lat":29.743322,
     "lon":-95.23209,
-    "recent_mean_pm25":11.0451612903,
-    "recent_n_days":31
+    "recent_mean_pm25":13.9980841973,
+    "recent_n_days":1688
   },
   {
     "sensor_id":97433,
     "lat":33.181686,
     "lon":-97.11399,
-    "recent_mean_pm25":10.7193548387,
-    "recent_n_days":31
+    "recent_mean_pm25":10.8397480389,
+    "recent_n_days":1415
   },
   {
     "sensor_id":98139,
     "lat":29.81888,
     "lon":-95.69566,
-    "recent_mean_pm25":11.1548387097,
-    "recent_n_days":31
+    "recent_mean_pm25":9.4185546129,
+    "recent_n_days":1886
   },
   {
     "sensor_id":98391,
     "lat":32.1783,
     "lon":-104.4404,
-    "recent_mean_pm25":5.9419354839,
-    "recent_n_days":31
+    "recent_mean_pm25":6.3393605292,
+    "recent_n_days":1814
   },
   {
     "sensor_id":98531,
     "lat":29.847527,
     "lon":-95.28072,
-    "recent_mean_pm25":9.6612903226,
-    "recent_n_days":31
+    "recent_mean_pm25":13.2785596414,
+    "recent_n_days":962
   },
   {
     "sensor_id":98633,
     "lat":29.705027,
     "lon":-95.15422,
-    "recent_mean_pm25":7.7741935484,
-    "recent_n_days":31
+    "recent_mean_pm25":12.3683749001,
+    "recent_n_days":1251
+  },
+  {
+    "sensor_id":99163,
+    "lat":32.48389,
+    "lon":-97.00183,
+    "recent_mean_pm25":8.6086533379,
+    "recent_n_days":364
   },
   {
     "sensor_id":99171,
     "lat":29.84179,
     "lon":-95.28896,
-    "recent_mean_pm25":10.3290322581,
-    "recent_n_days":31
+    "recent_mean_pm25":13.9841560571,
+    "recent_n_days":1296
   },
   {
     "sensor_id":99179,
     "lat":35.395443,
     "lon":-105.945625,
-    "recent_mean_pm25":0.0,
-    "recent_n_days":31
+    "recent_mean_pm25":2.1526857143,
+    "recent_n_days":1750
   },
   {
     "sensor_id":99187,
     "lat":32.473907,
     "lon":-96.99008,
-    "recent_mean_pm25":18.0466666667,
-    "recent_n_days":15
+    "recent_mean_pm25":11.8898989899,
+    "recent_n_days":1089
   },
   {
     "sensor_id":99279,
     "lat":33.094864,
     "lon":-97.1461,
-    "recent_mean_pm25":7.0870967742,
-    "recent_n_days":31
+    "recent_mean_pm25":9.0727291313,
+    "recent_n_days":1577
   },
   {
     "sensor_id":99593,
     "lat":32.45916,
     "lon":-96.97078,
-    "recent_mean_pm25":8.0058823529,
-    "recent_n_days":17
+    "recent_mean_pm25":9.405686449,
+    "recent_n_days":1608
   },
   {
     "sensor_id":99595,
     "lat":32.636204,
     "lon":-97.149704,
-    "recent_mean_pm25":5.7516129032,
-    "recent_n_days":31
+    "recent_mean_pm25":8.0696398045,
+    "recent_n_days":1611
   },
   {
     "sensor_id":99797,
     "lat":29.737322,
     "lon":-95.25296,
-    "recent_mean_pm25":8.9419354839,
-    "recent_n_days":31
+    "recent_mean_pm25":12.9388727464,
+    "recent_n_days":1664
   },
   {
     "sensor_id":101808,
     "lat":29.620468,
     "lon":-98.53274,
-    "recent_mean_pm25":12.7322580645,
-    "recent_n_days":31
+    "recent_mean_pm25":9.7412092654,
+    "recent_n_days":1722
   },
   {
     "sensor_id":102762,
     "lat":30.2912,
     "lon":-97.712906,
-    "recent_mean_pm25":10.5741935484,
-    "recent_n_days":31
+    "recent_mean_pm25":7.7900545521,
+    "recent_n_days":1641
   },
   {
     "sensor_id":104402,
     "lat":32.719143,
     "lon":-97.353935,
-    "recent_mean_pm25":14.0838709677,
-    "recent_n_days":31
+    "recent_mean_pm25":12.4050178161,
+    "recent_n_days":1740
   },
   {
     "sensor_id":104876,
     "lat":35.89019,
     "lon":-106.04514,
-    "recent_mean_pm25":0.6677419355,
-    "recent_n_days":31
+    "recent_mean_pm25":4.890998767,
+    "recent_n_days":1622
   },
   {
     "sensor_id":105110,
     "lat":32.07596,
     "lon":-94.52738,
-    "recent_mean_pm25":12.9774193548,
-    "recent_n_days":31
+    "recent_mean_pm25":13.9413120567,
+    "recent_n_days":1128
   },
   {
     "sensor_id":109562,
     "lat":32.502693,
     "lon":-96.99841,
-    "recent_mean_pm25":6.3870967742,
-    "recent_n_days":31
+    "recent_mean_pm25":5.6834402876,
+    "recent_n_days":817
   },
   {
     "sensor_id":109566,
     "lat":32.576748,
     "lon":-97.008194,
-    "recent_mean_pm25":12.8064516129,
-    "recent_n_days":31
+    "recent_mean_pm25":10.7548254703,
+    "recent_n_days":1382
   },
   {
     "sensor_id":110162,
     "lat":30.444378,
     "lon":-97.76113,
-    "recent_mean_pm25":12.4096774194,
-    "recent_n_days":31
+    "recent_mean_pm25":5.5789858221,
+    "recent_n_days":1709
   },
   {
     "sensor_id":111125,
     "lat":36.474407,
     "lon":-105.62876,
-    "recent_mean_pm25":0.7838709677,
-    "recent_n_days":31
+    "recent_mean_pm25":1.836286201,
+    "recent_n_days":1174
   },
   {
     "sensor_id":113074,
     "lat":33.35849,
     "lon":-93.60401,
-    "recent_mean_pm25":7.1032258065,
-    "recent_n_days":31
+    "recent_mean_pm25":10.2326834862,
+    "recent_n_days":872
+  },
+  {
+    "sensor_id":113648,
+    "lat":33.18787,
+    "lon":-97.00863,
+    "recent_mean_pm25":4.1223876678,
+    "recent_n_days":283
   },
   {
     "sensor_id":113732,
     "lat":33.377106,
     "lon":-97.00857,
-    "recent_mean_pm25":12.1230769231,
-    "recent_n_days":13
+    "recent_mean_pm25":5.5267824916,
+    "recent_n_days":594
+  },
+  {
+    "sensor_id":114119,
+    "lat":33.238647,
+    "lon":-97.109695,
+    "recent_mean_pm25":3.5964099438,
+    "recent_n_days":267
   },
   {
     "sensor_id":118895,
     "lat":29.816628,
     "lon":-95.32461,
-    "recent_mean_pm25":11.1129032258,
-    "recent_n_days":31
+    "recent_mean_pm25":11.6092884036,
+    "recent_n_days":498
   },
   {
     "sensor_id":118993,
     "lat":33.290825,
     "lon":-96.61884,
-    "recent_mean_pm25":8.0516129032,
-    "recent_n_days":31
+    "recent_mean_pm25":6.2945421963,
+    "recent_n_days":1630
+  },
+  {
+    "sensor_id":119625,
+    "lat":31.906324,
+    "lon":-106.41056,
+    "recent_mean_pm25":1.2204946996,
+    "recent_n_days":566
   },
   {
     "sensor_id":120681,
     "lat":32.97801,
     "lon":-96.97727,
-    "recent_mean_pm25":7.0903225806,
-    "recent_n_days":31
+    "recent_mean_pm25":7.5961864602,
+    "recent_n_days":1647
   },
   {
     "sensor_id":121359,
     "lat":30.26691,
     "lon":-97.72221,
-    "recent_mean_pm25":12.135483871,
-    "recent_n_days":31
+    "recent_mean_pm25":7.2121080548,
+    "recent_n_days":1167
+  },
+  {
+    "sensor_id":122131,
+    "lat":30.5106,
+    "lon":-97.75505,
+    "recent_mean_pm25":5.9696029927,
+    "recent_n_days":1497
   },
   {
     "sensor_id":122907,
     "lat":29.987087,
     "lon":-97.86185,
-    "recent_mean_pm25":12.7709677419,
-    "recent_n_days":31
+    "recent_mean_pm25":8.2869968464,
+    "recent_n_days":983
+  },
+  {
+    "sensor_id":122917,
+    "lat":33.09477,
+    "lon":-96.88482,
+    "recent_mean_pm25":8.9128353333,
+    "recent_n_days":720
   },
   {
     "sensor_id":122923,
     "lat":30.312178,
     "lon":-97.71627,
-    "recent_mean_pm25":8.4967741935,
-    "recent_n_days":31
+    "recent_mean_pm25":5.2531184297,
+    "recent_n_days":761
   },
   {
     "sensor_id":123001,
     "lat":30.678675,
     "lon":-97.67456,
-    "recent_mean_pm25":10.7612903226,
-    "recent_n_days":31
+    "recent_mean_pm25":7.6,
+    "recent_n_days":912
   },
   {
     "sensor_id":123007,
     "lat":30.57915,
     "lon":-97.416466,
-    "recent_mean_pm25":10.95,
-    "recent_n_days":12
+    "recent_mean_pm25":7.0645343694,
+    "recent_n_days":999
   },
   {
     "sensor_id":123009,
     "lat":30.108255,
     "lon":-97.29375,
-    "recent_mean_pm25":12.6161290323,
-    "recent_n_days":31
+    "recent_mean_pm25":10.5282828283,
+    "recent_n_days":792
+  },
+  {
+    "sensor_id":123409,
+    "lat":32.686947,
+    "lon":-96.73787,
+    "recent_mean_pm25":8.2035719147,
+    "recent_n_days":551
+  },
+  {
+    "sensor_id":123453,
+    "lat":32.73404,
+    "lon":-96.792435,
+    "recent_mean_pm25":9.4159688013,
+    "recent_n_days":1218
+  },
+  {
+    "sensor_id":124669,
+    "lat":29.468405,
+    "lon":-98.76946,
+    "recent_mean_pm25":7.0661607143,
+    "recent_n_days":1120
   },
   {
     "sensor_id":126067,
     "lat":31.330355,
     "lon":-97.26543,
-    "recent_mean_pm25":8.7774193548,
-    "recent_n_days":31
+    "recent_mean_pm25":6.340374677,
+    "recent_n_days":1548
   },
   {
     "sensor_id":127045,
     "lat":33.022003,
     "lon":-97.22522,
-    "recent_mean_pm25":8.1580645161,
-    "recent_n_days":31
+    "recent_mean_pm25":7.1927131653,
+    "recent_n_days":1071
   },
   {
     "sensor_id":127059,
     "lat":33.032448,
     "lon":-97.1484,
-    "recent_mean_pm25":6.54,
-    "recent_n_days":25
+    "recent_mean_pm25":6.1887204938,
+    "recent_n_days":1458
+  },
+  {
+    "sensor_id":127103,
+    "lat":33.08867,
+    "lon":-97.3037,
+    "recent_mean_pm25":5.4823352987,
+    "recent_n_days":636
   },
   {
     "sensor_id":127441,
     "lat":29.809729,
     "lon":-95.280334,
-    "recent_mean_pm25":11.1806451613,
-    "recent_n_days":31
+    "recent_mean_pm25":12.6092389706,
+    "recent_n_days":952
   },
   {
     "sensor_id":127451,
     "lat":29.778414,
     "lon":-95.35952,
-    "recent_mean_pm25":4.8677419355,
-    "recent_n_days":31
+    "recent_mean_pm25":8.5716713849,
+    "recent_n_days":1307
+  },
+  {
+    "sensor_id":127463,
+    "lat":29.803877,
+    "lon":-95.30717,
+    "recent_mean_pm25":9.1560082988,
+    "recent_n_days":241
   },
   {
     "sensor_id":128007,
     "lat":29.670757,
     "lon":-95.1453,
-    "recent_mean_pm25":4.3903225806,
-    "recent_n_days":31
+    "recent_mean_pm25":7.9763239116,
+    "recent_n_days":1539
   },
   {
     "sensor_id":128017,
     "lat":30.153257,
     "lon":-96.012215,
-    "recent_mean_pm25":7.4870967742,
-    "recent_n_days":31
+    "recent_mean_pm25":8.1970779221,
+    "recent_n_days":616
+  },
+  {
+    "sensor_id":128645,
+    "lat":32.836563,
+    "lon":-96.810425,
+    "recent_mean_pm25":7.7370186755,
+    "recent_n_days":755
+  },
+  {
+    "sensor_id":130825,
+    "lat":30.250307,
+    "lon":-97.75918,
+    "recent_mean_pm25":4.6598086124,
+    "recent_n_days":418
+  },
+  {
+    "sensor_id":131903,
+    "lat":31.785929,
+    "lon":-106.359764,
+    "recent_mean_pm25":1.3346846847,
+    "recent_n_days":222
   },
   {
     "sensor_id":132703,
     "lat":35.35897,
     "lon":-94.40662,
-    "recent_mean_pm25":6.4806451613,
-    "recent_n_days":31
+    "recent_mean_pm25":8.9730597015,
+    "recent_n_days":1340
+  },
+  {
+    "sensor_id":133141,
+    "lat":29.6531,
+    "lon":-98.29758,
+    "recent_mean_pm25":5.875461395,
+    "recent_n_days":681
   },
   {
     "sensor_id":133634,
     "lat":35.173115,
     "lon":-101.933075,
-    "recent_mean_pm25":4.1774193548,
-    "recent_n_days":31
+    "recent_mean_pm25":3.2477591036,
+    "recent_n_days":714
   },
   {
     "sensor_id":133818,
     "lat":33.24342,
     "lon":-96.91281,
-    "recent_mean_pm25":5.1096774194,
-    "recent_n_days":31
+    "recent_mean_pm25":11.8723577236,
+    "recent_n_days":246
   },
   {
     "sensor_id":133994,
     "lat":29.741404,
     "lon":-95.33349,
-    "recent_mean_pm25":3.4290322581,
-    "recent_n_days":31
+    "recent_mean_pm25":7.2342974874,
+    "recent_n_days":1582
   },
   {
     "sensor_id":134304,
     "lat":33.443832,
     "lon":-104.515236,
-    "recent_mean_pm25":1.1612903226,
-    "recent_n_days":31
+    "recent_mean_pm25":2.5640506329,
+    "recent_n_days":1580
+  },
+  {
+    "sensor_id":134442,
+    "lat":30.458267,
+    "lon":-97.809296,
+    "recent_mean_pm25":6.4518556735,
+    "recent_n_days":1225
   },
   {
     "sensor_id":135084,
     "lat":30.31899,
     "lon":-97.71798,
-    "recent_mean_pm25":5.3096774194,
-    "recent_n_days":31
+    "recent_mean_pm25":6.8215434084,
+    "recent_n_days":1555
   },
   {
     "sensor_id":135100,
     "lat":30.292566,
     "lon":-97.709274,
-    "recent_mean_pm25":7.5903225806,
-    "recent_n_days":31
+    "recent_mean_pm25":5.2985763847,
+    "recent_n_days":1123
   },
   {
     "sensor_id":137666,
     "lat":33.117588,
     "lon":-96.05107,
-    "recent_mean_pm25":10.1548387097,
-    "recent_n_days":31
+    "recent_mean_pm25":8.1191666667,
+    "recent_n_days":1560
   },
   {
     "sensor_id":137762,
     "lat":30.40166,
     "lon":-97.95699,
-    "recent_mean_pm25":10.1,
-    "recent_n_days":2
+    "recent_mean_pm25":6.9066532081,
+    "recent_n_days":1331
   },
   {
     "sensor_id":138876,
     "lat":35.63695,
     "lon":-105.98577,
-    "recent_mean_pm25":0.4387096774,
-    "recent_n_days":31
+    "recent_mean_pm25":1.7554175293,
+    "recent_n_days":1449
   },
   {
     "sensor_id":141412,
     "lat":35.698067,
     "lon":-105.89777,
-    "recent_mean_pm25":0.5612903226,
-    "recent_n_days":31
+    "recent_mean_pm25":1.3351415094,
+    "recent_n_days":1272
   },
   {
     "sensor_id":142154,
     "lat":32.45638,
     "lon":-97.00684,
-    "recent_mean_pm25":8.8612903226,
-    "recent_n_days":31
+    "recent_mean_pm25":7.4227297771,
+    "recent_n_days":785
   },
   {
     "sensor_id":142600,
     "lat":35.819214,
     "lon":-106.194466,
-    "recent_mean_pm25":0.6870967742,
-    "recent_n_days":31
+    "recent_mean_pm25":3.7148114075,
+    "recent_n_days":1087
   },
   {
     "sensor_id":142604,
     "lat":35.708576,
     "lon":-106.06241,
-    "recent_mean_pm25":2.4612903226,
-    "recent_n_days":31
+    "recent_mean_pm25":4.730137931,
+    "recent_n_days":1450
   },
   {
     "sensor_id":143258,
     "lat":29.464113,
     "lon":-98.484924,
-    "recent_mean_pm25":14.0258064516,
-    "recent_n_days":31
+    "recent_mean_pm25":10.2830695138,
+    "recent_n_days":1522
   },
   {
     "sensor_id":143264,
     "lat":29.45708,
     "lon":-95.6638,
-    "recent_mean_pm25":9.2193548387,
-    "recent_n_days":31
+    "recent_mean_pm25":7.7271285601,
+    "recent_n_days":441
   },
   {
     "sensor_id":143398,
     "lat":32.227688,
     "lon":-98.22396,
-    "recent_mean_pm25":9.4225806452,
-    "recent_n_days":31
+    "recent_mean_pm25":8.440521494,
+    "recent_n_days":1419
   },
   {
     "sensor_id":143530,
     "lat":35.56752,
     "lon":-105.84184,
-    "recent_mean_pm25":3.5838709677,
-    "recent_n_days":31
+    "recent_mean_pm25":2.8178595774,
+    "recent_n_days":1467
   },
   {
     "sensor_id":143738,
     "lat":32.295547,
     "lon":-106.63077,
-    "recent_mean_pm25":0.9774193548,
-    "recent_n_days":31
+    "recent_mean_pm25":2.0055026455,
+    "recent_n_days":945
   },
   {
     "sensor_id":144032,
     "lat":32.861404,
     "lon":-96.68724,
-    "recent_mean_pm25":12.9548387097,
-    "recent_n_days":31
+    "recent_mean_pm25":12.2039113781,
+    "recent_n_days":1415
   },
   {
     "sensor_id":145372,
     "lat":30.5232,
     "lon":-96.24781,
-    "recent_mean_pm25":10.8838709677,
-    "recent_n_days":31
+    "recent_mean_pm25":9.6423255814,
+    "recent_n_days":1505
+  },
+  {
+    "sensor_id":146710,
+    "lat":32.241337,
+    "lon":-94.45149,
+    "recent_mean_pm25":14.5624113475,
+    "recent_n_days":564
   },
   {
     "sensor_id":146912,
     "lat":32.45914,
     "lon":-93.72053,
-    "recent_mean_pm25":7.6161290323,
-    "recent_n_days":31
+    "recent_mean_pm25":12.8804737976,
+    "recent_n_days":1393
   },
   {
     "sensor_id":147038,
     "lat":33.00878,
     "lon":-96.80816,
-    "recent_mean_pm25":7.4096774194,
-    "recent_n_days":31
+    "recent_mean_pm25":7.4027039373,
+    "recent_n_days":1435
   },
   {
     "sensor_id":147390,
     "lat":35.299706,
     "lon":-106.4513,
-    "recent_mean_pm25":1.6096774194,
-    "recent_n_days":31
+    "recent_mean_pm25":3.1377186844,
+    "recent_n_days":1429
   },
   {
     "sensor_id":147490,
     "lat":30.882107,
     "lon":-94.98899,
-    "recent_mean_pm25":9.3161290323,
-    "recent_n_days":31
+    "recent_mean_pm25":12.039182058,
+    "recent_n_days":758
   },
   {
     "sensor_id":147751,
     "lat":35.70347,
     "lon":-106.07523,
-    "recent_mean_pm25":0.3161290323,
-    "recent_n_days":31
+    "recent_mean_pm25":1.8640677966,
+    "recent_n_days":295
   },
   {
     "sensor_id":147907,
     "lat":35.640785,
     "lon":-105.92437,
-    "recent_mean_pm25":11.8578947368,
-    "recent_n_days":19
+    "recent_mean_pm25":11.0841304348,
+    "recent_n_days":1380
   },
   {
     "sensor_id":148709,
     "lat":29.77624,
     "lon":-95.10313,
-    "recent_mean_pm25":10.4483870968,
-    "recent_n_days":31
+    "recent_mean_pm25":13.639094733,
+    "recent_n_days":1367
   },
   {
     "sensor_id":149298,
     "lat":30.290565,
     "lon":-97.927925,
-    "recent_mean_pm25":12.8032258065,
-    "recent_n_days":31
+    "recent_mean_pm25":9.1239324392,
+    "recent_n_days":1193
   },
   {
     "sensor_id":149506,
     "lat":30.66903,
     "lon":-98.07575,
-    "recent_mean_pm25":13.5548387097,
-    "recent_n_days":31
+    "recent_mean_pm25":10.9114263199,
+    "recent_n_days":1269
   },
   {
     "sensor_id":150840,
     "lat":29.440323,
     "lon":-98.48145,
-    "recent_mean_pm25":22.8258064516,
-    "recent_n_days":31
+    "recent_mean_pm25":14.5404303797,
+    "recent_n_days":1027
   },
   {
     "sensor_id":151010,
     "lat":36.001114,
     "lon":-105.9597,
-    "recent_mean_pm25":1.1095238095,
-    "recent_n_days":21
+    "recent_mean_pm25":7.7434889435,
+    "recent_n_days":814
   },
   {
     "sensor_id":151486,
     "lat":32.77908,
     "lon":-97.346794,
-    "recent_mean_pm25":11.8903225806,
-    "recent_n_days":31
+    "recent_mean_pm25":12.125047671,
+    "recent_n_days":1374
   },
   {
     "sensor_id":151522,
     "lat":35.085182,
     "lon":-106.59503,
-    "recent_mean_pm25":5.9290322581,
-    "recent_n_days":31
+    "recent_mean_pm25":11.7730911787,
+    "recent_n_days":1349
+  },
+  {
+    "sensor_id":151568,
+    "lat":29.582073,
+    "lon":-98.56895,
+    "recent_mean_pm25":8.3723086957,
+    "recent_n_days":230
   },
   {
     "sensor_id":151676,
     "lat":29.36873,
     "lon":-98.468666,
-    "recent_mean_pm25":14.7677419355,
-    "recent_n_days":31
+    "recent_mean_pm25":10.4167231121,
+    "recent_n_days":437
   },
   {
     "sensor_id":152302,
     "lat":29.45791,
     "lon":-98.59668,
-    "recent_mean_pm25":14.6666666667,
-    "recent_n_days":30
+    "recent_mean_pm25":10.203678973,
+    "recent_n_days":667
   },
   {
     "sensor_id":152566,
     "lat":29.40569,
     "lon":-98.48297,
-    "recent_mean_pm25":14.9903225806,
-    "recent_n_days":31
+    "recent_mean_pm25":12.3248171215,
+    "recent_n_days":1136
   },
   {
     "sensor_id":155367,
     "lat":29.822277,
     "lon":-95.42584,
-    "recent_mean_pm25":11.4290322581,
-    "recent_n_days":31
+    "recent_mean_pm25":12.7822964351,
+    "recent_n_days":1101
   },
   {
     "sensor_id":156335,
     "lat":32.91304,
     "lon":-105.5253,
-    "recent_mean_pm25":7.4225806452,
-    "recent_n_days":31
+    "recent_mean_pm25":4.3966301601,
+    "recent_n_days":1187
   },
   {
     "sensor_id":156491,
     "lat":35.34317,
     "lon":-106.558945,
-    "recent_mean_pm25":0.7870967742,
-    "recent_n_days":31
+    "recent_mean_pm25":4.0729166667,
+    "recent_n_days":1104
   },
   {
     "sensor_id":156533,
     "lat":35.343575,
     "lon":-106.531044,
-    "recent_mean_pm25":0.6322580645,
-    "recent_n_days":31
+    "recent_mean_pm25":4.5363123994,
+    "recent_n_days":1242
   },
   {
     "sensor_id":156673,
     "lat":30.18931,
     "lon":-97.8702,
-    "recent_mean_pm25":13.2967741935,
-    "recent_n_days":31
+    "recent_mean_pm25":9.8389283898,
+    "recent_n_days":944
   },
   {
     "sensor_id":161003,
     "lat":29.585194,
     "lon":-95.45126,
-    "recent_mean_pm25":4.8838709677,
-    "recent_n_days":31
+    "recent_mean_pm25":6.0402853535,
+    "recent_n_days":495
   },
   {
     "sensor_id":161015,
     "lat":29.574024,
     "lon":-95.52899,
-    "recent_mean_pm25":12.2838709677,
-    "recent_n_days":31
+    "recent_mean_pm25":10.7821191781,
+    "recent_n_days":657
   },
   {
     "sensor_id":161141,
     "lat":29.55004,
     "lon":-95.68345,
-    "recent_mean_pm25":10.5129032258,
-    "recent_n_days":31
+    "recent_mean_pm25":9.9809855276,
+    "recent_n_days":834
   },
   {
     "sensor_id":161159,
     "lat":29.57438,
     "lon":-95.584496,
-    "recent_mean_pm25":9.0961538462,
-    "recent_n_days":26
+    "recent_mean_pm25":10.6601160668,
+    "recent_n_days":778
   },
   {
     "sensor_id":161237,
     "lat":30.556028,
     "lon":-96.01281,
-    "recent_mean_pm25":13.5967741935,
-    "recent_n_days":31
+    "recent_mean_pm25":12.4730034722,
+    "recent_n_days":1152
   },
   {
     "sensor_id":161517,
     "lat":36.087486,
     "lon":-95.80862,
-    "recent_mean_pm25":8.9322580645,
-    "recent_n_days":31
+    "recent_mean_pm25":11.5210405509,
+    "recent_n_days":1307
   },
   {
     "sensor_id":161581,
     "lat":30.266005,
     "lon":-97.751915,
-    "recent_mean_pm25":2.8416666667,
-    "recent_n_days":12
+    "recent_mean_pm25":6.4618583861,
+    "recent_n_days":821
   },
   {
     "sensor_id":161671,
     "lat":29.494665,
     "lon":-98.44818,
-    "recent_mean_pm25":8.6548387097,
-    "recent_n_days":31
+    "recent_mean_pm25":8.2686647227,
+    "recent_n_days":541
   },
   {
     "sensor_id":161689,
     "lat":29.685053,
     "lon":-95.13147,
-    "recent_mean_pm25":8.9064516129,
-    "recent_n_days":31
+    "recent_mean_pm25":9.4050207736,
+    "recent_n_days":349
   },
   {
     "sensor_id":161701,
     "lat":29.418436,
     "lon":-98.51176,
-    "recent_mean_pm25":12.7064516129,
-    "recent_n_days":31
+    "recent_mean_pm25":11.4443620387,
+    "recent_n_days":569
   },
   {
     "sensor_id":161727,
     "lat":29.442532,
     "lon":-98.400154,
-    "recent_mean_pm25":14.5129032258,
-    "recent_n_days":31
+    "recent_mean_pm25":9.4072848985,
+    "recent_n_days":394
   },
   {
     "sensor_id":162137,
     "lat":29.599012,
     "lon":-98.71258,
-    "recent_mean_pm25":12.8774193548,
-    "recent_n_days":31
+    "recent_mean_pm25":8.7874510478,
+    "recent_n_days":1317
   },
   {
     "sensor_id":162303,
     "lat":35.697872,
     "lon":-105.92414,
-    "recent_mean_pm25":0.6419354839,
-    "recent_n_days":31
+    "recent_mean_pm25":1.986497545,
+    "recent_n_days":1222
   },
   {
     "sensor_id":164335,
     "lat":33.11261,
     "lon":-96.77854,
-    "recent_mean_pm25":11.4967741935,
-    "recent_n_days":31
+    "recent_mean_pm25":11.60605803,
+    "recent_n_days":1066
   },
   {
     "sensor_id":164965,
     "lat":33.073666,
     "lon":-96.89765,
-    "recent_mean_pm25":12.0833333333,
-    "recent_n_days":30
+    "recent_mean_pm25":11.4522169678,
+    "recent_n_days":1306
   },
   {
     "sensor_id":165203,
     "lat":30.023579,
     "lon":-95.45273,
-    "recent_mean_pm25":7.9366666667,
-    "recent_n_days":30
+    "recent_mean_pm25":11.0707201594,
+    "recent_n_days":1286
   },
   {
     "sensor_id":165295,
     "lat":30.459578,
     "lon":-97.849556,
-    "recent_mean_pm25":10.9419354839,
-    "recent_n_days":31
+    "recent_mean_pm25":8.4262359633,
+    "recent_n_days":1308
   },
   {
     "sensor_id":165513,
     "lat":35.71391,
     "lon":-105.885445,
-    "recent_mean_pm25":0.6032258065,
-    "recent_n_days":31
+    "recent_mean_pm25":2.020797498,
+    "recent_n_days":1279
   },
   {
     "sensor_id":165731,
     "lat":30.522022,
     "lon":-97.75721,
-    "recent_mean_pm25":11.5032258065,
-    "recent_n_days":31
+    "recent_mean_pm25":6.7566723515,
+    "recent_n_days":1263
   },
   {
     "sensor_id":166141,
     "lat":36.08113,
     "lon":-94.140274,
-    "recent_mean_pm25":7.0516129032,
-    "recent_n_days":31
+    "recent_mean_pm25":10.3576449912,
+    "recent_n_days":569
+  },
+  {
+    "sensor_id":166381,
+    "lat":29.801435,
+    "lon":-95.09357,
+    "recent_mean_pm25":10.5895070423,
+    "recent_n_days":355
   },
   {
     "sensor_id":166399,
     "lat":29.803095,
     "lon":-95.096,
-    "recent_mean_pm25":9.6548387097,
-    "recent_n_days":31
+    "recent_mean_pm25":12.7897621822,
+    "recent_n_days":944
   },
   {
     "sensor_id":166413,
     "lat":29.763874,
     "lon":-94.968155,
-    "recent_mean_pm25":8.7419354839,
-    "recent_n_days":31
+    "recent_mean_pm25":11.0800576923,
+    "recent_n_days":780
   },
   {
     "sensor_id":166421,
     "lat":29.82794,
     "lon":-95.283745,
-    "recent_mean_pm25":11.6806451613,
-    "recent_n_days":31
+    "recent_mean_pm25":15.3143824485,
+    "recent_n_days":923
   },
   {
     "sensor_id":166427,
     "lat":29.763205,
     "lon":-95.00236,
-    "recent_mean_pm25":10.0193548387,
-    "recent_n_days":31
+    "recent_mean_pm25":10.0617705847,
+    "recent_n_days":838
   },
   {
     "sensor_id":166435,
     "lat":29.74531,
     "lon":-95.2333,
-    "recent_mean_pm25":14.9258064516,
-    "recent_n_days":31
+    "recent_mean_pm25":14.7314026596,
+    "recent_n_days":940
   },
   {
     "sensor_id":166441,
     "lat":29.776548,
     "lon":-95.153625,
-    "recent_mean_pm25":9.235483871,
-    "recent_n_days":31
+    "recent_mean_pm25":13.3491646975,
+    "recent_n_days":1058
   },
   {
     "sensor_id":166451,
     "lat":29.675089,
     "lon":-95.43187,
-    "recent_mean_pm25":9.9838709677,
-    "recent_n_days":31
+    "recent_mean_pm25":10.7089141156,
+    "recent_n_days":441
   },
   {
     "sensor_id":166475,
     "lat":33.969128,
     "lon":-96.40198,
-    "recent_mean_pm25":18.5483870968,
-    "recent_n_days":31
+    "recent_mean_pm25":14.7517674784,
+    "recent_n_days":1273
   },
   {
     "sensor_id":167655,
     "lat":29.752865,
     "lon":-98.145195,
-    "recent_mean_pm25":17.1882352941,
-    "recent_n_days":17
+    "recent_mean_pm25":10.9055727554,
+    "recent_n_days":969
   },
   {
     "sensor_id":170139,
     "lat":33.23815,
     "lon":-96.910576,
-    "recent_mean_pm25":10.8967741935,
-    "recent_n_days":31
+    "recent_mean_pm25":9.8925587835,
+    "recent_n_days":559
   },
   {
     "sensor_id":173719,
     "lat":29.775267,
     "lon":-95.693016,
-    "recent_mean_pm25":5.4935483871,
-    "recent_n_days":31
+    "recent_mean_pm25":9.4369246157,
+    "recent_n_days":1106
   },
   {
     "sensor_id":176071,
     "lat":35.631905,
     "lon":-106.04361,
-    "recent_mean_pm25":1.7064516129,
-    "recent_n_days":31
+    "recent_mean_pm25":3.9329401089,
+    "recent_n_days":1102
   },
   {
     "sensor_id":177863,
     "lat":29.65659,
     "lon":-98.12018,
-    "recent_mean_pm25":22.2666666667,
-    "recent_n_days":27
+    "recent_mean_pm25":11.1082215457,
+    "recent_n_days":1061
   },
   {
     "sensor_id":181037,
     "lat":33.27111,
     "lon":-105.71731,
-    "recent_mean_pm25":11.9322580645,
-    "recent_n_days":31
+    "recent_mean_pm25":2.7317997294,
+    "recent_n_days":739
   },
   {
     "sensor_id":181061,
     "lat":33.22437,
     "lon":-105.74294,
-    "recent_mean_pm25":1.7161290323,
-    "recent_n_days":31
+    "recent_mean_pm25":3.3696923077,
+    "recent_n_days":650
   },
   {
     "sensor_id":181097,
     "lat":33.18893,
     "lon":-105.72471,
-    "recent_mean_pm25":2.7677419355,
-    "recent_n_days":31
+    "recent_mean_pm25":4.4497975709,
+    "recent_n_days":741
   },
   {
     "sensor_id":181145,
     "lat":33.173267,
     "lon":-105.46362,
-    "recent_mean_pm25":2.7967741935,
-    "recent_n_days":31
+    "recent_mean_pm25":3.8825806452,
+    "recent_n_days":310
   },
   {
     "sensor_id":182041,
     "lat":33.1261,
     "lon":-97.05939,
-    "recent_mean_pm25":8.2666666667,
-    "recent_n_days":3
+    "recent_mean_pm25":9.3368543266,
+    "recent_n_days":698
   },
   {
     "sensor_id":182191,
     "lat":29.635967,
     "lon":-95.179085,
-    "recent_mean_pm25":9.5838709677,
-    "recent_n_days":31
+    "recent_mean_pm25":11.8061944444,
+    "recent_n_days":774
   },
   {
     "sensor_id":183281,
     "lat":30.521292,
     "lon":-97.58313,
-    "recent_mean_pm25":12.064516129,
-    "recent_n_days":31
+    "recent_mean_pm25":9.4433746425,
+    "recent_n_days":1049
   },
   {
     "sensor_id":184011,
     "lat":30.188492,
     "lon":-97.86353,
-    "recent_mean_pm25":12.3516129032,
-    "recent_n_days":31
+    "recent_mean_pm25":8.1377453001,
+    "recent_n_days":1033
   },
   {
     "sensor_id":184041,
     "lat":30.618843,
     "lon":-97.69658,
-    "recent_mean_pm25":13.4161290323,
-    "recent_n_days":31
+    "recent_mean_pm25":11.3645631068,
+    "recent_n_days":1030
   },
   {
     "sensor_id":185145,
     "lat":32.38393,
     "lon":-93.721214,
-    "recent_mean_pm25":8.6387096774,
-    "recent_n_days":31
+    "recent_mean_pm25":13.0285714286,
+    "recent_n_days":1043
   },
   {
     "sensor_id":186155,
     "lat":29.536121,
     "lon":-99.71745,
-    "recent_mean_pm25":21.4,
-    "recent_n_days":1
+    "recent_mean_pm25":10.2543023256,
+    "recent_n_days":860
   },
   {
     "sensor_id":186263,
     "lat":29.681028,
     "lon":-95.1707,
-    "recent_mean_pm25":9.6838709677,
-    "recent_n_days":31
+    "recent_mean_pm25":10.4872714143,
+    "recent_n_days":753
   },
   {
     "sensor_id":186271,
     "lat":29.777805,
     "lon":-95.13781,
-    "recent_mean_pm25":11.1161290323,
-    "recent_n_days":31
+    "recent_mean_pm25":14.9919140709,
+    "recent_n_days":931
   },
   {
     "sensor_id":186277,
     "lat":29.81704,
     "lon":-95.0665,
-    "recent_mean_pm25":10.1290322581,
-    "recent_n_days":31
+    "recent_mean_pm25":13.779153072,
+    "recent_n_days":708
   },
   {
     "sensor_id":186295,
     "lat":29.67665,
     "lon":-95.215515,
-    "recent_mean_pm25":9.8903225806,
-    "recent_n_days":31
+    "recent_mean_pm25":13.1062371926,
+    "recent_n_days":488
   },
   {
     "sensor_id":186303,
     "lat":29.781633,
     "lon":-95.35113,
-    "recent_mean_pm25":11.0838709677,
-    "recent_n_days":31
+    "recent_mean_pm25":13.5294330855,
+    "recent_n_days":807
   },
   {
     "sensor_id":186315,
     "lat":29.708698,
     "lon":-95.477104,
-    "recent_mean_pm25":10.8612903226,
-    "recent_n_days":31
+    "recent_mean_pm25":12.8073179848,
+    "recent_n_days":923
   },
   {
     "sensor_id":186327,
     "lat":29.79457,
     "lon":-95.14891,
-    "recent_mean_pm25":10.68,
-    "recent_n_days":25
+    "recent_mean_pm25":14.1554095092,
+    "recent_n_days":652
   },
   {
     "sensor_id":188817,
     "lat":33.633026,
     "lon":-96.64832,
-    "recent_mean_pm25":9.5838709677,
-    "recent_n_days":31
+    "recent_mean_pm25":9.6506598985,
+    "recent_n_days":985
+  },
+  {
+    "sensor_id":189883,
+    "lat":36.1606,
+    "lon":-95.98896,
+    "recent_mean_pm25":13.6173202614,
+    "recent_n_days":306
   },
   {
     "sensor_id":191191,
     "lat":35.096928,
     "lon":-106.61598,
-    "recent_mean_pm25":1.9290322581,
-    "recent_n_days":31
+    "recent_mean_pm25":6.4390495868,
+    "recent_n_days":484
+  },
+  {
+    "sensor_id":192023,
+    "lat":31.839306,
+    "lon":-106.5155,
+    "recent_mean_pm25":3.9813648294,
+    "recent_n_days":381
   },
   {
     "sensor_id":193303,
     "lat":30.47187,
     "lon":-97.58414,
-    "recent_mean_pm25":12.4064516129,
-    "recent_n_days":31
+    "recent_mean_pm25":8.7377087738,
+    "recent_n_days":946
   },
   {
     "sensor_id":194191,
     "lat":30.209915,
     "lon":-93.662964,
-    "recent_mean_pm25":7.3636363636,
-    "recent_n_days":11
+    "recent_mean_pm25":10.2357298475,
+    "recent_n_days":459
   },
   {
     "sensor_id":194469,
     "lat":30.094578,
     "lon":-95.48181,
-    "recent_mean_pm25":12.6419354839,
-    "recent_n_days":31
+    "recent_mean_pm25":12.5849889192,
+    "recent_n_days":916
   },
   {
     "sensor_id":195187,
     "lat":35.686928,
     "lon":-105.92736,
-    "recent_mean_pm25":1.3419354839,
-    "recent_n_days":31
+    "recent_mean_pm25":4.4555423123,
+    "recent_n_days":839
   },
   {
     "sensor_id":195474,
     "lat":33.454636,
     "lon":-101.928825,
-    "recent_mean_pm25":11.8967741935,
-    "recent_n_days":31
+    "recent_mean_pm25":7.7032258065,
+    "recent_n_days":868
   },
   {
     "sensor_id":196323,
     "lat":32.960114,
     "lon":-96.6922,
-    "recent_mean_pm25":12.4193548387,
-    "recent_n_days":31
+    "recent_mean_pm25":11.4355468582,
+    "recent_n_days":931
   },
   {
     "sensor_id":196421,
     "lat":32.977444,
     "lon":-96.77611,
-    "recent_mean_pm25":10.7322580645,
-    "recent_n_days":31
+    "recent_mean_pm25":9.5669863776,
+    "recent_n_days":911
   },
   {
     "sensor_id":196707,
     "lat":36.0825,
     "lon":-95.96178,
-    "recent_mean_pm25":9.9903225806,
-    "recent_n_days":31
+    "recent_mean_pm25":13.6342105263,
+    "recent_n_days":494
   },
   {
     "sensor_id":196827,
     "lat":35.57926,
     "lon":-101.7033,
-    "recent_mean_pm25":2.9548387097,
-    "recent_n_days":31
+    "recent_mean_pm25":5.8173553719,
+    "recent_n_days":242
   },
   {
     "sensor_id":198155,
     "lat":29.760813,
     "lon":-104.55047,
-    "recent_mean_pm25":0.5741935484,
-    "recent_n_days":31
+    "recent_mean_pm25":2.0267935578,
+    "recent_n_days":683
   },
   {
     "sensor_id":204043,
     "lat":34.23154,
     "lon":-95.642166,
-    "recent_mean_pm25":12.9161290323,
-    "recent_n_days":31
+    "recent_mean_pm25":13.1079283887,
+    "recent_n_days":782
   },
   {
     "sensor_id":204049,
     "lat":34.38737,
     "lon":-94.89719,
-    "recent_mean_pm25":11.4322580645,
-    "recent_n_days":31
+    "recent_mean_pm25":12.9160206718,
+    "recent_n_days":774
   },
   {
     "sensor_id":204051,
     "lat":35.238937,
     "lon":-94.65427,
-    "recent_mean_pm25":8.8741935484,
-    "recent_n_days":31
+    "recent_mean_pm25":11.3725888325,
+    "recent_n_days":788
   },
   {
     "sensor_id":204053,
     "lat":34.01616,
     "lon":-95.52812,
-    "recent_mean_pm25":13.1451612903,
-    "recent_n_days":31
+    "recent_mean_pm25":13.5905732484,
+    "recent_n_days":785
   },
   {
     "sensor_id":204055,
     "lat":34.07173,
     "lon":-95.00791,
-    "recent_mean_pm25":14.7533333333,
-    "recent_n_days":15
+    "recent_mean_pm25":12.0895765472,
+    "recent_n_days":614
   },
   {
     "sensor_id":204057,
     "lat":34.89776,
     "lon":-96.1,
-    "recent_mean_pm25":10.6806451613,
-    "recent_n_days":31
+    "recent_mean_pm25":11.0267833109,
+    "recent_n_days":743
   },
   {
     "sensor_id":204063,
     "lat":34.753628,
     "lon":-95.04932,
-    "recent_mean_pm25":10.2774193548,
-    "recent_n_days":31
+    "recent_mean_pm25":11.6941798942,
+    "recent_n_days":756
   },
   {
     "sensor_id":204067,
     "lat":34.889416,
     "lon":-95.77546,
-    "recent_mean_pm25":9.9677419355,
-    "recent_n_days":31
+    "recent_mean_pm25":11.2955527319,
+    "recent_n_days":787
   },
   {
     "sensor_id":204083,
     "lat":35.12332,
     "lon":-95.674355,
-    "recent_mean_pm25":9.6709677419,
-    "recent_n_days":31
+    "recent_mean_pm25":10.816066838,
+    "recent_n_days":778
   },
   {
     "sensor_id":204085,
     "lat":34.93284,
     "lon":-95.33757,
-    "recent_mean_pm25":9.9935483871,
-    "recent_n_days":31
+    "recent_mean_pm25":11.1486153846,
+    "recent_n_days":650
   },
   {
     "sensor_id":204091,
     "lat":34.53308,
     "lon":-96.21819,
-    "recent_mean_pm25":11.064516129,
-    "recent_n_days":31
+    "recent_mean_pm25":11.1338645418,
+    "recent_n_days":753
   },
   {
     "sensor_id":204093,
     "lat":35.02052,
     "lon":-94.65825,
-    "recent_mean_pm25":11.4129032258,
-    "recent_n_days":31
+    "recent_mean_pm25":12.6239543726,
+    "recent_n_days":789
   },
   {
     "sensor_id":204099,
     "lat":33.88034,
     "lon":-94.79528,
-    "recent_mean_pm25":12.7677419355,
-    "recent_n_days":31
+    "recent_mean_pm25":14.4527272727,
+    "recent_n_days":770
   },
   {
     "sensor_id":204105,
     "lat":34.395954,
     "lon":-96.15154,
-    "recent_mean_pm25":10.4064516129,
-    "recent_n_days":31
+    "recent_mean_pm25":11.6694117647,
+    "recent_n_days":765
   },
   {
     "sensor_id":204497,
     "lat":29.365728,
     "lon":-98.47932,
-    "recent_mean_pm25":9.7125,
-    "recent_n_days":8
+    "recent_mean_pm25":11.7039585427,
+    "recent_n_days":796
   },
   {
     "sensor_id":204613,
     "lat":29.732443,
     "lon":-94.97432,
-    "recent_mean_pm25":9.5806451613,
-    "recent_n_days":31
+    "recent_mean_pm25":10.4474307065,
+    "recent_n_days":460
   },
   {
     "sensor_id":204789,
     "lat":29.853159,
     "lon":-97.958755,
-    "recent_mean_pm25":12.7064516129,
-    "recent_n_days":31
+    "recent_mean_pm25":9.366745283,
+    "recent_n_days":424
   },
   {
     "sensor_id":204791,
     "lat":30.22148,
     "lon":-97.69634,
-    "recent_mean_pm25":10.4387096774,
-    "recent_n_days":31
+    "recent_mean_pm25":9.7235172414,
+    "recent_n_days":725
   },
   {
     "sensor_id":211261,
     "lat":30.2545,
     "lon":-97.72198,
-    "recent_mean_pm25":5.3064516129,
-    "recent_n_days":31
+    "recent_mean_pm25":5.5827769953,
+    "recent_n_days":639
   },
   {
     "sensor_id":211511,
     "lat":32.730137,
     "lon":-97.12047,
-    "recent_mean_pm25":2.1266666667,
-    "recent_n_days":30
+    "recent_mean_pm25":1.0514274953,
+    "recent_n_days":531
   },
   {
     "sensor_id":211523,
     "lat":33.227592,
     "lon":-97.60712,
-    "recent_mean_pm25":6.3916666667,
-    "recent_n_days":24
+    "recent_mean_pm25":7.8204374163,
+    "recent_n_days":747
   },
   {
     "sensor_id":213701,
     "lat":29.768635,
     "lon":-95.03154,
-    "recent_mean_pm25":8.4741935484,
-    "recent_n_days":31
+    "recent_mean_pm25":9.0932910207,
+    "recent_n_days":774
   },
   {
     "sensor_id":213765,
     "lat":30.30728,
     "lon":-97.82609,
-    "recent_mean_pm25":13.8516129032,
-    "recent_n_days":31
+    "recent_mean_pm25":7.9918904027,
+    "recent_n_days":596
   },
   {
     "sensor_id":213789,
     "lat":30.228407,
     "lon":-97.75423,
-    "recent_mean_pm25":13.664516129,
-    "recent_n_days":31
+    "recent_mean_pm25":8.8947793561,
+    "recent_n_days":660
   },
   {
     "sensor_id":213905,
     "lat":31.4165,
     "lon":-97.4225,
-    "recent_mean_pm25":11.3870967742,
-    "recent_n_days":31
+    "recent_mean_pm25":10.7865384615,
+    "recent_n_days":676
   },
   {
     "sensor_id":214881,
     "lat":35.960484,
     "lon":-95.63205,
-    "recent_mean_pm25":9.0225806452,
-    "recent_n_days":31
+    "recent_mean_pm25":11.9033766234,
+    "recent_n_days":385
   },
   {
     "sensor_id":214883,
     "lat":35.751625,
     "lon":-95.37169,
-    "recent_mean_pm25":9.5806451613,
-    "recent_n_days":31
+    "recent_mean_pm25":11.4781818182,
+    "recent_n_days":330
   },
   {
     "sensor_id":214895,
     "lat":35.648308,
     "lon":-95.95781,
-    "recent_mean_pm25":8.7967741935,
-    "recent_n_days":31
+    "recent_mean_pm25":10.9876247505,
+    "recent_n_days":501
   },
   {
     "sensor_id":214915,
     "lat":29.106672,
     "lon":-95.092186,
-    "recent_mean_pm25":7.9935483871,
-    "recent_n_days":31
+    "recent_mean_pm25":7.7226490066,
+    "recent_n_days":755
   },
   {
     "sensor_id":215469,
     "lat":30.738123,
     "lon":-97.71929,
-    "recent_mean_pm25":9.5612903226,
-    "recent_n_days":31
+    "recent_mean_pm25":9.6503030303,
+    "recent_n_days":660
   },
   {
     "sensor_id":217323,
     "lat":30.03465,
     "lon":-95.62582,
-    "recent_mean_pm25":10.4580645161,
-    "recent_n_days":31
+    "recent_mean_pm25":10.1749837715,
+    "recent_n_days":757
   },
   {
     "sensor_id":217461,
     "lat":26.213018,
     "lon":-97.78273,
-    "recent_mean_pm25":14.7096774194,
-    "recent_n_days":31
+    "recent_mean_pm25":13.0975783476,
+    "recent_n_days":702
   },
   {
     "sensor_id":218151,
     "lat":34.02791,
     "lon":-94.720474,
-    "recent_mean_pm25":13.3857142857,
-    "recent_n_days":28
+    "recent_mean_pm25":15.3398601399,
+    "recent_n_days":715
   },
   {
     "sensor_id":220311,
     "lat":25.95848,
     "lon":-97.48182,
-    "recent_mean_pm25":10.5225806452,
-    "recent_n_days":31
+    "recent_mean_pm25":9.9681303116,
+    "recent_n_days":706
   },
   {
     "sensor_id":221071,
     "lat":32.920242,
     "lon":-96.22803,
-    "recent_mean_pm25":11.1161290323,
-    "recent_n_days":31
+    "recent_mean_pm25":10.9076817558,
+    "recent_n_days":729
   },
   {
     "sensor_id":222065,
     "lat":30.232843,
     "lon":-98.17323,
-    "recent_mean_pm25":9.3,
-    "recent_n_days":12
+    "recent_mean_pm25":7.46171875,
+    "recent_n_days":512
   },
   {
     "sensor_id":222223,
     "lat":30.308128,
     "lon":-97.80189,
-    "recent_mean_pm25":7.1774193548,
-    "recent_n_days":31
+    "recent_mean_pm25":6.0441662104,
+    "recent_n_days":694
   },
   {
     "sensor_id":222417,
     "lat":30.468704,
     "lon":-95.903175,
-    "recent_mean_pm25":17.4096774194,
-    "recent_n_days":31
+    "recent_mean_pm25":16.0417236662,
+    "recent_n_days":731
   },
   {
     "sensor_id":222583,
     "lat":29.829018,
     "lon":-95.27625,
-    "recent_mean_pm25":11.0580645161,
-    "recent_n_days":31
+    "recent_mean_pm25":13.8745846024,
+    "recent_n_days":591
   },
   {
     "sensor_id":222589,
     "lat":29.682943,
     "lon":-95.14033,
-    "recent_mean_pm25":8.4322580645,
-    "recent_n_days":31
+    "recent_mean_pm25":10.8871313673,
+    "recent_n_days":373
   },
   {
     "sensor_id":222593,
     "lat":29.698973,
     "lon":-95.11124,
-    "recent_mean_pm25":8.7032258065,
-    "recent_n_days":31
+    "recent_mean_pm25":8.7137837838,
+    "recent_n_days":370
   },
   {
     "sensor_id":222601,
     "lat":29.780289,
     "lon":-95.301636,
-    "recent_mean_pm25":6.6064516129,
-    "recent_n_days":31
+    "recent_mean_pm25":8.9898196565,
+    "recent_n_days":393
   },
   {
     "sensor_id":222815,
     "lat":29.70345,
     "lon":-95.053925,
-    "recent_mean_pm25":8.1451612903,
-    "recent_n_days":31
+    "recent_mean_pm25":9.7596436782,
+    "recent_n_days":696
   },
   {
     "sensor_id":223809,
     "lat":26.19116,
     "lon":-98.37472,
-    "recent_mean_pm25":21.25,
-    "recent_n_days":22
+    "recent_mean_pm25":14.0037993921,
+    "recent_n_days":658
   },
   {
     "sensor_id":223813,
     "lat":29.798374,
     "lon":-95.407936,
-    "recent_mean_pm25":11.0379310345,
-    "recent_n_days":29
+    "recent_mean_pm25":10.6802684564,
+    "recent_n_days":596
   },
   {
     "sensor_id":225127,
     "lat":36.15895,
     "lon":-94.19528,
-    "recent_mean_pm25":10.2258064516,
-    "recent_n_days":31
+    "recent_mean_pm25":11.6464788732,
+    "recent_n_days":710
   },
   {
     "sensor_id":225623,
     "lat":31.31772,
     "lon":-98.50803,
-    "recent_mean_pm25":0.364516129,
-    "recent_n_days":31
+    "recent_mean_pm25":4.3129659643,
+    "recent_n_days":617
   },
   {
     "sensor_id":227139,
     "lat":29.535683,
     "lon":-98.54609,
-    "recent_mean_pm25":14.164516129,
-    "recent_n_days":31
+    "recent_mean_pm25":8.6494926379,
+    "recent_n_days":671
   },
   {
     "sensor_id":227321,
     "lat":34.884674,
     "lon":-95.51798,
-    "recent_mean_pm25":8.6387096774,
-    "recent_n_days":31
+    "recent_mean_pm25":10.0669001751,
+    "recent_n_days":571
   },
   {
     "sensor_id":227355,
     "lat":34.589294,
     "lon":-95.35449,
-    "recent_mean_pm25":10.7612903226,
-    "recent_n_days":31
+    "recent_mean_pm25":11.2802816901,
+    "recent_n_days":568
   },
   {
     "sensor_id":227445,
     "lat":31.980537,
     "lon":-102.054695,
-    "recent_mean_pm25":7.5444444444,
-    "recent_n_days":27
+    "recent_mean_pm25":8.0672025723,
+    "recent_n_days":622
   },
   {
     "sensor_id":227787,
     "lat":36.479156,
     "lon":-94.33789,
-    "recent_mean_pm25":9.6451612903,
-    "recent_n_days":31
+    "recent_mean_pm25":11.8993710692,
+    "recent_n_days":636
   },
   {
     "sensor_id":228269,
     "lat":31.758595,
     "lon":-106.493195,
-    "recent_mean_pm25":1.4,
-    "recent_n_days":30
+    "recent_mean_pm25":2.6448753463,
+    "recent_n_days":361
   },
   {
     "sensor_id":229853,
     "lat":29.78866,
     "lon":-95.319435,
-    "recent_mean_pm25":6.7838709677,
-    "recent_n_days":31
+    "recent_mean_pm25":9.3524121996,
+    "recent_n_days":541
   },
   {
     "sensor_id":229861,
     "lat":30.148928,
     "lon":-97.800026,
-    "recent_mean_pm25":14.0548387097,
-    "recent_n_days":31
+    "recent_mean_pm25":9.0843696562,
+    "recent_n_days":349
   },
   {
     "sensor_id":229903,
     "lat":30.35471,
     "lon":-97.67966,
-    "recent_mean_pm25":14.2516129032,
-    "recent_n_days":31
+    "recent_mean_pm25":9.3440465116,
+    "recent_n_days":430
   },
   {
     "sensor_id":229907,
     "lat":30.3116,
     "lon":-97.64333,
-    "recent_mean_pm25":7.47,
-    "recent_n_days":10
+    "recent_mean_pm25":8.8139108911,
+    "recent_n_days":404
   },
   {
     "sensor_id":230941,
     "lat":26.12404,
     "lon":-98.19416,
-    "recent_mean_pm25":16.7064516129,
-    "recent_n_days":31
+    "recent_mean_pm25":14.2215231788,
+    "recent_n_days":302
   },
   {
     "sensor_id":231047,
     "lat":29.417986,
     "lon":-98.53378,
-    "recent_mean_pm25":20.8064516129,
-    "recent_n_days":31
+    "recent_mean_pm25":14.1192541866,
+    "recent_n_days":418
   },
   {
     "sensor_id":231093,
     "lat":29.419785,
     "lon":-98.52815,
-    "recent_mean_pm25":15.7612903226,
-    "recent_n_days":31
+    "recent_mean_pm25":12.7089370438,
+    "recent_n_days":274
   },
   {
     "sensor_id":231145,
     "lat":29.356503,
     "lon":-98.50378,
-    "recent_mean_pm25":13.9193548387,
-    "recent_n_days":31
+    "recent_mean_pm25":11.2702571429,
+    "recent_n_days":210
   },
   {
     "sensor_id":231165,
     "lat":29.356842,
     "lon":-98.50358,
-    "recent_mean_pm25":14.8032258065,
-    "recent_n_days":31
+    "recent_mean_pm25":10.6423576487,
+    "recent_n_days":353
   },
   {
     "sensor_id":232571,
     "lat":30.814083,
     "lon":-97.69081,
-    "recent_mean_pm25":29.15,
-    "recent_n_days":2
+    "recent_mean_pm25":10.0378494624,
+    "recent_n_days":465
   },
   {
     "sensor_id":232609,
     "lat":30.818905,
     "lon":-97.69178,
-    "recent_mean_pm25":12.2193548387,
-    "recent_n_days":31
+    "recent_mean_pm25":9.9299029126,
+    "recent_n_days":515
   },
   {
     "sensor_id":232657,
     "lat":33.25248,
     "lon":-97.163124,
-    "recent_mean_pm25":11.4611111111,
-    "recent_n_days":18
+    "recent_mean_pm25":11.5382189239,
+    "recent_n_days":539
   },
   {
     "sensor_id":232993,
     "lat":33.017765,
     "lon":-97.00562,
-    "recent_mean_pm25":12.7193548387,
-    "recent_n_days":31
+    "recent_mean_pm25":10.883955516,
+    "recent_n_days":281
   },
   {
     "sensor_id":233007,
     "lat":33.03821,
     "lon":-97.01968,
-    "recent_mean_pm25":12.2774193548,
-    "recent_n_days":31
+    "recent_mean_pm25":10.1251419668,
+    "recent_n_days":361
   },
   {
     "sensor_id":233009,
     "lat":33.031593,
     "lon":-96.970695,
-    "recent_mean_pm25":12.6806451613,
-    "recent_n_days":31
+    "recent_mean_pm25":10.5534446309,
+    "recent_n_days":298
   },
   {
     "sensor_id":233725,
     "lat":35.75808,
     "lon":-106.026955,
-    "recent_mean_pm25":0.5516129032,
-    "recent_n_days":31
+    "recent_mean_pm25":1.9970873786,
+    "recent_n_days":618
   },
   {
     "sensor_id":235423,
     "lat":29.73623,
     "lon":-95.31653,
-    "recent_mean_pm25":11.735483871,
-    "recent_n_days":31
+    "recent_mean_pm25":12.5898072262,
+    "recent_n_days":557
   },
   {
     "sensor_id":235425,
     "lat":29.704206,
     "lon":-95.17937,
-    "recent_mean_pm25":9.1258064516,
-    "recent_n_days":31
+    "recent_mean_pm25":10.5760366071,
+    "recent_n_days":420
   },
   {
     "sensor_id":235427,
     "lat":29.803728,
     "lon":-95.307686,
-    "recent_mean_pm25":9.9612903226,
-    "recent_n_days":31
+    "recent_mean_pm25":7.5,
+    "recent_n_days":484
   },
   {
     "sensor_id":235737,
     "lat":36.384193,
     "lon":-106.50024,
-    "recent_mean_pm25":0.6612903226,
-    "recent_n_days":31
+    "recent_mean_pm25":2.1401652893,
+    "recent_n_days":605
   },
   {
     "sensor_id":236091,
     "lat":35.243324,
     "lon":-96.248604,
-    "recent_mean_pm25":10.5903225806,
-    "recent_n_days":31
+    "recent_mean_pm25":12.6616977226,
+    "recent_n_days":483
   },
   {
     "sensor_id":236097,
     "lat":35.827175,
     "lon":-96.391266,
-    "recent_mean_pm25":10.9580645161,
-    "recent_n_days":31
+    "recent_mean_pm25":13.0531590414,
+    "recent_n_days":459
   },
   {
     "sensor_id":236123,
     "lat":36.036,
     "lon":-96.011024,
-    "recent_mean_pm25":10.3032258065,
-    "recent_n_days":31
+    "recent_mean_pm25":12.2902390438,
+    "recent_n_days":502
   },
   {
     "sensor_id":236245,
     "lat":33.358078,
     "lon":-97.69344,
-    "recent_mean_pm25":8.752,
-    "recent_n_days":25
+    "recent_mean_pm25":7.1215076201,
+    "recent_n_days":437
   },
   {
     "sensor_id":236401,
     "lat":30.337454,
     "lon":-97.71158,
-    "recent_mean_pm25":13.6225806452,
-    "recent_n_days":31
+    "recent_mean_pm25":8.7089981949,
+    "recent_n_days":554
   },
   {
     "sensor_id":237189,
     "lat":36.158348,
     "lon":-98.93187,
-    "recent_mean_pm25":7.8677419355,
-    "recent_n_days":31
+    "recent_mean_pm25":9.2683206107,
+    "recent_n_days":262
   },
   {
     "sensor_id":241905,
     "lat":33.01271,
     "lon":-96.51433,
-    "recent_mean_pm25":12.9903225806,
-    "recent_n_days":31
+    "recent_mean_pm25":9.639936,
+    "recent_n_days":575
   },
   {
     "sensor_id":241909,
     "lat":36.36325,
     "lon":-93.797104,
-    "recent_mean_pm25":6.764516129,
-    "recent_n_days":31
+    "recent_mean_pm25":10.8398373984,
+    "recent_n_days":246
   },
   {
     "sensor_id":241945,
     "lat":36.306618,
     "lon":-94.13847,
-    "recent_mean_pm25":9.8387096774,
-    "recent_n_days":31
+    "recent_mean_pm25":13.0862962963,
+    "recent_n_days":270
   },
   {
     "sensor_id":242357,
     "lat":32.7311,
     "lon":-96.3225,
-    "recent_mean_pm25":13.0580645161,
-    "recent_n_days":31
+    "recent_mean_pm25":13.3066055046,
+    "recent_n_days":545
   },
   {
     "sensor_id":242475,
     "lat":31.763643,
     "lon":-106.3392,
-    "recent_mean_pm25":2.3741935484,
-    "recent_n_days":31
+    "recent_mean_pm25":6.6956521739,
+    "recent_n_days":322
   },
   {
     "sensor_id":242563,
     "lat":35.7508,
     "lon":-94.6698,
-    "recent_mean_pm25":11.3064516129,
-    "recent_n_days":31
+    "recent_mean_pm25":12.6087557604,
+    "recent_n_days":434
   },
   {
     "sensor_id":242593,
     "lat":30.701674,
     "lon":-94.674065,
-    "recent_mean_pm25":10.7064516129,
-    "recent_n_days":31
+    "recent_mean_pm25":12.7255172414,
+    "recent_n_days":435
   },
   {
     "sensor_id":242859,
     "lat":34.880634,
     "lon":-101.66469,
-    "recent_mean_pm25":3.9161290323,
-    "recent_n_days":31
+    "recent_mean_pm25":7.2803532009,
+    "recent_n_days":453
   },
   {
     "sensor_id":243539,
     "lat":32.48889,
     "lon":-96.939575,
-    "recent_mean_pm25":13.8766666667,
-    "recent_n_days":30
+    "recent_mean_pm25":9.7619804745,
+    "recent_n_days":548
   },
   {
     "sensor_id":243801,
     "lat":30.08833,
     "lon":-99.282814,
-    "recent_mean_pm25":13.9451612903,
-    "recent_n_days":31
+    "recent_mean_pm25":9.8141057935,
+    "recent_n_days":397
   },
   {
     "sensor_id":243835,
     "lat":35.41059,
     "lon":-99.05879,
-    "recent_mean_pm25":6.6451612903,
-    "recent_n_days":31
+    "recent_mean_pm25":7.2393867925,
+    "recent_n_days":424
   },
   {
     "sensor_id":243843,
     "lat":29.77938,
     "lon":-95.17161,
-    "recent_mean_pm25":12.1967741935,
-    "recent_n_days":31
+    "recent_mean_pm25":15.3111811798,
+    "recent_n_days":534
   },
   {
     "sensor_id":244811,
     "lat":30.33309,
     "lon":-97.735214,
-    "recent_mean_pm25":13.6733333333,
-    "recent_n_days":30
+    "recent_mean_pm25":8.2969978571,
+    "recent_n_days":525
   },
   {
     "sensor_id":244939,
     "lat":29.690561,
     "lon":-95.17067,
-    "recent_mean_pm25":8.4548387097,
-    "recent_n_days":31
+    "recent_mean_pm25":11.9072191456,
+    "recent_n_days":474
+  },
+  {
+    "sensor_id":246009,
+    "lat":29.793543,
+    "lon":-95.33716,
+    "recent_mean_pm25":12.0731115196,
+    "recent_n_days":204
   },
   {
     "sensor_id":246011,
     "lat":29.819454,
     "lon":-95.36081,
-    "recent_mean_pm25":8.0870967742,
-    "recent_n_days":31
+    "recent_mean_pm25":10.8762608696,
+    "recent_n_days":575
   },
   {
     "sensor_id":247283,
     "lat":29.598433,
     "lon":-95.139366,
-    "recent_mean_pm25":9.3322580645,
-    "recent_n_days":31
+    "recent_mean_pm25":8.5090342052,
+    "recent_n_days":497
   },
   {
     "sensor_id":250205,
     "lat":29.706715,
     "lon":-95.12605,
-    "recent_mean_pm25":6.7161290323,
-    "recent_n_days":31
+    "recent_mean_pm25":7.0475192308,
+    "recent_n_days":546
   },
   {
     "sensor_id":252301,
     "lat":30.410666,
     "lon":-97.85269,
-    "recent_mean_pm25":16.1225806452,
-    "recent_n_days":31
+    "recent_mean_pm25":9.8844236782,
+    "recent_n_days":522
   },
   {
     "sensor_id":254053,
     "lat":30.288366,
     "lon":-97.709335,
-    "recent_mean_pm25":13.7580645161,
-    "recent_n_days":31
+    "recent_mean_pm25":6.9831260896,
+    "recent_n_days":491
   },
   {
     "sensor_id":255423,
     "lat":30.95862,
     "lon":-94.41352,
-    "recent_mean_pm25":6.5,
-    "recent_n_days":19
+    "recent_mean_pm25":10.7231460674,
+    "recent_n_days":445
   },
   {
     "sensor_id":255435,
     "lat":32.943066,
     "lon":-105.81076,
-    "recent_mean_pm25":0.9806451613,
-    "recent_n_days":31
+    "recent_mean_pm25":2.2022271715,
+    "recent_n_days":449
+  },
+  {
+    "sensor_id":255463,
+    "lat":32.417114,
+    "lon":-97.24084,
+    "recent_mean_pm25":7.638266921,
+    "recent_n_days":367
   },
   {
     "sensor_id":257227,
     "lat":34.00846,
     "lon":-96.0386,
-    "recent_mean_pm25":11.2258064516,
-    "recent_n_days":31
+    "recent_mean_pm25":11.1126027397,
+    "recent_n_days":365
   },
   {
     "sensor_id":257623,
     "lat":30.734915,
     "lon":-98.31273,
-    "recent_mean_pm25":13.1225806452,
-    "recent_n_days":31
+    "recent_mean_pm25":9.9157667387,
+    "recent_n_days":463
   },
   {
     "sensor_id":261245,
     "lat":34.826363,
     "lon":-95.84289,
-    "recent_mean_pm25":10.0677419355,
-    "recent_n_days":31
+    "recent_mean_pm25":11.3068085106,
+    "recent_n_days":235
   },
   {
     "sensor_id":261297,
     "lat":33.546738,
     "lon":-96.58845,
-    "recent_mean_pm25":13.9677419355,
-    "recent_n_days":31
+    "recent_mean_pm25":12.0107142857,
+    "recent_n_days":364
   },
   {
     "sensor_id":261707,
     "lat":35.57258,
     "lon":-94.3641,
-    "recent_mean_pm25":8.7064516129,
-    "recent_n_days":31
+    "recent_mean_pm25":10.2997214485,
+    "recent_n_days":359
   },
   {
     "sensor_id":261797,
     "lat":36.147503,
     "lon":-105.2417,
-    "recent_mean_pm25":1.5032258065,
-    "recent_n_days":31
+    "recent_mean_pm25":2.6216470588,
+    "recent_n_days":425
   },
   {
     "sensor_id":261801,
     "lat":36.127087,
     "lon":-105.23914,
-    "recent_mean_pm25":0.8741935484,
-    "recent_n_days":31
+    "recent_mean_pm25":2.3713625866,
+    "recent_n_days":433
   },
   {
     "sensor_id":261829,
     "lat":35.985912,
     "lon":-105.35859,
-    "recent_mean_pm25":0.9774193548,
-    "recent_n_days":31
+    "recent_mean_pm25":2.7329545455,
+    "recent_n_days":352
   },
   {
     "sensor_id":261830,
     "lat":36.046864,
     "lon":-105.28594,
-    "recent_mean_pm25":1.0806451613,
-    "recent_n_days":31
+    "recent_mean_pm25":2.772960373,
+    "recent_n_days":429
   },
   {
     "sensor_id":261853,
     "lat":35.989758,
     "lon":-105.37349,
-    "recent_mean_pm25":5.064516129,
-    "recent_n_days":31
+    "recent_mean_pm25":6.6184729064,
+    "recent_n_days":406
   },
   {
     "sensor_id":263923,
     "lat":30.737377,
     "lon":-98.29991,
-    "recent_mean_pm25":12.0838709677,
-    "recent_n_days":31
+    "recent_mean_pm25":10.5855670103,
+    "recent_n_days":388
   },
   {
     "sensor_id":263935,
     "lat":30.715187,
     "lon":-98.335045,
-    "recent_mean_pm25":12.8870967742,
-    "recent_n_days":31
+    "recent_mean_pm25":9.4407821229,
+    "recent_n_days":358
   },
   {
     "sensor_id":263949,
     "lat":30.70613,
     "lon":-98.27122,
-    "recent_mean_pm25":13.7451612903,
-    "recent_n_days":31
+    "recent_mean_pm25":10.07578125,
+    "recent_n_days":384
   },
   {
     "sensor_id":263973,
     "lat":30.706795,
     "lon":-98.325096,
-    "recent_mean_pm25":13.3935483871,
-    "recent_n_days":31
+    "recent_mean_pm25":10.0888349515,
+    "recent_n_days":412
   },
   {
     "sensor_id":265884,
     "lat":35.092937,
     "lon":-106.5896,
-    "recent_mean_pm25":1.5684210526,
-    "recent_n_days":19
+    "recent_mean_pm25":5.9219512195,
+    "recent_n_days":328
+  },
+  {
+    "sensor_id":266233,
+    "lat":30.261024,
+    "lon":-97.73581,
+    "recent_mean_pm25":5.4402575188,
+    "recent_n_days":266
   },
   {
     "sensor_id":266465,
     "lat":32.995834,
     "lon":-96.725136,
-    "recent_mean_pm25":11.9322580645,
-    "recent_n_days":31
+    "recent_mean_pm25":11.0210253186,
+    "recent_n_days":361
+  },
+  {
+    "sensor_id":266477,
+    "lat":30.306784,
+    "lon":-97.388794,
+    "recent_mean_pm25":11.1150442478,
+    "recent_n_days":226
   },
   {
     "sensor_id":267373,
     "lat":32.62553,
     "lon":-95.56267,
-    "recent_mean_pm25":13.2193548387,
-    "recent_n_days":31
+    "recent_mean_pm25":13.066025641,
+    "recent_n_days":312
   },
   {
     "sensor_id":268165,
     "lat":29.669638,
     "lon":-95.10476,
-    "recent_mean_pm25":9.8516129032,
-    "recent_n_days":31
+    "recent_mean_pm25":10.0878957237,
+    "recent_n_days":380
   },
   {
     "sensor_id":268171,
     "lat":29.77873,
     "lon":-95.03287,
-    "recent_mean_pm25":8.5387096774,
-    "recent_n_days":31
+    "recent_mean_pm25":9.4203099762,
+    "recent_n_days":421
   },
   {
     "sensor_id":269366,
     "lat":33.539032,
     "lon":-96.586876,
-    "recent_mean_pm25":11.4032258065,
-    "recent_n_days":31
+    "recent_mean_pm25":11.2776243094,
+    "recent_n_days":362
   },
   {
     "sensor_id":270066,
     "lat":35.636997,
     "lon":-105.9936,
-    "recent_mean_pm25":1.9612903226,
-    "recent_n_days":31
+    "recent_mean_pm25":4.4777777778,
+    "recent_n_days":369
   },
   {
     "sensor_id":270240,
     "lat":32.88226,
     "lon":-97.264725,
-    "recent_mean_pm25":10.8129032258,
-    "recent_n_days":31
+    "recent_mean_pm25":8.8995678395,
+    "recent_n_days":405
   },
   {
     "sensor_id":270722,
     "lat":33.400898,
     "lon":-96.59883,
-    "recent_mean_pm25":13.7677419355,
-    "recent_n_days":31
+    "recent_mean_pm25":13.5225888325,
+    "recent_n_days":394
   },
   {
     "sensor_id":271339,
     "lat":33.555355,
     "lon":-96.5822,
-    "recent_mean_pm25":12.1064516129,
-    "recent_n_days":31
+    "recent_mean_pm25":12.3670623145,
+    "recent_n_days":337
   },
   {
     "sensor_id":272875,
     "lat":30.41968,
     "lon":-97.60284,
-    "recent_mean_pm25":16.3870967742,
-    "recent_n_days":31
+    "recent_mean_pm25":10.5376642491,
+    "recent_n_days":293
   },
   {
     "sensor_id":272881,
     "lat":29.7636,
     "lon":-95.7079,
-    "recent_mean_pm25":11.9290322581,
-    "recent_n_days":31
+    "recent_mean_pm25":10.5265733978,
+    "recent_n_days":362
   },
   {
     "sensor_id":273507,
     "lat":29.399055,
     "lon":-98.51937,
-    "recent_mean_pm25":16.7322580645,
-    "recent_n_days":31
+    "recent_mean_pm25":12.5838527508,
+    "recent_n_days":309
   },
   {
     "sensor_id":273535,
     "lat":29.40652,
     "lon":-98.53665,
-    "recent_mean_pm25":14.9806451613,
-    "recent_n_days":31
+    "recent_mean_pm25":10.6832194719,
+    "recent_n_days":303
   },
   {
     "sensor_id":273547,
     "lat":29.423292,
     "lon":-98.51979,
-    "recent_mean_pm25":17.0096774194,
-    "recent_n_days":31
+    "recent_mean_pm25":12.9758072344,
+    "recent_n_days":273
   },
   {
     "sensor_id":273553,
     "lat":29.417849,
     "lon":-98.43026,
-    "recent_mean_pm25":17.6967741935,
-    "recent_n_days":31
+    "recent_mean_pm25":11.052,
+    "recent_n_days":310
   },
   {
     "sensor_id":273571,
     "lat":29.365046,
     "lon":-98.49354,
-    "recent_mean_pm25":16.0322580645,
-    "recent_n_days":31
+    "recent_mean_pm25":12.5633286853,
+    "recent_n_days":251
   },
   {
     "sensor_id":273575,
     "lat":29.36283,
     "lon":-98.48332,
-    "recent_mean_pm25":15.1709677419,
-    "recent_n_days":31
+    "recent_mean_pm25":12.2432702381,
+    "recent_n_days":210
   },
   {
     "sensor_id":273579,
     "lat":29.417196,
     "lon":-98.52541,
-    "recent_mean_pm25":16.3096774194,
-    "recent_n_days":31
+    "recent_mean_pm25":12.1367094156,
+    "recent_n_days":308
   },
   {
     "sensor_id":273585,
     "lat":29.412245,
     "lon":-98.51877,
-    "recent_mean_pm25":16.464516129,
-    "recent_n_days":31
+    "recent_mean_pm25":12.4278680556,
+    "recent_n_days":288
   },
   {
     "sensor_id":273593,
     "lat":29.416656,
     "lon":-98.53718,
-    "recent_mean_pm25":22.24,
-    "recent_n_days":15
+    "recent_mean_pm25":12.1450134409,
+    "recent_n_days":279
   },
   {
     "sensor_id":273723,
     "lat":29.353403,
     "lon":-98.49552,
-    "recent_mean_pm25":10.247826087,
-    "recent_n_days":23
+    "recent_mean_pm25":9.9025102041,
+    "recent_n_days":294
   },
   {
     "sensor_id":273729,
     "lat":29.357466,
     "lon":-98.48836,
-    "recent_mean_pm25":16.135483871,
-    "recent_n_days":31
+    "recent_mean_pm25":10.9759991611,
+    "recent_n_days":298
   },
   {
     "sensor_id":274402,
     "lat":29.364033,
     "lon":-98.489555,
-    "recent_mean_pm25":15.6032258065,
-    "recent_n_days":31
+    "recent_mean_pm25":11.5385583333,
+    "recent_n_days":240
   },
   {
     "sensor_id":274692,
     "lat":29.362417,
     "lon":-98.48912,
-    "recent_mean_pm25":15.0,
-    "recent_n_days":31
+    "recent_mean_pm25":10.7258952465,
+    "recent_n_days":284
   },
   {
     "sensor_id":275214,
     "lat":35.181362,
     "lon":-97.43933,
-    "recent_mean_pm25":8.8774193548,
-    "recent_n_days":31
+    "recent_mean_pm25":9.5383870968,
+    "recent_n_days":310
   },
   {
     "sensor_id":275230,
     "lat":36.48371,
     "lon":-97.07115,
-    "recent_mean_pm25":10.835483871,
-    "recent_n_days":31
+    "recent_mean_pm25":12.2493421053,
+    "recent_n_days":304
   },
   {
     "sensor_id":275350,
     "lat":29.393457,
     "lon":-98.52581,
-    "recent_mean_pm25":14.7,
-    "recent_n_days":31
+    "recent_mean_pm25":10.576878327,
+    "recent_n_days":263
   },
   {
     "sensor_id":275386,
     "lat":29.427132,
     "lon":-98.44565,
-    "recent_mean_pm25":15.6419354839,
-    "recent_n_days":31
+    "recent_mean_pm25":10.9461481481,
+    "recent_n_days":297
   },
   {
     "sensor_id":275756,
     "lat":29.41278,
     "lon":-98.53114,
-    "recent_mean_pm25":16.6903225806,
-    "recent_n_days":31
+    "recent_mean_pm25":11.7243954918,
+    "recent_n_days":305
   },
   {
     "sensor_id":275762,
     "lat":29.419922,
     "lon":-98.520645,
-    "recent_mean_pm25":15.5806451613,
-    "recent_n_days":31
+    "recent_mean_pm25":11.5391713576,
+    "recent_n_days":302
   },
   {
     "sensor_id":276176,
     "lat":29.416826,
     "lon":-98.43784,
-    "recent_mean_pm25":14.6290322581,
-    "recent_n_days":31
+    "recent_mean_pm25":10.4983050497,
+    "recent_n_days":302
   },
   {
     "sensor_id":279384,
     "lat":35.228256,
     "lon":-106.60815,
-    "recent_mean_pm25":1.7344827586,
-    "recent_n_days":29
+    "recent_mean_pm25":6.08875,
+    "recent_n_days":320
   },
   {
     "sensor_id":279466,
     "lat":35.05562,
     "lon":-106.6183,
-    "recent_mean_pm25":1.2419354839,
-    "recent_n_days":31
+    "recent_mean_pm25":3.9350364964,
+    "recent_n_days":274
   },
   {
     "sensor_id":279842,
     "lat":33.214638,
     "lon":-96.939865,
-    "recent_mean_pm25":11.9483870968,
-    "recent_n_days":31
+    "recent_mean_pm25":10.0802488274,
+    "recent_n_days":307
   },
   {
     "sensor_id":280456,
     "lat":32.6153,
     "lon":-97.06244,
-    "recent_mean_pm25":11.2774193548,
-    "recent_n_days":31
+    "recent_mean_pm25":9.2407424808,
+    "recent_n_days":260
   },
   {
     "sensor_id":280468,
     "lat":32.63575,
     "lon":-97.04373,
-    "recent_mean_pm25":10.5967741935,
-    "recent_n_days":31
+    "recent_mean_pm25":9.5503846154,
+    "recent_n_days":260
   },
   {
     "sensor_id":280470,
     "lat":32.70023,
     "lon":-97.00805,
-    "recent_mean_pm25":10.6903225806,
-    "recent_n_days":31
+    "recent_mean_pm25":10.1928341346,
+    "recent_n_days":260
   },
   {
     "sensor_id":280474,
     "lat":32.75654,
     "lon":-96.95801,
-    "recent_mean_pm25":11.3612903226,
-    "recent_n_days":31
+    "recent_mean_pm25":10.0148798077,
+    "recent_n_days":260
   },
   {
     "sensor_id":280824,
     "lat":29.108183,
     "lon":-99.14532,
-    "recent_mean_pm25":15.7548387097,
-    "recent_n_days":31
+    "recent_mean_pm25":10.1282131661,
+    "recent_n_days":319
   },
   {
     "sensor_id":281951,
     "lat":30.532576,
     "lon":-98.26912,
-    "recent_mean_pm25":13.424137931,
-    "recent_n_days":29
+    "recent_mean_pm25":9.0601626016,
+    "recent_n_days":246
   },
   {
     "sensor_id":282756,
     "lat":31.872591,
     "lon":-106.54606,
-    "recent_mean_pm25":1.4967741935,
-    "recent_n_days":31
+    "recent_mean_pm25":3.2198501873,
+    "recent_n_days":267
   },
   {
     "sensor_id":283882,
     "lat":32.894684,
     "lon":-96.811386,
-    "recent_mean_pm25":12.1967741935,
-    "recent_n_days":31
+    "recent_mean_pm25":9.2642601896,
+    "recent_n_days":211
   },
   {
     "sensor_id":284834,
     "lat":35.687046,
     "lon":-105.93871,
-    "recent_mean_pm25":1.9129032258,
-    "recent_n_days":31
+    "recent_mean_pm25":2.9971119134,
+    "recent_n_days":277
   },
   {
     "sensor_id":285760,
     "lat":32.43869,
     "lon":-96.99625,
-    "recent_mean_pm25":12.5322580645,
-    "recent_n_days":31
+    "recent_mean_pm25":9.5597599372,
+    "recent_n_days":239
   },
   {
     "sensor_id":286082,
     "lat":30.130415,
     "lon":-94.39408,
-    "recent_mean_pm25":10.1225806452,
-    "recent_n_days":31
+    "recent_mean_pm25":12.8857692308,
+    "recent_n_days":260
   },
   {
     "sensor_id":288246,
     "lat":36.02075,
     "lon":-94.20786,
-    "recent_mean_pm25":11.7903225806,
-    "recent_n_days":31
+    "recent_mean_pm25":13.4826415094,
+    "recent_n_days":265
   },
   {
     "sensor_id":288282,
     "lat":30.15146,
     "lon":-95.590614,
-    "recent_mean_pm25":11.3677419355,
-    "recent_n_days":31
+    "recent_mean_pm25":15.2254032258,
+    "recent_n_days":248
   },
   {
     "sensor_id":288660,
     "lat":35.260136,
     "lon":-95.09233,
-    "recent_mean_pm25":10.1870967742,
-    "recent_n_days":31
+    "recent_mean_pm25":11.9690140845,
+    "recent_n_days":213
   },
   {
     "sensor_id":288896,
     "lat":32.534904,
     "lon":-96.9811,
-    "recent_mean_pm25":14.8967741935,
-    "recent_n_days":31
+    "recent_mean_pm25":11.6880096168,
+    "recent_n_days":274
   },
   {
     "sensor_id":293473,
     "lat":31.062162,
     "lon":-97.50188,
-    "recent_mean_pm25":15.2903225806,
-    "recent_n_days":31
+    "recent_mean_pm25":11.9345132743,
+    "recent_n_days":226
   }
 ]
