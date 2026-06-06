@@ -707,19 +707,27 @@ def interpolate_color(color1, color2, factor):
 
 
 def pm25_color_gradient(pm25: float) -> str:
-    """Get gradient color based on PM2.5 value."""
+    """Get gradient color based on PM2.5 value.
+
+    The Good range (0-8.9) spans deep teal -> green -> lime with a power curve
+    so the dense 1-6 µg/m³ band (where most clean-day readings sit) is spread
+    across a wide, visible color range. This makes within-city and clean-day
+    spatial structure legible instead of one flat green. Buckets/breakpoints
+    are unchanged (still Good 0-8.9, Moderate 9-12.9, etc.).
+    """
     if pm25 < 0:
         pm25 = 0
 
-    # Green range: 0.0-8.9
+    # Good range: 0.0-8.9 — deep teal (pristine) -> lime (approaching moderate).
+    # Power<1 curve expands the low-value end where clean-day data concentrates.
     if pm25 <= 8.9:
-        factor = pm25 / 8.9
-        return interpolate_color("#90EE90", "#00b894", factor)
+        factor = (pm25 / 8.9) ** 0.65
+        return interpolate_color("#00838f", "#c0ca33", factor)
 
     # Yellow range: 9.0-12.9
     elif pm25 <= 12.9:
         factor = (pm25 - 9.0) / 3.9
-        return interpolate_color("#FFFF99", "#FFD700", factor)
+        return interpolate_color("#FFEB3B", "#FFB300", factor)
 
     # Red range: 13.0-17.9
     elif pm25 <= 17.9:
