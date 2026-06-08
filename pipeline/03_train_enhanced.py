@@ -410,7 +410,7 @@ def load_data():
     # date). Map each sensor to its 0.5deg cell (SAME grid as backend inference)
     # and merge. Archive AOD starts ~2022-08, so pre-2022-08 rows are NaN ->
     # median-filled below (same median exported to the bundle for inference parity).
-    GRID_DEG = 2.0
+    GRID_DEG = 0.5
     if "latitude" in df.columns and "longitude" in df.columns:
         df["cell_lat"] = (df["latitude"] / GRID_DEG).round() * GRID_DEG
         df["cell_lon"] = (df["longitude"] / GRID_DEG).round() * GRID_DEG

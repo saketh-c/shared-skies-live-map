@@ -21,7 +21,7 @@ import numpy as np
 
 AQ_URL = "https://air-quality-api.open-meteo.com/v1/air-quality"
 MET_URL = "https://api.open-meteo.com/v1/forecast"
-GRID_DEG = 2.0  # cell size for binning tracts
+GRID_DEG = 0.5  # cell size for binning tracts
 
 
 def _cell_key(lat: float, lon: float) -> tuple:

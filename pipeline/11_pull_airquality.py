@@ -23,7 +23,7 @@ CACHE_DIR = os.path.join(ROOT, "pipeline", "data_pull_cache", "airquality_grid")
 OUT = os.path.join(ROOT, "pipeline", "airquality_by_cell.parquet")
 URL = "https://air-quality-api.open-meteo.com/v1/air-quality"
 ARCHIVE_START = "2022-08-03"
-GRID_DEG = 2.0
+GRID_DEG = 0.5
 BATCH = 30
 os.makedirs(CACHE_DIR, exist_ok=True)
 
