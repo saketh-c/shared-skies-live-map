@@ -7,8 +7,8 @@
  *   15 = WHO 24-hour guideline
  *
  * Scale:
- * 0.0-5.0:  Green  (at/below WHO annual)            "Good"
- * 5.0-9.0:  Yellow (WHO–EPA annual band)            "Moderate"
+ * 0.0-6.0:  Green  (clean, at/near WHO annual of 5)  "Good"
+ * 6.0-9.0:  Yellow (above WHO annual, within EPA 9)   "Moderate"
  * 9.0-15.0: Orange (above EPA annual standard)      "Elevated"
  * 15.0+:    Red → dark red (above WHO 24-hr)        "High"
  * MUST stay in sync with backend/main.py pm25_color_gradient/pm25_info.
@@ -18,19 +18,19 @@
 const COLOR_SCALE = {
   goodRange: {
     min: 0.0,
-    max: 5.0,
+    max: 6.0,
     colorMin: "#90EE90",  // Light green
     colorMax: "#00b894",  // Darker green
     category: "Good",
-    label: "0–5 µg/m³"
+    label: "0–6 µg/m³"
   },
   moderateRange: {
-    min: 5.0,
+    min: 6.0,
     max: 9.0,
     colorMin: "#FFFF99",  // Light yellow
     colorMax: "#FFD700",  // Darker yellow/gold
     category: "Moderate",
-    label: "5–9 µg/m³"
+    label: "6–9 µg/m³"
   },
   elevatedRange: {
     min: 9.0,
@@ -149,7 +149,7 @@ export function getAQIInfo(pm25) {
       bg: "rgba(144, 238, 144, 0.12)",
       label: COLOR_SCALE.goodRange.label,
       aqi_range: "Good",
-      health_msg: "At or below the WHO annual guideline (5 µg/m³). Air quality is good."
+      health_msg: "Air quality is good (at or near the WHO annual guideline of 5 µg/m³)."
     };
   }
 
@@ -235,8 +235,8 @@ export function pm25ToEpaAqi(pm25) {
  * Export breakpoints for legend display
  */
 export const BREAKPOINTS = [
-  { max: 5.0,   category: "Good",     color: "#00b894", label: "0–5" },
-  { max: 9.0,   category: "Moderate", color: "#FFD700", label: "5–9" },
+  { max: 6.0,   category: "Good",     color: "#00b894", label: "0–6" },
+  { max: 9.0,   category: "Moderate", color: "#FFD700", label: "6–9" },
   { max: 15.0,  category: "Elevated", color: "#E8590C", label: "9–15" },
   { max: Infinity, category: "High",  color: "#b30000", label: "15+" },
 ];

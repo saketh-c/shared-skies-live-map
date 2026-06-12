@@ -37,6 +37,8 @@ TEXAS_SNAPSHOT_PATH = os.path.join(SNAPSHOTS_DIR, "texas_predictions_latest.json
 QUANTUM_SNAPSHOT_PATH = os.path.join(SNAPSHOTS_DIR, "quantum_latest.json")
 HMS_SNAPSHOT_PATH = os.path.join(SNAPSHOTS_DIR, "hms_smoke_latest.json")
 PURPLEAIR_SNAPSHOT_PATH = os.path.join(SNAPSHOTS_DIR, "purpleair_sensors_latest.json")
+WEATHER_GRID_SNAPSHOT_PATH = os.path.join(SNAPSHOTS_DIR, "weather_grid_latest.json")
+AQ_SNAPSHOT_PATH = os.path.join(SNAPSHOTS_DIR, "airquality_latest.json")
 MODELS_DIR = os.path.join(ROOT, "models")
 
 # Live PurpleAir: the model's dominant feature (nbr_pm25_*) must be computed
@@ -107,6 +109,21 @@ HMS_CACHE_TTL_MIN = 60  # HMS analysts publish daily and re-draw a few times/day
 
 # Live PurpleAir sensor cache (list of {lat, lon, pm25} for current TX air).
 _purpleair_cache: dict = {"data": None, "expires": datetime.min.replace(tzinfo=timezone.utc)}
+
+# Open-Meteo grid caches (daily means — refreshing a few times a day is plenty).
+# QUOTA: Open-Meteo's free tier is ~10,000 call-weights/day per API, and a
+# multi-location call weighs ~1 PER LOCATION. Refetching a 254-cell grid every
+# 30-min prediction cycle (48×/day ≈ 12k weights) exhausted the quota and 429'd
+# (observed on Render). With a 6h TTL + disk snapshot + stale-on-failure, the
+# steady-state cost is a few hundred weights/day per API.
+OPENMETEO_GRID_TTL_MIN = int(os.environ.get("OPENMETEO_GRID_TTL_MIN", "360"))
+_wgrid_cache: dict = {"data": None, "expires": datetime.min.replace(tzinfo=timezone.utc)}
+_aq_cache: dict = {"data": None, "expires": datetime.min.replace(tzinfo=timezone.utc)}
+
+# Per-cell cache for tract-click weather (display): humans click a few tracts,
+# but each click was a fresh single-location API call. 30-min per-cell reuse.
+_click_weather_cache: dict = {}
+CLICK_WEATHER_TTL_MIN = 30
 
 
 # ── Spatial-context reference points (kept in sync with pipeline/03_train_enhanced.py) ──
@@ -346,6 +363,21 @@ async def lifespan(app: FastAPI):
             "expires": datetime.min.replace(tzinfo=timezone.utc),
         }
         print(f"Loaded PurpleAir snapshot ({pa_snap.get('count', 0)} live sensors)")
+
+    # Open-Meteo grid snapshots — hydrate as already-expired: the first cycle
+    # tries a fresh fetch, and if the daily quota is exhausted it falls back to
+    # this stale grid instead of training-median fills (much better than nothing
+    # after a redeploy mid-outage).
+    wg_snap = _load_snapshot(WEATHER_GRID_SNAPSHOT_PATH)
+    if wg_snap is not None:
+        global _wgrid_cache
+        _wgrid_cache = {"data": wg_snap, "expires": datetime.min.replace(tzinfo=timezone.utc)}
+        print(f"Loaded weather-grid snapshot ({wg_snap.get('n_cells', 0)} cells)")
+    aq_snap = _load_snapshot(AQ_SNAPSHOT_PATH)
+    if aq_snap is not None:
+        global _aq_cache
+        _aq_cache = {"data": aq_snap, "expires": datetime.min.replace(tzinfo=timezone.utc)}
+        print(f"Loaded air-quality snapshot ({aq_snap.get('n_cells', 0)} cells)")
     if os.environ.get("PURPLEAIR_API_KEY", "").strip():
         print("PurpleAir: using PURPLEAIR_API_KEY from environment.")
     else:
@@ -494,6 +526,27 @@ WEATHER_FALLBACK = {
 }
 
 
+def _weather_fallback() -> dict:
+    """Model-unit fallback weather WITH a converted display dict.
+
+    Every fallback path MUST go through this: returning bare WEATHER_FALLBACK to
+    the UI once showed '20.2' (the °C training median) labeled as °F on every
+    tract during an Open-Meteo quota outage. Prefer the last successful fetch
+    (kept in state) over the static medians.
+    """
+    last = state.get("last_weather")
+    if isinstance(last, dict) and "display" in last:
+        return last
+    w = dict(WEATHER_FALLBACK)
+    w["display"] = {
+        "temperature": round(w["temperature"] * 9 / 5 + 32, 1),   # °F
+        "humidity":    w["humidity"],
+        "pressure":    1013.0,                                    # MSL-style for display
+        "wind_speed":  round(w["wind_speed"] * 2.23694, 1),       # mph
+    }
+    return w
+
+
 async def fetch_weather(lat: float, lon: float) -> dict:
     """Fetch weather from Open-Meteo (free, no API key) for one location.
 
@@ -542,6 +595,7 @@ async def fetch_weather(lat: float, lon: float) -> dict:
         "pressure":    round(cur.get("pressure_msl", 1013.0), 1),
         "wind_speed":  round(ws_ms * 2.23694, 1) if ws_ms is not None else round(model["wind_speed"] * 2.23694, 1),
     }
+    state["last_weather"] = model  # last-known-good for quota/outage fallbacks
     return model
 
 
@@ -767,14 +821,14 @@ def pm25_color_gradient(pm25: float) -> str:
     if pm25 < 0:
         pm25 = 0
 
-    # Green: 0.0-5.0  (at/below WHO annual guideline)
-    if pm25 <= 5.0:
-        factor = pm25 / 5.0
+    # Green: 0.0-6.0  (clean — at/near the WHO annual guideline of 5)
+    if pm25 <= 6.0:
+        factor = pm25 / 6.0
         return interpolate_color("#90EE90", "#00b894", factor)
 
-    # Yellow: 5.0-9.0  (above WHO annual, within EPA annual standard)
+    # Yellow: 6.0-9.0  (above the WHO annual guideline, within EPA annual std)
     elif pm25 <= 9.0:
-        factor = (pm25 - 5.0) / 4.0
+        factor = (pm25 - 6.0) / 3.0
         return interpolate_color("#FFFF99", "#FFD700", factor)
 
     # Orange: 9.0-15.0  (above EPA annual NAAQS of 9.0)
@@ -816,18 +870,18 @@ def pm25_info(pm25: float) -> dict:
     """Get category info on a standards-anchored scale (WHO 5 / EPA 9 / WHO 15)."""
     color = pm25_color_gradient(pm25)
 
-    if pm25 <= 5.0:
+    if pm25 <= 6.0:
         return {
             "category": "Good",
             "color": color,
-            "aqi_range": "0–5",
-            "health_msg": "At or below the WHO annual guideline (5 µg/m³). Air quality is good.",
+            "aqi_range": "0–6",
+            "health_msg": "Air quality is good (at or near the WHO annual guideline of 5 µg/m³).",
         }
     elif pm25 <= 9.0:
         return {
             "category": "Moderate",
             "color": color,
-            "aqi_range": "5–9",
+            "aqi_range": "6–9",
             "health_msg": "Above the WHO annual guideline; within the U.S. EPA annual standard (9 µg/m³).",
         }
     elif pm25 <= 15.0:
@@ -896,8 +950,8 @@ async def get_city_predictions(city: str):
     try:
         weather = await fetch_weather(*city_config["center"])
     except Exception as e:
-        print(f"Weather API error for {city}: {e}. Using fallback values.")
-        weather = dict(WEATHER_FALLBACK)
+        print(f"Weather API error for {city}: {e}. Using last-known/fallback values.")
+        weather = _weather_fallback()
 
     avg_pm25 = round(float(np.mean([t["pm25"] for t in tracts])), 2)
 
@@ -1069,6 +1123,68 @@ async def get_metrics():
         return {"visits": 0}
 
 
+def _grid_matches(snap: dict | None, n: int) -> bool:
+    """A cached per-tract grid is reusable only if it was built for the same
+    tract list length (the tract lookup is static, so length is a sufficient key)."""
+    if not snap or not snap.get("usable"):
+        return False
+    feats = snap.get("features") or {}
+    arr = next(iter(feats.values()), None)
+    return arr is not None and len(arr) == n
+
+
+async def _get_weather_grid(lats, lons) -> dict | None:
+    """Cached per-tract daily-mean weather grid (TTL 6h + disk snapshot).
+    On refetch failure, serves the stale grid (daily means age gracefully) and
+    backs off 30 min — never hammers a quota-exhausted API every cycle."""
+    global _wgrid_cache
+    now = datetime.now(timezone.utc)
+    cached = _wgrid_cache.get("data")
+    if _grid_matches(cached, len(lats)) and now < _wgrid_cache.get("expires", datetime.min.replace(tzinfo=timezone.utc)):
+        return cached
+    try:
+        from backend.airquality import fetch_weather_grid
+        snap = await fetch_weather_grid(lats, lons)
+    except Exception as e:
+        print(f"[weather-grid] fetch raised: {e}")
+        snap = None
+    if snap and snap.get("usable"):
+        _wgrid_cache = {"data": snap, "expires": now + timedelta(minutes=OPENMETEO_GRID_TTL_MIN)}
+        _save_snapshot(WEATHER_GRID_SNAPSHOT_PATH, snap)
+        return snap
+    if _grid_matches(cached, len(lats)):
+        print("[weather-grid] refetch failed — serving stale cached grid (backoff 30 min)")
+        _wgrid_cache["expires"] = now + timedelta(minutes=30)
+        return cached
+    return None
+
+
+async def _get_aq_snapshot(lats, lons, include_met: bool) -> dict | None:
+    """Cached per-tract CAMS air-quality snapshot (TTL 6h + disk snapshot,
+    stale-on-failure). Was refetched EVERY 30-min cycle before — the main
+    Open-Meteo quota burner."""
+    global _aq_cache
+    now = datetime.now(timezone.utc)
+    cached = _aq_cache.get("data")
+    if _grid_matches(cached, len(lats)) and now < _aq_cache.get("expires", datetime.min.replace(tzinfo=timezone.utc)):
+        return cached
+    try:
+        from backend.airquality import fetch_airquality_snapshot
+        snap = await fetch_airquality_snapshot(lats, lons, include_met=include_met)
+    except Exception as e:
+        print(f"[airquality] fetch raised: {e}")
+        snap = None
+    if snap and snap.get("usable"):
+        _aq_cache = {"data": snap, "expires": now + timedelta(minutes=OPENMETEO_GRID_TTL_MIN)}
+        _save_snapshot(AQ_SNAPSHOT_PATH, snap)
+        return snap
+    if _grid_matches(cached, len(lats)):
+        print("[airquality] refetch failed — serving stale cached snapshot (backoff 30 min)")
+        _aq_cache["expires"] = now + timedelta(minutes=30)
+        return cached
+    return None
+
+
 async def _compute_texas_predictions() -> dict:
     """Heavy path: actually compute predictions for every TX tract, update cache + snapshot."""
     if state.get("bundle") is None:
@@ -1082,50 +1198,47 @@ async def _compute_texas_predictions() -> dict:
 
     print(f"Generating predictions for all {len(lookup)} Texas tracts (vectorized)...")
     # Single-point weather is the statewide FALLBACK + the display payload;
-    # the model gets per-tract gridded daily means below.
+    # the model gets per-tract gridded daily means below. On failure, reuse the
+    # last successful fetch (NEVER bare medians-as-display — that once rendered
+    # the 20.2°C training median as "20°F" on every tract).
     try:
         weather = await fetch_weather(30.2672, -97.7431)  # Austin (display/fallback)
     except Exception as e:
-        print(f"Weather API error: {e}. Using fallback values.")
-        weather = dict(WEATHER_FALLBACK)
+        print(f"Weather API error: {e}. Using last-known/fallback values.")
+        weather = _weather_fallback()
 
     temporal = get_temporal("America/Chicago")
 
     # Work on a COPY so concurrent per-city requests never see half-updated columns.
     lookup_reset = lookup.reset_index(drop=True)
 
-    # ── Per-tract DAILY-MEAN weather (training-consistent) ──────────────────
+    # ── Per-tract DAILY-MEAN weather (training-consistent, CACHED 6h) ───────
     # Training weather is per-sensor-location daily aggregates (°C, %, surface
-    # hPa, m/s, mm). The old code fed ONE Austin instantaneous reading (in °F /
-    # mph / MSL!) to all 6,896 tracts — both spatially wrong and unit-wrong.
-    # Now: one batched Open-Meteo call over the 0.5° grid, applied per tract,
-    # including the per-tract interaction features.
+    # hPa, m/s, mm). One batched Open-Meteo call over a coarse grid, cached with
+    # a 6h TTL + disk snapshot (daily means don't change every 30 min, and
+    # refetching per cycle exhausted the free API quota).
     weather_grid_cells = 0
-    try:
-        from backend.airquality import fetch_weather_grid
-        wsnap = await fetch_weather_grid(
-            lookup_reset["lat"].values, lookup_reset["lon"].values)
-        if wsnap.get("usable"):
-            lookup_reset = lookup_reset.copy()
-            for f in ("temperature", "humidity", "pressure", "wind_speed", "precipitation"):
-                vals = wsnap["features"].get(f)
-                if vals is not None:
-                    # None -> NaN; run_predictions_batch backfills with the
-                    # statewide scalar, then the training median.
-                    lookup_reset[f] = pd.Series(vals, dtype="float64").values
-            # Per-tract interactions (must mirror training formulas exactly).
-            lookup_reset["temp_x_humidity"] = (
-                lookup_reset["temperature"] * lookup_reset["humidity"] / 100.0)
-            lookup_reset["wind_x_temp"] = (
-                lookup_reset["wind_speed"] * lookup_reset["temperature"] / 100.0)
-            weather_grid_cells = int(wsnap.get("n_cells", 0))
-            print(f"Gridded daily-mean weather applied ({weather_grid_cells} cells): "
-                  f"T median={lookup_reset['temperature'].median():.1f}°C, "
-                  f"wind median={lookup_reset['wind_speed'].median():.1f} m/s")
-        else:
-            print("Weather grid unusable — statewide single-point fallback in effect.")
-    except Exception as e:
-        print(f"Weather grid failed ({e}); statewide single-point fallback in effect.")
+    wsnap = await _get_weather_grid(
+        lookup_reset["lat"].values, lookup_reset["lon"].values)
+    if wsnap is not None:
+        lookup_reset = lookup_reset.copy()
+        for f in ("temperature", "humidity", "pressure", "wind_speed", "precipitation"):
+            vals = wsnap["features"].get(f)
+            if vals is not None:
+                # None -> NaN; run_predictions_batch backfills with the
+                # statewide scalar, then the training median.
+                lookup_reset[f] = pd.Series(vals, dtype="float64").values
+        # Per-tract interactions (must mirror training formulas exactly).
+        lookup_reset["temp_x_humidity"] = (
+            lookup_reset["temperature"] * lookup_reset["humidity"] / 100.0)
+        lookup_reset["wind_x_temp"] = (
+            lookup_reset["wind_speed"] * lookup_reset["temperature"] / 100.0)
+        weather_grid_cells = int(wsnap.get("n_cells", 0))
+        print(f"Gridded daily-mean weather applied ({weather_grid_cells} cells): "
+              f"T median={lookup_reset['temperature'].median():.1f}°C, "
+              f"wind median={lookup_reset['wind_speed'].median():.1f} m/s")
+    else:
+        print("Weather grid unavailable — statewide single-point fallback in effect.")
 
     # ── Live neighbor-feature recompute (the fix for scrambled predictions) ──
     # The multi-radius neighbor PM features (~dominant model signal) MUST reflect
@@ -1189,31 +1302,30 @@ async def _compute_texas_predictions() -> dict:
             lookup_reset = lookup_reset.copy()
             lookup_reset["hms_smoke"] = 0
 
-    # ── Live CAMS air-quality + met PBL-proxy features ──────────────────────
-    # aod/cams_pm25/dust/shortwave/et0/cloud_cover per tract, computed the SAME
-    # way as training (daily-mean of today's hourly AOD; today's daily met). Done
-    # once per cycle, batched by grid cell (~50-100 calls). Missing values fall
-    # back to the training median via run_predictions_batch's feature_fill.
+    # ── Live CAMS air-quality (+ met PBL proxies only if the model uses them) ──
+    # aod/cams_pm25 per tract, computed the SAME way as training (daily-mean of
+    # today's hourly AOD), CACHED 6h + disk snapshot. The met call (shortwave/
+    # et0/cloud_cover) is skipped for v6 — those features were dropped, and the
+    # 254-location met call every cycle was the main api.open-meteo.com quota
+    # burner. Missing values fall back to the training median fill.
     aq_feats = {"aod", "cams_pm25", "dust", "shortwave", "et0", "cloud_cover"}
     if aq_feats & features_needed:
-        try:
-            from backend.airquality import fetch_airquality_snapshot
-            snap = await fetch_airquality_snapshot(
-                lookup_reset["lat"].values, lookup_reset["lon"].values)
-            if snap.get("usable"):
-                lookup_reset = lookup_reset.copy()
-                applied = []
-                for f in aq_feats:
-                    vals = snap["features"].get(f)
-                    if vals is not None:
-                        # leave None -> NaN so run_predictions_batch fills with training median
-                        lookup_reset[f] = pd.Series(vals, dtype="float64").values
-                        applied.append(f)
-                print(f"Air-quality/met features applied ({snap['n_cells']} cells): {applied}")
-            else:
-                print("No usable live air-quality data — features will use training-median fill.")
-        except Exception as e:
-            print(f"Air-quality feature fetch failed ({e}); using training-median fill.")
+        met_needed = bool({"shortwave", "et0", "cloud_cover"} & features_needed)
+        snap = await _get_aq_snapshot(
+            lookup_reset["lat"].values, lookup_reset["lon"].values,
+            include_met=met_needed)
+        if snap is not None:
+            lookup_reset = lookup_reset.copy()
+            applied = []
+            for f in aq_feats & features_needed:
+                vals = snap["features"].get(f)
+                if vals is not None:
+                    # leave None -> NaN so run_predictions_batch fills with training median
+                    lookup_reset[f] = pd.Series(vals, dtype="float64").values
+                    applied.append(f)
+            print(f"Air-quality features applied ({snap['n_cells']} cells): {applied}")
+        else:
+            print("No usable live air-quality data — features will use training-median fill.")
 
     # Vectorized batch prediction — single model.predict() call for all 6,900+ tracts
     pm25_array = await asyncio.to_thread(run_predictions_batch, lookup_reset, weather, temporal)
@@ -1361,11 +1473,27 @@ async def get_tract(geoid: str):
             break
 
     # Local CURRENT weather — display only (°F/mph), so the panel matches what
-    # the user sees on weather sites for THIS location.
-    try:
-        weather = await fetch_weather(float(row["lat"]), float(row["lon"]))
-    except Exception:
-        weather = dict(WEATHER_FALLBACK)
+    # the user sees on weather sites for THIS location. Cached per 0.5° cell for
+    # 30 min: every click was a fresh API call, and during a quota outage every
+    # click returned the same raw fallback dict (the "20°F everywhere" bug).
+    cell = (round(float(row["lat"]) * 2) / 2, round(float(row["lon"]) * 2) / 2)
+    now_utc = datetime.now(timezone.utc)
+    cached_w = _click_weather_cache.get(cell)
+    if cached_w and now_utc < cached_w["expires"]:
+        weather = cached_w["weather"]
+    else:
+        try:
+            weather = await fetch_weather(float(row["lat"]), float(row["lon"]))
+            if len(_click_weather_cache) > 400:
+                _click_weather_cache.clear()
+            _click_weather_cache[cell] = {
+                "weather": weather,
+                "expires": now_utc + timedelta(minutes=CLICK_WEATHER_TTL_MIN),
+            }
+        except Exception:
+            # Quota/outage: last-known-good statewide weather, NEVER the bare
+            # model-unit medians (those render as "20.2 °F").
+            weather = _weather_fallback()
     display_weather = weather.get("display", weather)
 
     # CONSISTENCY: the tract's PM2.5 comes from the SAME texas-wide batch the

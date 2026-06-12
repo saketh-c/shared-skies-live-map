@@ -21,18 +21,22 @@ import numpy as np
 
 AQ_URL = "https://air-quality-api.open-meteo.com/v1/air-quality"
 MET_URL = "https://api.open-meteo.com/v1/forecast"
-GRID_DEG = 0.5  # cell size for binning tracts
+GRID_DEG = 0.5  # cell size for binning tracts (CAMS air-quality — matches training)
+# Weather grid is COARSER (1.0° ≈ ~70 cells vs 254): daily-mean weather varies
+# smoothly, and Open-Meteo weighs multi-location calls per location — the free
+# quota (~10k/day) cannot afford 254-cell refetches.
+WEATHER_GRID_DEG = 1.0
 
 
-def _cell_key(lat: float, lon: float) -> tuple:
-    return (round(lat / GRID_DEG) * GRID_DEG, round(lon / GRID_DEG) * GRID_DEG)
+def _cell_key(lat: float, lon: float, grid_deg: float = GRID_DEG) -> tuple:
+    return (round(lat / grid_deg) * grid_deg, round(lon / grid_deg) * grid_deg)
 
 
-def build_cells(lats, lons):
+def build_cells(lats, lons, grid_deg: float = GRID_DEG):
     """Map tracts to coarse grid cells. Returns (cell_list, tract_cell_index)
     where cell_list is unique (lat, lon) cell centers and tract_cell_index[i] is
     the index into cell_list for tract i."""
-    keys = [_cell_key(float(la), float(lo)) for la, lo in zip(lats, lons)]
+    keys = [_cell_key(float(la), float(lo), grid_deg) for la, lo in zip(lats, lons)]
     uniq = {}
     order = []
     idx = np.empty(len(keys), dtype=np.int32)
@@ -55,10 +59,15 @@ def _daily_mean_today(times, values):
     return float(np.mean(vals)) if vals else None
 
 
-async def fetch_cell_features(cell_centers) -> dict:
-    """Fetch air-quality + met for each grid cell. Returns
-    {cell_index: {aod, cams_pm25, dust, shortwave, et0, cloud_cover}} (None where
-    unavailable). Batched multi-location calls to stay within rate limits."""
+async def fetch_cell_features(cell_centers, include_met: bool = True) -> dict:
+    """Fetch air-quality (and optionally met) for each grid cell. Returns
+    {cell_index: {aod, cams_pm25, dust[, shortwave, et0, cloud_cover]}} (None
+    where unavailable). Batched multi-location calls to stay within rate limits.
+
+    include_met=False skips the api.open-meteo.com met call entirely — the v6
+    model dropped shortwave/et0/cloud_cover, and that 254-location call per
+    cycle was the main consumer of the free daily quota.
+    """
     if not cell_centers:
         return {}
     lats = ",".join(f"{c[0]:.4f}" for c in cell_centers)
@@ -83,31 +92,36 @@ async def fetch_cell_features(cell_centers) -> dict:
                     out[i]["aod"] = _daily_mean_today(t, h.get("aerosol_optical_depth", []))
                     out[i]["cams_pm25"] = _daily_mean_today(t, h.get("pm2_5", []))
                     out[i]["dust"] = _daily_mean_today(t, h.get("dust", []))
+            else:
+                print(f"[airquality] AQ HTTP {r.status_code}: {r.text[:160]}")
     except Exception as e:
         print(f"[airquality] AQ fetch error: {e}")
 
-    # 2. Met forecast (today's daily aggregates).
-    try:
-        async with httpx.AsyncClient(timeout=60.0) as client:
-            r = await client.get(MET_URL, params={
-                "latitude": lats, "longitude": lons,
-                "daily": "shortwave_radiation_sum,et0_fao_evapotranspiration,cloud_cover_mean",
-                "forecast_days": 1, "timezone": "UTC",
-            })
-            if r.status_code == 200:
-                payload = r.json()
-                if isinstance(payload, dict):
-                    payload = [payload]
-                for i, loc in enumerate(payload):
-                    d = loc.get("daily", {})
-                    sw = d.get("shortwave_radiation_sum", [None])
-                    et = d.get("et0_fao_evapotranspiration", [None])
-                    cc = d.get("cloud_cover_mean", [None])
-                    out[i]["shortwave"] = sw[0] if sw else None
-                    out[i]["et0"] = et[0] if et else None
-                    out[i]["cloud_cover"] = cc[0] if cc else None
-    except Exception as e:
-        print(f"[airquality] met fetch error: {e}")
+    # 2. Met forecast (today's daily aggregates) — only when the model uses them.
+    if include_met:
+        try:
+            async with httpx.AsyncClient(timeout=60.0) as client:
+                r = await client.get(MET_URL, params={
+                    "latitude": lats, "longitude": lons,
+                    "daily": "shortwave_radiation_sum,et0_fao_evapotranspiration,cloud_cover_mean",
+                    "forecast_days": 1, "timezone": "UTC",
+                })
+                if r.status_code == 200:
+                    payload = r.json()
+                    if isinstance(payload, dict):
+                        payload = [payload]
+                    for i, loc in enumerate(payload):
+                        d = loc.get("daily", {})
+                        sw = d.get("shortwave_radiation_sum", [None])
+                        et = d.get("et0_fao_evapotranspiration", [None])
+                        cc = d.get("cloud_cover_mean", [None])
+                        out[i]["shortwave"] = sw[0] if sw else None
+                        out[i]["et0"] = et[0] if et else None
+                        out[i]["cloud_cover"] = cc[0] if cc else None
+                else:
+                    print(f"[airquality] met HTTP {r.status_code}: {r.text[:160]}")
+        except Exception as e:
+            print(f"[airquality] met fetch error: {e}")
 
     return out
 
@@ -123,7 +137,7 @@ async def fetch_weather_grid(lats, lons) -> dict:
 
     Returns {'features': {feat: [per-tract values or None]}, 'usable': bool}.
     """
-    cells, idx = build_cells(lats, lons)
+    cells, idx = build_cells(lats, lons, grid_deg=WEATHER_GRID_DEG)
     feat_names = ["temperature", "humidity", "pressure", "wind_speed", "precipitation"]
     per_tract = {f: [None] * len(lats) for f in feat_names}
     if not cells:
@@ -174,13 +188,14 @@ async def fetch_weather_grid(lats, lons) -> dict:
     return {"features": per_tract, "usable": usable, "n_cells": len(cells)}
 
 
-async def fetch_airquality_snapshot(lats, lons) -> dict:
+async def fetch_airquality_snapshot(lats, lons, include_met: bool = True) -> dict:
     """Build a per-tract feature snapshot for all tracts. Returns
     {'features': {feat: [per-tract values]}, 'fetched_at', 'n_cells', 'usable'}.
     Values are None where the API didn't return them (backend fills with the
-    training median)."""
+    training median). include_met=False skips the met call (v6 dropped those
+    features) to conserve the api.open-meteo.com daily quota."""
     cells, idx = build_cells(lats, lons)
-    cell_feats = await fetch_cell_features(cells)
+    cell_feats = await fetch_cell_features(cells, include_met=include_met)
     feat_names = ["aod", "cams_pm25", "dust", "shortwave", "et0", "cloud_cover"]
     per_tract = {f: [None] * len(lats) for f in feat_names}
     usable = False

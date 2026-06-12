@@ -24,13 +24,13 @@ const TRANSLATIONS = {
       levels: {
         good: {
           name: "Good",
-          range: "0 – 5 µg/m³",
-          description: "At or below the WHO annual air-quality guideline (5 µg/m³). No health concerns for anyone — ideal for outdoor activities.",
+          range: "0 – 6 µg/m³",
+          description: "Clean air at or near the WHO annual guideline (5 µg/m³). No health concerns for anyone — ideal for outdoor activities.",
           who: "Safe for everyone",
         },
         moderate: {
           name: "Moderate",
-          range: "5 – 9 µg/m³",
+          range: "6 – 9 µg/m³",
           description: "Above the WHO annual guideline but within the U.S. EPA annual standard (9 µg/m³). Most people experience no effects; a few unusually sensitive individuals may notice minor symptoms.",
           who: "Unusually sensitive people: consider reducing prolonged outdoor exertion",
         },
@@ -147,13 +147,13 @@ const TRANSLATIONS = {
       levels: {
         good: {
           name: "Bueno",
-          range: "0 – 5 µg/m³",
-          description: "Igual o por debajo de la guía anual de calidad del aire de la OMS (5 µg/m³). Sin preocupaciones de salud para nadie — ideal para actividades al aire libre.",
+          range: "0 – 6 µg/m³",
+          description: "Aire limpio, igual o cercano a la guía anual de la OMS (5 µg/m³). Sin preocupaciones de salud para nadie — ideal para actividades al aire libre.",
           who: "Seguro para todos",
         },
         moderate: {
           name: "Moderado",
-          range: "5 – 9 µg/m³",
+          range: "6 – 9 µg/m³",
           description: "Por encima de la guía anual de la OMS pero dentro del estándar anual de la EPA de EE. UU. (9 µg/m³). La mayoría no experimenta efectos; algunos individuos inusualmente sensibles pueden notar síntomas menores.",
           who: "Personas sensibles: considere reducir el esfuerzo prolongado al aire libre",
         },
@@ -264,13 +264,13 @@ const CATEGORY_MAP = {
 
 const HEALTH_MSG = {
   en: {
-    Good: "At or below the WHO annual guideline (5 µg/m³). Air quality is good.",
+    Good: "Air quality is good (at or near the WHO annual guideline of 5 µg/m³).",
     Moderate: "Above the WHO annual guideline; within the U.S. EPA annual standard (9 µg/m³).",
     Elevated: "Above the U.S. EPA annual PM2.5 standard (9 µg/m³). Sensitive groups should take care.",
     High: "⚠️ Above the WHO 24-hour guideline (15 µg/m³). Everyone should limit prolonged outdoor exposure.",
   },
   es: {
-    Good: "Igual o por debajo de la guía anual de la OMS (5 µg/m³). La calidad del aire es buena.",
+    Good: "La calidad del aire es buena (igual o cercana a la guía anual de la OMS de 5 µg/m³).",
     Moderate: "Por encima de la guía anual de la OMS; dentro del estándar anual de la EPA de EE. UU. (9 µg/m³).",
     Elevated: "Por encima del estándar anual de PM2.5 de la EPA (9 µg/m³). Los grupos sensibles deben tener cuidado.",
     High: "⚠️ Por encima de la guía de 24 horas de la OMS (15 µg/m³). Todos deberían limitar la exposición prolongada al aire libre.",
