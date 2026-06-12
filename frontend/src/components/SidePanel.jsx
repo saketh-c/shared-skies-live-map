@@ -276,8 +276,8 @@ export default function SidePanel({
           {localWeather && (
             <div className="weather-source-note">
               {lang === "es"
-                ? "Clima en tiempo real para las coordenadas de este tracto"
-                : "Live weather fetched for this tract's coordinates"}
+                ? "Condiciones actuales cerca de este tracto · se actualizan cada hora"
+                : "Current conditions near this tract · updates hourly"}
             </div>
           )}
           <EJContext tract={selectedTract} lang={lang} />

@@ -188,6 +188,65 @@ async def fetch_weather_grid(lats, lons) -> dict:
     return {"features": per_tract, "usable": usable, "n_cells": len(cells)}
 
 
+def conditions_cell_key(lat: float, lon: float) -> str:
+    """String cell key for the CURRENT-CONDITIONS grid (1.0°). String keys keep
+    the snapshot JSON-serializable and let arbitrary points (tract clicks, city
+    centers) look up their cell directly."""
+    k = _cell_key(float(lat), float(lon), WEATHER_GRID_DEG)
+    return f"{k[0]:.1f},{k[1]:.1f}"
+
+
+async def fetch_conditions_grid(lats, lons) -> dict:
+    """Fetch CURRENT conditions per 1.0° cell, in DISPLAY UNITS (°F, mph,
+    sea-level hPa) — UI-only, never model input.
+
+    One batched multi-location call per refresh (hourly TTL upstream) replaces
+    the old one-API-call-per-tract-click design, which both burned quota and
+    froze to a single static fallback during the quota outage (the
+    '68°F everywhere' report).
+
+    Returns {'by_key': {cell_key: {temperature, humidity, pressure, wind_speed}},
+             'n_cells', 'usable', 'fetched_at'}.
+    """
+    cells, _ = build_cells(lats, lons, grid_deg=WEATHER_GRID_DEG)
+    out = {"by_key": {}, "n_cells": len(cells), "usable": False,
+           "fetched_at": datetime.now(timezone.utc).isoformat()}
+    if not cells:
+        return out
+    lat_s = ",".join(f"{c[0]:.4f}" for c in cells)
+    lon_s = ",".join(f"{c[1]:.4f}" for c in cells)
+    try:
+        async with httpx.AsyncClient(timeout=60.0) as client:
+            r = await client.get(MET_URL, params={
+                "latitude": lat_s, "longitude": lon_s,
+                "current": "temperature_2m,relative_humidity_2m,pressure_msl,wind_speed_10m",
+                "temperature_unit": "fahrenheit",
+                "wind_speed_unit": "mph",
+                "timezone": "UTC",
+            })
+            if r.status_code != 200:
+                print(f"[conditions] HTTP {r.status_code}: {r.text[:160]}")
+                return out
+            payload = r.json()
+            if isinstance(payload, dict):
+                payload = [payload]
+            for i, loc in enumerate(payload):
+                cur = loc.get("current", {})
+                if cur.get("temperature_2m") is None:
+                    continue
+                key = conditions_cell_key(cells[i][0], cells[i][1])
+                out["by_key"][key] = {
+                    "temperature": round(float(cur["temperature_2m"]), 1),
+                    "humidity":    round(float(cur.get("relative_humidity_2m") or 0), 1),
+                    "pressure":    round(float(cur.get("pressure_msl") or 1013.0), 1),
+                    "wind_speed":  round(float(cur.get("wind_speed_10m") or 0), 1),
+                }
+            out["usable"] = len(out["by_key"]) > 0
+    except Exception as e:
+        print(f"[conditions] fetch error: {e}")
+    return out
+
+
 async def fetch_airquality_snapshot(lats, lons, include_met: bool = True) -> dict:
     """Build a per-tract feature snapshot for all tracts. Returns
     {'features': {feat: [per-tract values]}, 'fetched_at', 'n_cells', 'usable'}.
