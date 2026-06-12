@@ -64,7 +64,9 @@ export default function App() {
       if (!res.ok) throw new Error(`API error ${res.status}: ${await res.text()}`);
       const data = await res.json();
       setPredictions(data);
-      setLastUpdated(new Date());
+      // Server-side generation time, not client fetch time — predictions can be
+      // up to 30 min older than the fetch (stale-while-revalidate cache).
+      setLastUpdated(data.generated_at ? new Date(data.generated_at) : new Date());
       setError(null);
     } catch (e) {
       console.error("Failed to fetch predictions:", e);

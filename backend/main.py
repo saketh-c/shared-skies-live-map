@@ -9,6 +9,7 @@ Start with:
 
 import asyncio
 import json
+import math
 import os
 from contextlib import asynccontextmanager
 from datetime import datetime, timedelta, timezone
@@ -38,11 +39,11 @@ HMS_SNAPSHOT_PATH = os.path.join(SNAPSHOTS_DIR, "hms_smoke_latest.json")
 PURPLEAIR_SNAPSHOT_PATH = os.path.join(SNAPSHOTS_DIR, "purpleair_sensors_latest.json")
 MODELS_DIR = os.path.join(ROOT, "models")
 
-# Live PurpleAir: the model's dominant feature (nbr_pm25_50km) must be computed
-# from same-day live readings to match training. TTL is long (3h) because the
-# model is daily-granularity and the live API is points-billed — 8 pulls/day is
-# plenty fresh and stays cheap (~$13/mo). Set PURPLEAIR_API_KEY in Render env.
-PURPLEAIR_CACHE_TTL_MIN = int(os.environ.get("PURPLEAIR_CACHE_TTL_MIN", "360"))
+# Live PurpleAir: the model's dominant feature (nbr_pm25_*) must be computed
+# from same-day live readings to match training. TTL 60 min: with the 24h-mean
+# field a 1-hour cadence tracks events closely while staying cheap (24 small
+# bbox pulls/day). Set PURPLEAIR_API_KEY in Render env to override the key.
+PURPLEAIR_CACHE_TTL_MIN = int(os.environ.get("PURPLEAIR_CACHE_TTL_MIN", "60"))
 # Clip dist_to_nearest_sensor to the training-network max so rural tracts (which
 # can be 195km from any sensor vs the 164km training max) don't push the tree
 # models out of distribution.
@@ -483,26 +484,65 @@ if os.path.exists(STATIC_DIR):
 
 # ── Utilities ─────────────────────────────────────────────────────────────────
 
+# Weather fallback = exact TRAINING MEDIANS (and training units: °C, %, surface
+# hPa, m/s, mm). The old fallback {72, 55, 1013, 8} was °F/MSL-shaped — values
+# the model never saw in training (temperature median is 20.2 °C; pressure is
+# SURFACE pressure ~991 hPa, not sea-level 1013).
+WEATHER_FALLBACK = {
+    "temperature": 20.2, "humidity": 65.0, "pressure": 991.3,
+    "wind_speed": 5.5, "precipitation": 0.0,
+}
+
+
 async def fetch_weather(lat: float, lon: float) -> dict:
-    """Fetch current weather from Open-Meteo (free, no API key)."""
+    """Fetch weather from Open-Meteo (free, no API key) for one location.
+
+    Returns MODEL-UNIT values at the top level — TODAY'S DAILY MEANS in the
+    exact units the model trained on (temperature °C, humidity %, SURFACE
+    pressure hPa, wind m/s, precipitation mm/day) — plus a `display` sub-dict
+    with CURRENT instantaneous conditions in user-facing units (°F, mph,
+    sea-level hPa) for the UI. The previous version fed the model current °F /
+    mph / MSL-pressure values: all three outside the training distribution.
+    """
     url = (
         "https://api.open-meteo.com/v1/forecast"
         f"?latitude={lat}&longitude={lon}"
-        "&current=temperature_2m,relative_humidity_2m,pressure_msl,wind_speed_10m"
-        "&temperature_unit=fahrenheit"
-        "&wind_speed_unit=mph"
-        "&timezone=America%2FChicago"
+        "&current=temperature_2m,relative_humidity_2m,pressure_msl,wind_speed_10m,precipitation"
+        "&daily=temperature_2m_mean,relative_humidity_2m_mean,surface_pressure_mean,"
+        "wind_speed_10m_mean,precipitation_sum"
+        "&wind_speed_unit=ms"
+        "&forecast_days=1"
+        "&timezone=UTC"
     )
     async with httpx.AsyncClient(timeout=10.0) as client:
         resp = await client.get(url)
         resp.raise_for_status()
-        cur = resp.json()["current"]
-    return {
-        "temperature": round(cur["temperature_2m"], 1),
-        "humidity":    round(cur["relative_humidity_2m"], 1),
-        "pressure":    round(cur["pressure_msl"], 1),
-        "wind_speed":  round(cur["wind_speed_10m"], 1),
+        body = resp.json()
+    cur = body.get("current", {})
+    daily = body.get("daily", {})
+
+    def d0(key, fallback):
+        v = daily.get(key) or []
+        return float(v[0]) if v and v[0] is not None else fallback
+
+    model = {
+        "temperature":   round(d0("temperature_2m_mean", WEATHER_FALLBACK["temperature"]), 1),
+        "humidity":      round(d0("relative_humidity_2m_mean", WEATHER_FALLBACK["humidity"]), 1),
+        "pressure":      round(d0("surface_pressure_mean", WEATHER_FALLBACK["pressure"]), 1),
+        "wind_speed":    round(d0("wind_speed_10m_mean", WEATHER_FALLBACK["wind_speed"]), 2),
+        "precipitation": round(d0("precipitation_sum", 0.0), 2),
     }
+    # Display: CURRENT conditions in the units users compare against weather
+    # sites (°F, mph, sea-level pressure) — what the side panel shows.
+    t_c = cur.get("temperature_2m")
+    ws_ms = cur.get("wind_speed_10m")
+    model["display"] = {
+        "temperature": round(t_c * 9 / 5 + 32, 1) if t_c is not None else round(model["temperature"] * 9 / 5 + 32, 1),
+        "humidity":    round(cur.get("relative_humidity_2m", model["humidity"]), 1),
+        "pressure":    round(cur.get("pressure_msl", 1013.0), 1),
+        "wind_speed":  round(ws_ms * 2.23694, 1) if ws_ms is not None else round(model["wind_speed"] * 2.23694, 1),
+    }
+    return model
 
 
 def get_temporal(tz: str = "America/Chicago") -> dict:
@@ -549,16 +589,18 @@ def run_prediction(tract_row: pd.Series, weather: dict, temporal: dict) -> float
 
 
 def _compute_v3_shared(weather: dict, temporal: dict) -> dict:
-    """Compute all derived features that are shared across tracts (weather + temporal)."""
+    """Compute all derived features that are shared across tracts (weather + temporal).
+    Defaults are the training medians in TRAINING UNITS (°C, %, surface hPa, m/s)."""
     month = temporal.get("month", 1)
     dow = temporal.get("dow", 0)
     doy = temporal.get("day_of_year", 1)
-    temp = weather.get("temperature", 72)
-    hum = weather.get("humidity", 55)
-    ws = weather.get("wind_speed", 8)
+    temp = weather.get("temperature", WEATHER_FALLBACK["temperature"])
+    hum = weather.get("humidity", WEATHER_FALLBACK["humidity"])
+    ws = weather.get("wind_speed", WEATHER_FALLBACK["wind_speed"])
     precip = weather.get("precipitation", 0)
 
     shared = {**weather, **temporal}
+    shared.pop("display", None)  # UI-only sub-dict, never a model feature
     shared["precipitation"] = precip
     # Cyclical
     shared["month_sin"] = np.sin(2 * np.pi * month / 12)
@@ -668,12 +710,20 @@ def run_predictions_batch(df: pd.DataFrame, weather: dict, temporal: dict) -> np
     # on. bundle['feature_fill'] holds the training medians (and hms_smoke=0).
     feature_fill = bundle.get("feature_fill", {})
 
+    # Precedence: per-tract df column FIRST (live gridded weather / neighbors /
+    # HMS / AOD vary by tract), then the shared scalar (single-point weather +
+    # temporal), then the training-median fill. df-first matters: the texas path
+    # now writes per-tract weather columns that must not be shadowed by the
+    # single shared scalar.
     for i, feat in enumerate(features):
         fill = float(feature_fill.get(feat, 0.0))
-        if feat in shared:
+        if feat in df.columns:
+            col = pd.to_numeric(df[feat], errors="coerce")
+            if feat in shared:
+                col = col.fillna(float(shared[feat]))
+            X[:, i] = col.fillna(fill).values
+        elif feat in shared:
             X[:, i] = shared[feat]
-        elif feat in df.columns:
-            X[:, i] = pd.to_numeric(df[feat], errors="coerce").fillna(fill).values
         else:
             X[:, i] = fill  # feature entirely absent -> training fill, not 0
 
@@ -737,6 +787,29 @@ def pm25_color_gradient(pm25: float) -> str:
     else:
         factor = min(1.0, (pm25 - 15.0) / 40.0)
         return interpolate_color("#FF6B6B", "#800000", factor)
+
+
+# U.S. EPA PM2.5 AQI breakpoints (May 2024 revision). Used to show an
+# AQI-equivalent next to our µg/m³ so users can compare directly with apps that
+# display AQI (PurpleAir map, AirNow). (C_lo, C_hi, AQI_lo, AQI_hi)
+_EPA_AQI_BREAKPOINTS = [
+    (0.0,   9.0,   0,   50),
+    (9.1,   35.4,  51,  100),
+    (35.5,  55.4,  101, 150),
+    (55.5,  125.4, 151, 200),
+    (125.5, 225.4, 201, 300),
+    (225.5, 325.4, 301, 500),
+]
+
+
+def pm25_to_epa_aqi(pm25: float) -> int:
+    """Convert PM2.5 (µg/m³) to the U.S. EPA AQI (2024 breakpoints)."""
+    c = max(0.0, math.floor(float(pm25) * 10) / 10)  # EPA truncates to 0.1
+    for c_lo, c_hi, a_lo, a_hi in _EPA_AQI_BREAKPOINTS:
+        if c <= c_hi:
+            c_lo_eff = c_lo if c >= c_lo else 0.0
+            return int(round((a_hi - a_lo) / (c_hi - c_lo_eff) * (c - c_lo_eff) + a_lo))
+    return 500
 
 
 def pm25_info(pm25: float) -> dict:
@@ -806,59 +879,39 @@ async def get_city_predictions(city: str):
     if state.get("tract_lookup") is None:
         raise HTTPException(503, "Tract lookup not loaded. Run pipeline/01_build_tract_lookup.py first.")
 
-    lookup = state["tract_lookup"]
-    city_tracts = lookup[lookup["GEOID"].str.startswith(city_config["fips"])].copy()
+    # CONSISTENCY: slice the texas-wide batch (live neighbors + HMS + AOD +
+    # gridded weather) instead of recomputing here. The old path called
+    # run_predictions_batch with NO live features, so city views predicted from
+    # training medians — blind to same-day events and inconsistent with the map.
+    texas = state.get("cache_texas", {}).get("data")
+    if texas is None:
+        texas = await _compute_texas_predictions()
 
-    if city_tracts.empty:
+    fips = city_config["fips"]
+    tracts = [t for t in texas["tracts"] if str(t["geoid"]).startswith(fips)]
+    if not tracts:
         raise HTTPException(404, f"No tracts found for city: {city}")
 
-    # Fetch weather for the city center
+    # City-center CURRENT weather for display only.
     try:
         weather = await fetch_weather(*city_config["center"])
     except Exception as e:
         print(f"Weather API error for {city}: {e}. Using fallback values.")
-        weather = {"temperature": 72.0, "humidity": 55.0, "pressure": 1013.0, "wind_speed": 8.0}
-
-    temporal = get_temporal(city_config["tz"])
-    tracts = []
-
-    # Vectorized batch prediction — single model.predict() call for all tracts
-    city_tracts_reset = city_tracts.reset_index(drop=True)
-    pm25_array = await asyncio.to_thread(run_predictions_batch, city_tracts_reset, weather, temporal)
-
-    for i, (_, row) in enumerate(city_tracts.iterrows()):
-        pm25 = round(float(pm25_array[i]), 2)
-        info = pm25_info(pm25)
-        tracts.append({
-            "geoid":               row["GEOID"],
-            "lat":                 round(float(row["lat"]), 6),
-            "lon":                 round(float(row["lon"]), 6),
-            "pm25":                pm25,
-            "category":            info["category"],
-            "color":               info["color"],
-            "aqi_range":           info["aqi_range"],
-            "health_msg":          info["health_msg"],
-            "ejf_score":           _safe_float(row.get("ejf_score")),
-            "pct_people_of_color": _safe_float(row.get("pct_people_of_color")),
-            "pct_low_income":      _safe_float(row.get("pct_low_income")),
-            "traffic_proximity":   _safe_float(row.get("traffic_proximity")),
-            "superfund_proximity": _safe_float(row.get("superfund_proximity")),
-            "diesel_pm_proximity": _safe_float(row.get("diesel_pm_proximity")),
-            "pct_ling_isolated":   _safe_float(row.get("pct_ling_isolated")),
-            "county":              str(row.get("CNTY_NAME", city)),
-        })
+        weather = dict(WEATHER_FALLBACK)
 
     avg_pm25 = round(float(np.mean([t["pm25"] for t in tracts])), 2)
 
     result = {
         "city":         city,
         "display_name": city_config["display_name"],
-        "generated_at": now.isoformat(),
-        "expires_at":   (now + timedelta(minutes=30)).isoformat(),
-        "weather":      weather,
+        "generated_at": texas.get("generated_at", now.isoformat()),
+        "expires_at":   texas.get("expires_at", (now + timedelta(minutes=30)).isoformat()),
+        "weather":      weather.get("display", weather),
         "avg_pm25":     avg_pm25,
+        "avg_epa_aqi":  pm25_to_epa_aqi(avg_pm25),
         "avg_info":     pm25_info(avg_pm25),
         "tract_count":  len(tracts),
+        "data_sources": texas.get("data_sources", {}),
         "tracts":       tracts,
     }
 
@@ -947,11 +1000,21 @@ async def _get_public_visit_count() -> int:
 
 @app.get("/api/health")
 async def health():
+    """Health + live-data-source status. The data_sources block makes silent
+    degradation visible: if PurpleAir/HMS/weather quietly fail, predictions
+    fall back to climatology/medians — operators need to SEE that."""
+    pa = _purpleair_cache.get("data") or {}
+    texas = state.get("cache_texas", {}).get("data") or {}
     return {
         "status": "ok",
         "model_loaded": state.get("bundle") is not None,
+        "model_version": (state.get("bundle") or {}).get("version"),
         "lookup_loaded": state.get("tract_lookup") is not None,
         "available_cities": list(CITIES.keys()),
+        "live_purpleair_sensors": len(pa.get("sensors", [])) if pa.get("usable") else 0,
+        "purpleair_fetched_at": pa.get("fetched_at"),
+        "predictions_generated_at": texas.get("generated_at"),
+        "data_sources": texas.get("data_sources", {}),
     }
 
 
@@ -1018,17 +1081,51 @@ async def _compute_texas_predictions() -> dict:
     now = datetime.now(timezone.utc)
 
     print(f"Generating predictions for all {len(lookup)} Texas tracts (vectorized)...")
-    # Use Austin as default weather location (central Texas)
+    # Single-point weather is the statewide FALLBACK + the display payload;
+    # the model gets per-tract gridded daily means below.
     try:
-        weather = await fetch_weather(30.2672, -97.7431)
+        weather = await fetch_weather(30.2672, -97.7431)  # Austin (display/fallback)
     except Exception as e:
         print(f"Weather API error: {e}. Using fallback values.")
-        weather = {"temperature": 72.0, "humidity": 55.0, "pressure": 1013.0, "wind_speed": 8.0}
+        weather = dict(WEATHER_FALLBACK)
 
     temporal = get_temporal("America/Chicago")
 
     # Work on a COPY so concurrent per-city requests never see half-updated columns.
     lookup_reset = lookup.reset_index(drop=True)
+
+    # ── Per-tract DAILY-MEAN weather (training-consistent) ──────────────────
+    # Training weather is per-sensor-location daily aggregates (°C, %, surface
+    # hPa, m/s, mm). The old code fed ONE Austin instantaneous reading (in °F /
+    # mph / MSL!) to all 6,896 tracts — both spatially wrong and unit-wrong.
+    # Now: one batched Open-Meteo call over the 0.5° grid, applied per tract,
+    # including the per-tract interaction features.
+    weather_grid_cells = 0
+    try:
+        from backend.airquality import fetch_weather_grid
+        wsnap = await fetch_weather_grid(
+            lookup_reset["lat"].values, lookup_reset["lon"].values)
+        if wsnap.get("usable"):
+            lookup_reset = lookup_reset.copy()
+            for f in ("temperature", "humidity", "pressure", "wind_speed", "precipitation"):
+                vals = wsnap["features"].get(f)
+                if vals is not None:
+                    # None -> NaN; run_predictions_batch backfills with the
+                    # statewide scalar, then the training median.
+                    lookup_reset[f] = pd.Series(vals, dtype="float64").values
+            # Per-tract interactions (must mirror training formulas exactly).
+            lookup_reset["temp_x_humidity"] = (
+                lookup_reset["temperature"] * lookup_reset["humidity"] / 100.0)
+            lookup_reset["wind_x_temp"] = (
+                lookup_reset["wind_speed"] * lookup_reset["temperature"] / 100.0)
+            weather_grid_cells = int(wsnap.get("n_cells", 0))
+            print(f"Gridded daily-mean weather applied ({weather_grid_cells} cells): "
+                  f"T median={lookup_reset['temperature'].median():.1f}°C, "
+                  f"wind median={lookup_reset['wind_speed'].median():.1f} m/s")
+        else:
+            print("Weather grid unusable — statewide single-point fallback in effect.")
+    except Exception as e:
+        print(f"Weather grid failed ({e}); statewide single-point fallback in effect.")
 
     # ── Live neighbor-feature recompute (the fix for scrambled predictions) ──
     # The multi-radius neighbor PM features (~dominant model signal) MUST reflect
@@ -1129,6 +1226,7 @@ async def _compute_texas_predictions() -> dict:
             "lat":                 round(float(row["lat"]), 6),
             "lon":                 round(float(row["lon"]), 6),
             "pm25":                pm25,
+            "epa_aqi":             pm25_to_epa_aqi(pm25),
             "category":            info["category"],
             "color":               info["color"],
             "aqi_range":           info["aqi_range"],
@@ -1145,21 +1243,38 @@ async def _compute_texas_predictions() -> dict:
 
     avg_pm25 = round(float(np.mean([t["pm25"] for t in tracts])), 2)
 
+    hms_data = _hms_cache.get("data") or {}
     result = {
         "region":       "texas",
         "display_name": "All of Texas",
         "generated_at": now.isoformat(),
         "expires_at":   (now + timedelta(minutes=30)).isoformat(),
-        "weather":      weather,
+        # Display weather (current conditions, °F/mph/MSL) for the UI; the model
+        # consumed per-tract gridded daily means in training units.
+        "weather":      weather.get("display", weather),
         "avg_pm25":     avg_pm25,
+        "avg_epa_aqi":  pm25_to_epa_aqi(avg_pm25),
         "avg_info":     pm25_info(avg_pm25),
         "tract_count":  len(tracts),
+        # Data-source transparency: lets the UI (and operators) see whether the
+        # dominant live signals were actually live for THIS prediction cycle.
+        "data_sources": {
+            "live_purpleair_sensors": live_sensor_count,
+            "using_live_neighbors":   live_sensor_count > 0,
+            "hms_polygons":           int(hms_data.get("count") or 0),
+            "hms_data_date":          hms_data.get("data_date"),
+            "weather_grid_cells":     weather_grid_cells,
+        },
+        "value_semantics": "Model-predicted 24-hour-average PM2.5 (µg/m³) per census tract",
         "tracts":       tracts,
     }
 
     state["cache_texas"] = {"data": result, "expires": now + timedelta(minutes=30)}
+    state["cache_texas_by_geoid"] = {t["geoid"]: t for t in tracts}
     _save_snapshot(TEXAS_SNAPSHOT_PATH, result)
-    print(f"✓ Texas predictions complete: {len(tracts)} tracts")
+    print(f"✓ Texas predictions complete: {len(tracts)} tracts "
+          f"(live sensors={live_sensor_count}, hms_polys={hms_data.get('count', 0)}, "
+          f"weather_cells={weather_grid_cells})")
     return result
 
 
@@ -1245,25 +1360,39 @@ async def get_tract(geoid: str):
             tz = config["tz"]
             break
 
+    # Local CURRENT weather — display only (°F/mph), so the panel matches what
+    # the user sees on weather sites for THIS location.
     try:
         weather = await fetch_weather(float(row["lat"]), float(row["lon"]))
     except Exception:
-        weather = {"temperature": 72.0, "humidity": 55.0, "pressure": 1013.0, "wind_speed": 8.0}
+        weather = dict(WEATHER_FALLBACK)
+    display_weather = weather.get("display", weather)
 
-    temporal = get_temporal(tz)
-    pm25     = run_prediction(row, weather, temporal)
-    info     = pm25_info(pm25)
+    # CONSISTENCY: the tract's PM2.5 comes from the SAME texas-wide batch the
+    # map shows (live neighbors + HMS + AOD + gridded weather). The old path
+    # recomputed it here through run_prediction() with climatological neighbors
+    # and no live features — so clicking a tract showed a different number than
+    # the map. Recompute is now only the cold-start fallback.
+    cached = (state.get("cache_texas_by_geoid") or {}).get(geoid)
+    if cached is not None:
+        pm25 = float(cached["pm25"])
+    else:
+        temporal = get_temporal(tz)
+        pm25 = run_prediction(row, weather, temporal)
+    info = pm25_info(pm25)
 
     return {
         "geoid":               geoid,
         "lat":                 round(float(row["lat"]), 6),
         "lon":                 round(float(row["lon"]), 6),
         "pm25":                round(pm25, 2),
+        "epa_aqi":             pm25_to_epa_aqi(pm25),
         "category":            info["category"],
         "color":               info["color"],
         "aqi_range":           info["aqi_range"],
         "health_msg":          info["health_msg"],
-        "weather":             weather,
+        "weather":             display_weather,
+        "from_map_batch":      cached is not None,
         "ejf_score":           _safe_float(row.get("ejf_score")),
         "pct_people_of_color": _safe_float(row.get("pct_people_of_color")),
         "pct_low_income":      _safe_float(row.get("pct_low_income")),
@@ -1431,10 +1560,9 @@ async def _run_quantum_placement():
     if model_disagreement is None:
         if state.get("bundle") and state.get("tract_lookup") is not None:
             try:
-                weather = texas_data.get("weather", {
-                    "temperature": 72.0, "humidity": 55.0,
-                    "pressure": 1013.0, "wind_speed": 8.0,
-                })
+                # Model-unit fallback (the payload's `weather` is the DISPLAY
+                # dict in °F/mph — never feed that to the model).
+                weather = dict(WEATHER_FALLBACK)
                 temporal = get_temporal("America/Chicago")
                 model_disagreement = await asyncio.to_thread(
                     _compute_model_disagreement, state["tract_lookup"],

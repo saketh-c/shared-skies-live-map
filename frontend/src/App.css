@@ -870,6 +870,37 @@ button { font-family: inherit; }
   margin-top: 3px;
   letter-spacing: 0.2px;
 }
+.ctt-aqi {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  opacity: 0.75;
+  letter-spacing: 0.2px;
+}
+.ctt-modeled {
+  font-size: 9.5px;
+  color: var(--text-dim);
+  margin-top: 2px;
+  font-style: italic;
+  letter-spacing: 0.2px;
+}
+.pm25-aqi-equiv {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-muted);
+  margin: 2px 0 8px;
+  letter-spacing: 0.3px;
+}
+.fallback-badge {
+  font-size: 10.5px;
+  color: #fbbf24;
+  background: rgba(251, 191, 36, 0.08);
+  border: 1px solid rgba(251, 191, 36, 0.25);
+  border-radius: 6px;
+  padding: 5px 8px;
+  margin-bottom: 6px;
+  line-height: 1.35;
+}
 
 .disable-transitions .pm25-number,
 .disable-transitions .gauge-bar-fill,

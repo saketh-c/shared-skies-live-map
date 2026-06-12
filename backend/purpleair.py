@@ -65,17 +65,27 @@ def _get_api_key() -> str:
 async def fetch_live_sensors() -> list[dict]:
     """Fetch current outdoor PurpleAir readings across Texas, QC'd.
 
-    Returns a list of {lat, lon, pm25} dicts (pm25 = raw pm2.5_atm). Returns
-    an empty list on any failure (no key, HTTP error, too few sensors) so the
-    caller can cleanly fall back to the static climatology — never worse than
-    the current behavior.
+    Returns a list of {lat, lon, pm25} dicts. pm25 = **pm2.5_24hour** (24-hour
+    rolling average of the raw ATM channel), falling back to instantaneous
+    pm2.5_atm only when the rolling average is missing.
+
+    WHY the 24-hour field: the model trains on DAILY MEANS (PurpleAir history
+    pulled with average=1440), so the rolling 24h average is the train-consistent
+    semantics for the dominant neighbor features. Instantaneous pm2.5_atm both
+    (a) injects diurnal swings the model never saw and (b) passes through
+    single-reading sensor glitches — e.g. a Dallas sensor was observed reading
+    atm=3326 µg/m³ while its 24h average was a sane 33.8. The 24h field smooths
+    glitches AND keeps genuine smoke-event signal.
+
+    Returns an empty list on any failure (no key, HTTP error, too few sensors)
+    so the caller can cleanly fall back to the static climatology.
     """
     key = _get_api_key()
     if not key:
         return []
 
     params = {
-        "fields": "latitude,longitude,pm2.5_atm,last_seen,confidence,location_type",
+        "fields": "latitude,longitude,pm2.5_24hour,pm2.5_atm,last_seen,confidence,location_type",
         "location_type": 0,        # outdoor only
         "max_age": MAX_AGE_SEC,    # server-side freshness filter
         **TX_BBOX,
@@ -101,6 +111,7 @@ async def fetch_live_sensors() -> list[dict]:
     if not all(n in idx for n in needed):
         print(f"[purpleair] unexpected fields: {cols}")
         return []
+    i24 = idx.get("pm2.5_24hour")
 
     now = int(time.time())
     sensors = []
@@ -108,7 +119,8 @@ async def fetch_live_sensors() -> list[dict]:
         try:
             lat = row[idx["latitude"]]
             lon = row[idx["longitude"]]
-            pm = row[idx["pm2.5_atm"]]
+            pm24 = row[i24] if i24 is not None else None
+            pm = pm24 if pm24 is not None else row[idx["pm2.5_atm"]]
             last_seen = row[idx["last_seen"]]
             conf = row[idx["confidence"]]
             loc = row[idx["location_type"]]

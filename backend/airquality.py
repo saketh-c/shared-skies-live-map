@@ -112,6 +112,68 @@ async def fetch_cell_features(cell_centers) -> dict:
     return out
 
 
+async def fetch_weather_grid(lats, lons) -> dict:
+    """Fetch TODAY'S DAILY-MEAN weather per 0.5° grid cell, in TRAINING UNITS.
+
+    The model trains on daily aggregates: temperature °C, humidity %, SURFACE
+    pressure hPa, wind m/s, precipitation mm/day — per sensor location. This
+    mirrors that at inference: per-cell daily means applied per tract, replacing
+    the old single-point instantaneous fetch (which was °F/mph/MSL — units the
+    model was never trained on).
+
+    Returns {'features': {feat: [per-tract values or None]}, 'usable': bool}.
+    """
+    cells, idx = build_cells(lats, lons)
+    feat_names = ["temperature", "humidity", "pressure", "wind_speed", "precipitation"]
+    per_tract = {f: [None] * len(lats) for f in feat_names}
+    if not cells:
+        return {"features": per_tract, "usable": False, "n_cells": 0}
+
+    lat_s = ",".join(f"{c[0]:.4f}" for c in cells)
+    lon_s = ",".join(f"{c[1]:.4f}" for c in cells)
+    cell_vals = {}
+    try:
+        async with httpx.AsyncClient(timeout=60.0) as client:
+            r = await client.get(MET_URL, params={
+                "latitude": lat_s, "longitude": lon_s,
+                "daily": ("temperature_2m_mean,relative_humidity_2m_mean,"
+                          "surface_pressure_mean,wind_speed_10m_mean,precipitation_sum"),
+                "wind_speed_unit": "ms",   # training wind is m/s
+                "forecast_days": 1, "timezone": "UTC",
+            })
+            if r.status_code != 200:
+                print(f"[weather-grid] HTTP {r.status_code}: {r.text[:160]}")
+                return {"features": per_tract, "usable": False, "n_cells": len(cells)}
+            payload = r.json()
+            if isinstance(payload, dict):
+                payload = [payload]
+            for i, loc in enumerate(payload):
+                d = loc.get("daily", {})
+                def first(key):
+                    v = d.get(key) or [None]
+                    return v[0] if v else None
+                cell_vals[i] = {
+                    "temperature":   first("temperature_2m_mean"),       # °C
+                    "humidity":      first("relative_humidity_2m_mean"), # %
+                    "pressure":      first("surface_pressure_mean"),     # hPa (surface)
+                    "wind_speed":    first("wind_speed_10m_mean"),       # m/s
+                    "precipitation": first("precipitation_sum"),         # mm/day
+                }
+    except Exception as e:
+        print(f"[weather-grid] fetch error: {e}")
+        return {"features": per_tract, "usable": False, "n_cells": len(cells)}
+
+    usable = False
+    for i in range(len(lats)):
+        cv = cell_vals.get(int(idx[i]), {})
+        for f in feat_names:
+            v = cv.get(f)
+            per_tract[f][i] = v
+            if v is not None:
+                usable = True
+    return {"features": per_tract, "usable": usable, "n_cells": len(cells)}
+
+
 async def fetch_airquality_snapshot(lats, lons) -> dict:
     """Build a per-tract feature snapshot for all tracts. Returns
     {'features': {feat: [per-tract values]}, 'fetched_at', 'n_cells', 'usable'}.

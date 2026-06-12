@@ -207,6 +207,31 @@ export function healthIcon(category) {
 }
 
 /**
+ * Convert PM2.5 (µg/m³) to the U.S. EPA AQI (May 2024 breakpoints).
+ * Shown as an equivalent next to our µg/m³ so users can compare directly with
+ * AQI-displaying apps (PurpleAir map, AirNow). Mirrors backend pm25_to_epa_aqi.
+ */
+const EPA_AQI_BREAKPOINTS = [
+  [0.0,   9.0,   0,   50],
+  [9.1,   35.4,  51,  100],
+  [35.5,  55.4,  101, 150],
+  [55.5,  125.4, 151, 200],
+  [125.5, 225.4, 201, 300],
+  [225.5, 325.4, 301, 500],
+];
+
+export function pm25ToEpaAqi(pm25) {
+  const c = Math.max(0, Math.floor(Number(pm25) * 10) / 10); // EPA truncates to 0.1
+  for (const [cLo, cHi, aLo, aHi] of EPA_AQI_BREAKPOINTS) {
+    if (c <= cHi) {
+      const lo = c >= cLo ? cLo : 0.0;
+      return Math.round((aHi - aLo) / (cHi - lo) * (c - lo) + aLo);
+    }
+  }
+  return 500;
+}
+
+/**
  * Export breakpoints for legend display
  */
 export const BREAKPOINTS = [

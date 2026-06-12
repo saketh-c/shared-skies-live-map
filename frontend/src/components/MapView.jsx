@@ -1,7 +1,7 @@
 import { useMemo, useRef, useEffect, useState, forwardRef, useCallback, useContext } from "react";
 import { MapContainer, TileLayer, GeoJSON, useMap, Circle, CircleMarker, Tooltip, Pane } from "react-leaflet";
 import L from "leaflet";
-import { BREAKPOINTS } from "../utils/aqi.js";
+import { BREAKPOINTS, pm25ToEpaAqi } from "../utils/aqi.js";
 import { LanguageContext } from '../App';
 import { t, translateCategory } from '../i18n';
 
@@ -261,7 +261,7 @@ const MapViewContent = forwardRef(
           if (!pred) return;
           const county = pred.county ? pred.county.replace(/ County$/i, "") : "";
           const pt = e.containerPoint;
-          setTooltipData({ name: displayName, pm25: pred.pm25, color: pred.color, category: pred.category, county, x: pt.x, y: pt.y });
+          setTooltipData({ name: displayName, pm25: pred.pm25, epaAqi: pred.epa_aqi ?? pm25ToEpaAqi(pred.pm25), color: pred.color, category: pred.category, county, x: pt.x, y: pt.y });
         },
 
         // Update tooltip position directly on DOM — no React re-render on every mouse move
@@ -635,8 +635,10 @@ const MapViewContent = forwardRef(
             <div className="ctt-name">{tooltipData.name}</div>
             <div className="ctt-pm25" style={{ color: tooltipData.color }}>
               {tooltipData.pm25} <span className="ctt-unit">µg/m³</span>
+              <span className="ctt-aqi"> · {t(lang, 'tooltip.aqi_label')} {tooltipData.epaAqi}</span>
             </div>
             <div className="ctt-cat">{translateCategory(lang, tooltipData.category)}</div>
+            <div className="ctt-modeled">{t(lang, 'tooltip.modeled_note')}</div>
             {tooltipData.county && (
               <div className="ctt-county">{tooltipData.county} {t(lang, 'tooltip.county_suffix')}</div>
             )}

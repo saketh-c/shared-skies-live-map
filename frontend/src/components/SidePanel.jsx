@@ -1,4 +1,4 @@
-import { BREAKPOINTS, pm25ToGaugePct } from "../utils/aqi.js";
+import { BREAKPOINTS, pm25ToGaugePct, pm25ToEpaAqi } from "../utils/aqi.js";
 import { useContext, useMemo, memo } from "react";
 import { LanguageContext } from "../App";
 import { t, translateCategory, translateHealth } from "../i18n";
@@ -32,8 +32,9 @@ function timeAgo(date, lang = "en") {
   return `${Math.floor(sec / 3600)}h ago`;
 }
 
-const PM25Hero = memo(function PM25Hero({ pm25, color, category, lang }) {
+const PM25Hero = memo(function PM25Hero({ pm25, epaAqi, color, category, lang }) {
   const gaugePct = pm25ToGaugePct(pm25);
+  const aqi = epaAqi ?? pm25ToEpaAqi(pm25);
   return (
     <>
       <div className="pm25-hero">
@@ -48,6 +49,7 @@ const PM25Hero = memo(function PM25Hero({ pm25, color, category, lang }) {
           </div>
           <div className="pm25-unit">µg/m³</div>
         </div>
+        <div className="pm25-aqi-equiv" data-num>{t(lang, "aqi_equiv", aqi)}</div>
         <div
           className="aqi-badge"
           style={{
@@ -258,6 +260,7 @@ export default function SidePanel({
         <>
           <PM25Hero
             pm25={selectedTract.pm25}
+            epaAqi={selectedTract.epa_aqi}
             color={selectedTract.color}
             category={selectedTract.category}
             lang={lang}
@@ -285,6 +288,7 @@ export default function SidePanel({
         <div className="overview-body">
           <PM25Hero
             pm25={predictions.avg_pm25}
+            epaAqi={predictions.avg_epa_aqi}
             color={predictions.avg_info?.color ?? "#10b981"}
             category={predictions.avg_info?.category ?? "Good"}
             lang={lang}
@@ -299,10 +303,18 @@ export default function SidePanel({
       )}
 
       <div className="sidebar-footer">
+        {predictions?.data_sources && !predictions.data_sources.using_live_neighbors && (
+          <div className="footer-row fallback-badge">
+            {t(lang, "fallback_badge")}
+          </div>
+        )}
         {lastUpdated && (
           <div className="footer-row">
             <span className="last-updated">
               {t(lang, "updated", timeAgo(lastUpdated, lang))}
+              {predictions?.data_sources?.using_live_neighbors && (
+                <> · {t(lang, "live_sensors_note", predictions.data_sources.live_purpleair_sensors)}</>
+              )}
             </span>
           </div>
         )}

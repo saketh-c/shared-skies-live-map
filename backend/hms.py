@@ -38,12 +38,18 @@ def density_to_int(density: str) -> int:
 
 
 def _bbox_intersects_tx(bb) -> bool:
-    """Reject polygons entirely outside Texas+buffer bbox."""
+    """Reject polygons entirely outside Texas+buffer bbox.
+
+    pyshp's shape.bbox is a plain [xmin, ymin, xmax, ymax] array (no attribute
+    access). The previous attribute-style access raised AttributeError on every
+    polygon, which silently zeroed the live hms_smoke feature in production.
+    """
+    xmin, ymin, xmax, ymax = bb[0], bb[1], bb[2], bb[3]
     return not (
-        bb.xmax < TX_BBOX["xmin"]
-        or bb.xmin > TX_BBOX["xmax"]
-        or bb.ymax < TX_BBOX["ymin"]
-        or bb.ymin > TX_BBOX["ymax"]
+        xmax < TX_BBOX["xmin"]
+        or xmin > TX_BBOX["xmax"]
+        or ymax < TX_BBOX["ymin"]
+        or ymin > TX_BBOX["ymax"]
     )
 
 

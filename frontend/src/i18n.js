@@ -2,7 +2,7 @@ const TRANSLATIONS = {
   en: {
     brand_tagline_all: "All of Texas · Census Tract Level",
     back_to: (name) => `Back to ${name}`,
-    current_pm25: "Current PM2.5",
+    current_pm25: "Predicted PM2.5 · 24-hr avg",
     current_conditions: "Current Conditions",
     temperature: "Temperature",
     humidity: "Humidity",
@@ -71,7 +71,12 @@ const TRANSLATIONS = {
     tooltip: {
       county_suffix: "County",
       updating: "Updating...",
+      aqi_label: "AQI",
+      modeled_note: "Model prediction · 24-hr average",
     },
+    aqi_equiv: (aqi) => `≈ US EPA AQI ${aqi}`,
+    fallback_badge: "⚠ Live sensors unavailable — showing historical-average estimates",
+    live_sensors_note: (n) => `${n} live PurpleAir sensors`,
     legend_title: "PM2.5 µg/m³",
     census_tract_prefix: "Census Tract",
     // Quantum Sensor Placement
@@ -120,7 +125,7 @@ const TRANSLATIONS = {
   es: {
     brand_tagline_all: "Todo Texas · Nivel de tracto censal",
     back_to: (name) => `Volver a ${name}`,
-    current_pm25: "PM2.5 actual",
+    current_pm25: "PM2.5 previsto · media 24 h",
     current_conditions: "Condiciones actuales",
     temperature: "Temperatura",
     humidity: "Humedad",
@@ -189,7 +194,12 @@ const TRANSLATIONS = {
     tooltip: {
       county_suffix: "Condado",
       updating: "Actualizando...",
+      aqi_label: "AQI",
+      modeled_note: "Predicción del modelo · media de 24 h",
     },
+    aqi_equiv: (aqi) => `≈ AQI ${aqi} (EPA de EE. UU.)`,
+    fallback_badge: "⚠ Sensores en vivo no disponibles — mostrando estimaciones históricas",
+    live_sensors_note: (n) => `${n} sensores PurpleAir en vivo`,
     legend_title: "PM2.5 µg/m³",
     census_tract_prefix: "Tracto censal",
     // Quantum Sensor Placement (Spanish)
