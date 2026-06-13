@@ -121,11 +121,22 @@ OPENMETEO_GRID_TTL_MIN = int(os.environ.get("OPENMETEO_GRID_TTL_MIN", "360"))
 _wgrid_cache: dict = {"data": None, "expires": datetime.min.replace(tzinfo=timezone.utc)}
 _aq_cache: dict = {"data": None, "expires": datetime.min.replace(tzinfo=timezone.utc)}
 
-# CURRENT-CONDITIONS grid (display-only): one batched 81-cell call per hour
-# replaces per-click API calls entirely — clicks can never hit the API, so a
-# quota outage can never freeze the conditions box to a single static value.
+# CURRENT-CONDITIONS grid (display-only): one batched 81-cell call per hour is
+# the always-available baseline for every tract/city/overview panel.
 CONDITIONS_TTL_MIN = int(os.environ.get("CONDITIONS_TTL_MIN", "60"))
 _conditions_cache: dict = {"data": None, "expires": datetime.min.replace(tzinfo=timezone.utc)}
+
+# EXACT-location current weather for a CLICKED tract (display only). The grid
+# above is coarse (1.0° ≈ a cell center up to ~70km away → a few °F off vs a
+# user's local weather); a clicked tract gets an exact single-location fetch
+# instead, cached per ~0.1° cell (~11km) and SHARED across users so the unique-
+# cell count is bounded by geography, not traffic. Hard guarantees against the
+# past failures: (1) any fetch error/429 trips a cooldown and falls back to the
+# conditions GRID (location-varying, never a frozen statewide constant);
+# (2) the cache is size-capped.
+CLICK_WEATHER_TTL_MIN = int(os.environ.get("CLICK_WEATHER_TTL_MIN", "60"))
+_click_weather_cache: dict = {}            # "lat,lon" 0.1° key -> {weather, expires}
+_click_weather_cooldown = {"until": datetime.min.replace(tzinfo=timezone.utc)}
 
 
 # ── Spatial-context reference points (kept in sync with pipeline/03_train_enhanced.py) ──
@@ -605,6 +616,48 @@ async def get_display_weather(lat: float, lon: float) -> dict:
         if v is not None:
             return dict(v)
     return dict(DISPLAY_WEATHER_FALLBACK)
+
+
+async def get_click_weather(lat: float, lon: float) -> dict:
+    """EXACT-location current weather (display units) for a clicked tract, with
+    a per-0.1°-cell shared cache. On cooldown or any failure, falls back to the
+    coarse conditions grid (location-varying) — so a quota outage degrades to
+    'slightly coarse' instead of the old 'frozen statewide constant'."""
+    key = f"{round(float(lat), 1):.1f},{round(float(lon), 1):.1f}"
+    now = datetime.now(timezone.utc)
+    hit = _click_weather_cache.get(key)
+    if hit and now < hit["expires"]:
+        return hit["weather"]
+    if now < _click_weather_cooldown["until"]:
+        return await get_display_weather(lat, lon)  # API recently failed
+    try:
+        async with httpx.AsyncClient(timeout=8.0) as client:
+            r = await client.get("https://api.open-meteo.com/v1/forecast", params={
+                "latitude": lat, "longitude": lon,
+                "current": "temperature_2m,relative_humidity_2m,pressure_msl,wind_speed_10m",
+                "temperature_unit": "fahrenheit", "wind_speed_unit": "mph", "timezone": "UTC",
+            })
+        if r.status_code != 200:
+            raise RuntimeError(f"HTTP {r.status_code}")
+        cur = r.json().get("current", {})
+        if cur.get("temperature_2m") is None:
+            raise RuntimeError("no current data")
+        weather = {
+            "temperature": round(float(cur["temperature_2m"]), 1),
+            "humidity":    round(float(cur.get("relative_humidity_2m") or 0), 1),
+            "pressure":    round(float(cur.get("pressure_msl") or 1013.0), 1),
+            "wind_speed":  round(float(cur.get("wind_speed_10m") or 0), 1),
+        }
+        if len(_click_weather_cache) > 600:
+            _click_weather_cache.clear()
+        _click_weather_cache[key] = {"weather": weather, "expires": now + timedelta(minutes=CLICK_WEATHER_TTL_MIN)}
+        return weather
+    except Exception as e:
+        # Trip a 30-min cooldown so we don't hammer a quota-exhausted API on
+        # every click; serve the grid (still varies by location) meanwhile.
+        _click_weather_cooldown["until"] = now + timedelta(minutes=30)
+        print(f"[click-weather] exact fetch failed ({e}); cooldown 30m, using conditions grid")
+        return await get_display_weather(lat, lon)
 
 
 def get_temporal(tz: str = "America/Chicago") -> dict:
@@ -1475,11 +1528,11 @@ async def get_tract(geoid: str):
             tz = config["tz"]
             break
 
-    # Local CURRENT conditions — display only (°F/mph), served from the hourly
-    # cached cell grid. Clicks NEVER call the weather API directly: the old
-    # per-click fetch both burned API quota and, during the quota outage, froze
-    # every tract to one static fallback value ("68°F everywhere").
-    display_weather = await get_display_weather(float(row["lat"]), float(row["lon"]))
+    # Local CURRENT conditions — display only (°F/mph). A clicked tract gets an
+    # EXACT-location fetch (cached per ~11km, shared) so it matches the user's
+    # local weather closely; on any failure it falls back to the coarse hourly
+    # conditions grid (location-varying — never the old frozen statewide value).
+    display_weather = await get_click_weather(float(row["lat"]), float(row["lon"]))
 
     # CONSISTENCY: the tract's PM2.5 comes from the SAME texas-wide batch the
     # map shows (live neighbors + HMS + AOD + gridded weather). The old path
