@@ -5,12 +5,12 @@
 \item {\bf Claims}
     \item[] Question: Do the main claims made in the abstract and introduction accurately reflect the paper's contributions and scope?
     \item[] Answer: \answerYes{}
-    \item[] Justification: The abstract lists four specific contributions (a 240-fold LOSO-CV benchmark, quantified evaluation bias, fairness-stratified error analysis, and an EJ audit) that are each delivered in a numbered section of the paper. Numerical claims (e.g., $R^2=0.810$, $r=0.875$, 85.1\% Q4 exceedance) match the tables and figures.
+    \item[] Justification: The abstract lists four specific contributions (a 239-fold LOSO-CV benchmark, quantified evaluation bias, fairness-stratified error analysis, and an EJ audit) that are each delivered in a numbered section of the paper. Numerical claims (e.g., random-split ensemble $R^2=0.810$, EJ correlation $r=0.760$, 77.2\% Q4 exceedance) match the tables and figures.
 
 \item {\bf Limitations}
     \item[] Question: Does the paper discuss the limitations of the work performed by the authors?
     \item[] Answer: \answerYes{}
-    \item[] Justification: Section~9 enumerates six concrete limitations: the spatial-generalization ceiling at $R^2\approx 0.81$, the cold-start problem for autoregressive features at newly-instrumented tracts, low-cost sensor measurement bias, the static treatment of EJScreen indicators, restricted temporal range (calendar year 2025), and the distinction between necessary and sufficient fairness conditions.
+    \item[] Justification: Section~9 enumerates six concrete limitations: the spatial-generalization ceiling (pooled LOSO $R^2\approx 0.75$), the cold-start problem for autoregressive features at newly-instrumented tracts, low-cost sensor measurement bias, the static treatment of EJScreen indicators, restricted temporal range (calendar year 2025), and the distinction between necessary and sufficient fairness conditions.
 
 \item {\bf Theory assumptions and proofs}
     \item[] Question: For each theoretical result, does the paper provide the full set of assumptions and a complete (and correct) proof?
@@ -30,7 +30,7 @@
 \item {\bf Experimental setting/details}
     \item[] Question: Does the paper specify all the training and test details (e.g., data splits, hyperparameters, how they were chosen, type of optimizer) necessary to understand the results?
     \item[] Answer: \answerYes{}
-    \item[] Justification: Section~5 specifies both data splits (Random 80/20 with \texttt{random\_state=42}; LOSO-CV across all 240 sensor folds). Section~6 lists all hyperparameters; we did not conduct hyperparameter search and report default values from prior literature.
+    \item[] Justification: Section~5 specifies both data splits (Random 80/20 with \texttt{random\_state=42}; LOSO-CV across 239 sensor folds). Section~6 lists all hyperparameters; we did not conduct hyperparameter search and report default values from prior literature.
 
 \item {\bf Experiment statistical significance}
     \item[] Question: Does the paper report error bars suitably and correctly defined or other appropriate information about the statistical significance of the experiments?
@@ -50,7 +50,7 @@
 \item {\bf Broader impacts}
     \item[] Question: Does the paper discuss both potential positive societal impacts and negative societal impacts of the work performed?
     \item[] Answer: \answerYes{}
-    \item[] Justification: Section~8 (EJ analysis) quantifies disparate exposure across communities and identifies \num{3.77} million Texans above the 2024 NAAQS --- a positive impact via policy-relevant evidence. Section~9 discusses the risks of over-confident deployment: low-cost sensor calibration offsets, uneven sensor coverage, and the limits of a one-year temporal window. We explicitly note that any policy use of these predictions should accompany the predicted exposure with the model's per-quartile RMSE.
+    \item[] Justification: Section~8 (EJ analysis) quantifies disparate exposure across communities --- \SI{77.2}{\percent} of highest-EJ-quartile sensors exceed the 2024 NAAQS versus \SI{0.0}{\percent} in the lowest --- a positive impact via policy-relevant evidence. Section~9 discusses the risks of over-confident deployment: low-cost sensor calibration offsets, uneven sensor coverage, and the limits of a one-year temporal window. We explicitly note that any policy use of these predictions should accompany the predicted exposure with the model's per-quartile RMSE.
 
 \item {\bf Safeguards}
     \item[] Question: Does the paper describe safeguards that have been put in place for responsible release of data or models that have a high risk for misuse (e.g., pre-trained language models, image generators, or scraped datasets)?
