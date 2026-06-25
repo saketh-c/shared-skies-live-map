@@ -20,7 +20,7 @@ import joblib
 import numpy as np
 import pandas as pd
 import sqlite3
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, Header, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
@@ -2013,17 +2013,24 @@ def get_live_purpleair_sensors() -> list:
     return []
 
 @app.get("/api/geocode")
-async def proxy_geocode(q: str):
-    """Proxy Nominatim requests to set User-Agent properly."""
+async def proxy_geocode(q: str, accept_language: str = Header(default="en")):
+    """Proxy Nominatim geocoding. We proxy server-side so we can send the
+    descriptive User-Agent Nominatim's usage policy requires (browsers forbid
+    setting User-Agent from fetch). The caller's Accept-Language (es/en) is
+    forwarded so suggestions are localized to the UI language; limit=5 matches
+    the autocomplete dropdown the frontend renders."""
     async with httpx.AsyncClient() as client:
         try:
             r = await client.get(
                 "https://nominatim.openstreetmap.org/search",
-                params={"q": q, "format": "json", "countrycodes": "us"},
-                headers={"User-Agent": "SharedSkiesInitiative/1.0 (contact@example.com)"},
+                params={"q": q, "format": "json", "countrycodes": "us", "limit": 5},
+                headers={
+                    "User-Agent": "SharedSkiesInitiative/1.0 (contact@example.com)",
+                    "Accept-Language": accept_language,
+                },
                 timeout=10.0
             )
             r.raise_for_status()
             return r.json()
-        except Exception as e:
+        except Exception:
             raise HTTPException(status_code=502, detail="Failed to reach geocoding service")
