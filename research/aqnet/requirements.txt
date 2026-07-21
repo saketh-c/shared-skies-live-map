@@ -1,0 +1,31 @@
+# AQNet research-track dependencies (research/aqnet).
+# torch: install per your platform/CUDA (see pytorch.org); Colab ships it.
+
+# core numerics / IO
+numpy
+pandas
+pyarrow
+scipy
+scikit-learn
+
+# Tier 1 — tabular ensemble
+lightgbm
+xgboost
+catboost
+
+# Tier 2 — FusionUNet (reuses research/deeplearning)
+torch
+
+# external data access (GEOS-CF OPeNDAP, MERRA-2 via Earthdata)
+xarray
+netCDF4
+earthaccess
+
+# geostatistics + interpretability
+pykrige
+shap
+matplotlib
+
+# reading the repo's EJScreen / population .xls files
+openpyxl
+xlrd
