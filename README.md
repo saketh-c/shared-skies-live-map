@@ -1,4 +1,4 @@
-# Shared Skies Initiative
+# Shared Skies Initiative - Real-Time Map
 
 Real-time PM2.5 air quality predictions for every census tract in Texas.
 
