@@ -1,0 +1,13 @@
+# This Vercel project builds only the map app in frontend/ (Root Directory =
+# frontend). Exclude everything the frontend build does not need so CLI deploys
+# stay small and fast. Does NOT affect the backend or git-based builds of other
+# projects.
+backend/
+pipeline/
+models/
+paper/
+paper_hs/
+website/
+*.xls
+*.sqlite
+*.parquet

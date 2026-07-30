@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://adjustments-drainage-shares-greatly.trycloudflare.com/api/:path*"
+    }
+  ]
+}

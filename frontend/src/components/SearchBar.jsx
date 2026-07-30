@@ -40,6 +40,8 @@ export default function SearchBar({ onSearch, loading }) {
   const [searchType, setSearchType] = useState("address");
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [suggestLoading, setSuggestLoading] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(-1);
   const [error, setError] = useState("");
   const [isSearching, setIsSearching] = useState(false);
   const searchRef = useRef(null);
@@ -47,35 +49,42 @@ export default function SearchBar({ onSearch, loading }) {
 
   const abortControllerRef = useRef(null);
 
-  // Debounced Nominatim suggestions
+  // Debounced typo-tolerant suggestions (backend proxies Photon w/ Texas bias;
+  // no need to append ", Texas" — the server scopes results to the TX bbox).
   useEffect(() => {
-    if (searchType !== "address" || !searchInput.trim() || searchInput.length < 3) {
+    if (searchType !== "address" || !searchInput.trim() || searchInput.trim().length < 2) {
       setSuggestions([]);
+      setSuggestLoading(false);
+      setActiveIndex(-1);
       return;
     }
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    setSuggestLoading(true);
     timeoutRef.current = setTimeout(async () => {
       if (abortControllerRef.current) abortControllerRef.current.abort();
       abortControllerRef.current = new AbortController();
 
       try {
         const response = await fetch(
-          `${API_BASE}/api/geocode?q=${encodeURIComponent(searchInput + ", Texas")}`,
-          { 
+          `${API_BASE}/api/geocode?q=${encodeURIComponent(searchInput.trim())}`,
+          {
             headers: { "Accept-Language": lang === "es" ? "es" : "en" },
             signal: abortControllerRef.current.signal
           }
         );
         const results = await response.json();
-        setSuggestions(results);
+        setSuggestions(Array.isArray(results) ? results : []);
+        setActiveIndex(-1);
         setShowSuggestions(true);
+        setSuggestLoading(false);
       } catch (err) {
         if (err.name !== 'AbortError') {
           console.error("Autocomplete error:", err);
           setSuggestions([]);
+          setSuggestLoading(false);
         }
       }
-    }, 300);
+    }, 250);
     return () => {
       clearTimeout(timeoutRef.current);
       if (abortControllerRef.current) abortControllerRef.current.abort();
@@ -114,7 +123,27 @@ export default function SearchBar({ onSearch, loading }) {
   };
 
   const handleSuggestionClick = (suggestion) => {
+    setSearchInput(suggestion.name || suggestion.display_name.split(",")[0]);
     geocodeAddress(suggestion.display_name, parseFloat(suggestion.lat), parseFloat(suggestion.lon));
+  };
+
+  // Keyboard navigation over the dropdown (ArrowUp/Down + Enter + Escape),
+  // like every mainstream map search box.
+  const handleInputKeyDown = (e) => {
+    if (searchType !== "address" || !showSuggestions || suggestions.length === 0) return;
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setActiveIndex((i) => (i + 1) % suggestions.length);
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setActiveIndex((i) => (i <= 0 ? suggestions.length - 1 : i - 1));
+    } else if (e.key === "Escape") {
+      setShowSuggestions(false);
+      setActiveIndex(-1);
+    } else if (e.key === "Enter" && activeIndex >= 0 && activeIndex < suggestions.length) {
+      e.preventDefault();
+      handleSuggestionClick(suggestions[activeIndex]);
+    }
   };
 
   const handleSearch = async (e) => {
@@ -126,17 +155,22 @@ export default function SearchBar({ onSearch, loading }) {
         setError(t(lang, "search.errors.enter_address"));
         return;
       }
-      if (suggestions.length > 0) {
+      if (activeIndex >= 0 && activeIndex < suggestions.length) {
+        handleSuggestionClick(suggestions[activeIndex]);
+      } else if (suggestions.length > 0) {
         handleSuggestionClick(suggestions[0]);
       } else {
+        // No suggestions yet (e.g. instant Enter) — one direct query through
+        // OUR backend proxy. (The old code called nominatim.org straight from
+        // the browser, which their policy blocks — it silently failed.)
         setIsSearching(true);
         try {
           const response = await fetch(
-            `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchInput + ", Texas")}&limit=1`,
+            `${API_BASE}/api/geocode?q=${encodeURIComponent(searchInput.trim())}`,
             { headers: { "Accept-Language": lang === "es" ? "es" : "en" } }
           );
           const results = await response.json();
-          if (results.length > 0) {
+          if (Array.isArray(results) && results.length > 0) {
             const r = results[0];
             geocodeAddress(r.display_name, parseFloat(r.lat), parseFloat(r.lon));
           } else {
@@ -206,27 +240,39 @@ export default function SearchBar({ onSearch, loading }) {
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
               onFocus={() => searchType === "address" && setShowSuggestions(true)}
+              onKeyDown={handleInputKeyDown}
               required
+              autoComplete="off"
               aria-label={searchType === "address"
                 ? t(lang, "search.placeholder_address")
                 : t(lang, "search.placeholder_coords")}
             />
 
-            {searchType === "address" && showSuggestions && suggestions.length > 0 && (
+            {searchType === "address" && showSuggestions &&
+              (suggestions.length > 0 || suggestLoading || searchInput.trim().length >= 2) && (
               <div className="suggestions-dropdown" role="listbox">
                 {suggestions.map((s, idx) => (
                   <div
-                    key={idx}
-                    className="suggestion-item"
+                    key={`${s.lat},${s.lon},${idx}`}
+                    className={`suggestion-item${idx === activeIndex ? " active" : ""}`}
                     role="option"
+                    aria-selected={idx === activeIndex}
                     tabIndex={0}
                     onClick={() => handleSuggestionClick(s)}
+                    onMouseEnter={() => setActiveIndex(idx)}
                     onKeyDown={(e) => e.key === "Enter" && handleSuggestionClick(s)}
                   >
                     <div className="suggestion-name">{s.name || s.display_name.split(",")[0]}</div>
                     <div className="suggestion-address">{s.display_name}</div>
                   </div>
                 ))}
+                {suggestions.length === 0 && (
+                  <div className="suggestion-status" aria-live="polite">
+                    {suggestLoading
+                      ? t(lang, "search.searching")
+                      : t(lang, "search.errors.address_not_found")}
+                  </div>
+                )}
               </div>
             )}
           </div>

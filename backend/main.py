@@ -20,9 +20,10 @@ import joblib
 import numpy as np
 import pandas as pd
 import sqlite3
-from fastapi import FastAPI, Header, HTTPException
+from fastapi import FastAPI, Header, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
+from fastapi.middleware.gzip import GZipMiddleware
+from fastapi.responses import FileResponse, Response
 from fastapi.staticfiles import StaticFiles
 
 # ── Paths ─────────────────────────────────────────────────────────────────────
@@ -285,6 +286,33 @@ def _load_snapshot(path: str) -> dict | None:
         return None
 
 
+# Pre-gzipped statewide tract GeoJSON (~24.6 MB raw → ~3 MB gz), built once and
+# held in memory so /api/texas/tracts/geojson costs zero CPU per request.
+_texas_geojson_gz: dict = {"bytes": None, "mtime": None}
+
+
+async def _get_texas_geojson_gz() -> bytes | None:
+    """Return gzip bytes of the statewide GeoJSON, (re)building if the source
+    file is new or changed. Compression runs in a thread (~0.5 s, once)."""
+    try:
+        mtime = os.path.getmtime(TEXAS_GEOJSON_PATH)
+        if _texas_geojson_gz["bytes"] is None or _texas_geojson_gz["mtime"] != mtime:
+            import gzip as _gzip
+
+            def _build() -> bytes:
+                with open(TEXAS_GEOJSON_PATH, "rb") as f:
+                    return _gzip.compress(f.read(), compresslevel=6)
+
+            _texas_geojson_gz["bytes"] = await asyncio.to_thread(_build)
+            _texas_geojson_gz["mtime"] = mtime
+            print(f"GeoJSON gz cache built: {len(_texas_geojson_gz['bytes'])/1e6:.1f} MB "
+                  f"(from {os.path.getsize(TEXAS_GEOJSON_PATH)/1e6:.1f} MB)")
+        return _texas_geojson_gz["bytes"]
+    except Exception as e:
+        print(f"GeoJSON gz cache failed: {e}")
+        return None
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Load model in a thread so the event loop stays responsive
@@ -517,6 +545,14 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         print(f"Failed to initialize visits DB: {e}")
 
+    # Pre-warm the gzipped statewide GeoJSON so even the first visitor after a
+    # restart gets the ~3 MB compressed payload instantly.
+    if os.path.exists(TEXAS_GEOJSON_PATH):
+        try:
+            asyncio.create_task(_get_texas_geojson_gz())
+        except Exception:
+            pass
+
     yield
 
 
@@ -539,6 +575,15 @@ app.add_middleware(
     allow_methods=["GET", "POST", "OPTIONS", "HEAD"],
     allow_headers=["*"],
 )
+
+# Gzip every sizable response. The two payloads that dominate map load —
+# /api/texas/predictions (~3.2 MB) and the tract GeoJSONs — compress 5-10x,
+# which matters enormously when the backend is served over a residential
+# uplink (home-PC bridge) instead of a datacenter. compresslevel=6 is the
+# speed/ratio sweet spot; level 9 costs ~3x CPU for ~1% smaller output.
+# (Responses that already carry a Content-Encoding — e.g. the pre-gzipped
+# statewide GeoJSON below — pass through untouched.)
+app.add_middleware(GZipMiddleware, minimum_size=1024, compresslevel=6)
 
 if os.path.exists(STATIC_DIR):
     app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
@@ -1616,11 +1661,28 @@ async def get_tract(geoid: str):
 
 
 @app.get("/api/texas/tracts/geojson")
-async def texas_tracts_geojson():
-    """Serve all Texas census tract GeoJSON. MUST be before /{city}/ route."""
+async def texas_tracts_geojson(request: Request):
+    """Serve all Texas census tract GeoJSON. MUST be before /{city}/ route.
+
+    The raw file is ~24.6 MB — far too heavy to re-send uncompressed (or to
+    re-gzip per request) over a residential uplink. We gzip it ONCE into
+    memory (~3 MB) and serve those bytes directly with Content-Encoding: gzip,
+    plus a 1-day browser cache (tract geometry only changes when the pipeline
+    regenerates the file, i.e. on redeploy)."""
     if not os.path.exists(TEXAS_GEOJSON_PATH):
         raise HTTPException(503, "Statewide GeoJSON not found. Run pipeline/01_build_tract_lookup.py first.")
-    return FileResponse(TEXAS_GEOJSON_PATH, media_type="application/geo+json")
+    cache_headers = {"Cache-Control": "public, max-age=86400", "Vary": "Accept-Encoding"}
+    if "gzip" in request.headers.get("accept-encoding", "").lower():
+        gz = await _get_texas_geojson_gz()
+        if gz is not None:
+            return Response(
+                gz,
+                media_type="application/geo+json",
+                headers={"Content-Encoding": "gzip", **cache_headers},
+            )
+    # Client doesn't accept gzip (rare) or compression failed — plain file.
+    return FileResponse(TEXAS_GEOJSON_PATH, media_type="application/geo+json",
+                        headers=cache_headers)
 
 
 @app.get("/api/tracts/geojson")
@@ -2012,25 +2074,207 @@ def get_live_purpleair_sensors() -> list:
         return cached.get("sensors", []) if cached.get("usable") else []
     return []
 
+# ── Geocoding (typo-tolerant autocomplete) ───────────────────────────────────
+# Primary: Photon (photon.komoot.io) — fuzzy/typo-tolerant, built for
+# search-as-you-type ("hueston" still finds Houston). Results are biased to the
+# Texas centroid and HARD-filtered to a Texas bounding box.
+# Fallback: Nominatim (exact-match) if Photon is down — scoped to Texas via
+# viewbox+bounded instead of appending ", Texas" to the query text.
+# Both are normalized to the same shape the frontend expects:
+#   [{name, display_name, lat, lon, type}]
+_TX_BBOX = (-107.0, 25.5, -93.2, 36.8)  # minLon, minLat, maxLon, maxLat (+margin)
+_GEOCODE_UA = "SharedSkiesInitiative/1.0 (+https://sharedskiesinitiative.org; chebrolusaketh@gmail.com)"
+_geocode_cache: OrderedDict = OrderedDict()   # q.lower() -> {results, expires}
+_GEOCODE_CACHE_TTL_MIN = 15
+_GEOCODE_CACHE_MAX = 500
+
+# "Did you mean" spell-correction layer: Photon's fuzziness handles swapped /
+# extra letters but misses dropped letters mid-word ("corpus cristi"). We
+# correct the query against the big Texas place names with stdlib difflib and
+# re-query. Names only — coordinates always come from the geocoder.
+_TX_CITIES = [
+    "Houston", "San Antonio", "Dallas", "Austin", "Fort Worth", "El Paso",
+    "Arlington", "Corpus Christi", "Plano", "Laredo", "Lubbock", "Garland",
+    "Irving", "Amarillo", "Grand Prairie", "Brownsville", "Pasadena",
+    "McKinney", "Mesquite", "Killeen", "Frisco", "McAllen", "Waco",
+    "Carrollton", "Denton", "Midland", "Abilene", "Beaumont", "Round Rock",
+    "Odessa", "Wichita Falls", "Richardson", "Lewisville", "Tyler",
+    "College Station", "Pearland", "San Angelo", "Allen", "League City",
+    "Sugar Land", "Longview", "Edinburg", "Mission", "Bryan", "Baytown",
+    "Pharr", "Temple", "Missouri City", "Flower Mound", "Harlingen",
+    "Victoria", "Conroe", "New Braunfels", "Mansfield", "Cedar Park",
+    "Rowlett", "Port Arthur", "Euless", "Georgetown", "Pflugerville",
+    "DeSoto", "San Marcos", "Grapevine", "Bedford", "Galveston",
+    "Cedar Hill", "Texas City", "Wylie", "Keller", "Coppell", "Rockwall",
+    "Huntsville", "Duncanville", "Sherman", "The Woodlands", "Texarkana",
+    "Friendswood", "Weslaco", "Lufkin", "Nacogdoches", "Del Rio", "Eagle Pass",
+    "Katy", "Spring", "Humble", "Cypress", "Kingwood", "Tomball", "Sealy",
+    "Boerne", "Kerrville", "Seguin", "Schertz", "Alamo Heights", "Uvalde",
+    "Stephenville", "Granbury", "Weatherford", "Cleburne", "Waxahachie",
+    "Corsicana", "Ennis", "Athens", "Palestine", "Marshall", "Paris",
+    "Greenville", "Denison", "Gainesville", "Mineral Wells", "Big Spring",
+    "Snyder", "Sweetwater", "Brownwood", "Kingsville", "Alice", "Beeville",
+    "Port Lavaca", "Bay City", "Angleton", "Lake Jackson", "Freeport",
+    "Orange", "Vidor", "Silsbee", "Jasper", "Livingston", "Bastrop",
+    "Lockhart", "Taylor", "Brenham", "Navasota", "Hearne", "Cameron",
+]
+
+
+def _spell_correct_tx(query: str) -> str | None:
+    """Return a corrected Texas place name if the query looks like a typo of
+    one, else None. Trailing 'tx'/'texas' tokens are ignored for matching."""
+    import difflib
+    qc = query.lower().strip()
+    for suf in (" texas", " tx", ",texas", ",tx"):
+        if qc.endswith(suf):
+            qc = qc[: -len(suf)].rstrip(", ")
+    if len(qc) < 4:
+        return None
+    match = difflib.get_close_matches(qc, [c.lower() for c in _TX_CITIES], n=1, cutoff=0.78)
+    if not match:
+        return None
+    corrected = next(c for c in _TX_CITIES if c.lower() == match[0])
+    return corrected if corrected.lower() != qc else None
+
+
+def _photon_to_result(feat: dict) -> dict | None:
+    """Normalize one Photon GeoJSON feature to the frontend's result shape."""
+    try:
+        p = feat.get("properties", {})
+        # The TX bbox has margin that clips border-state slivers — hard-reject
+        # anything Photon labels with a non-Texas state.
+        st = p.get("state")
+        if st and st not in ("Texas", "TX"):
+            return None
+        lon, lat = feat["geometry"]["coordinates"][:2]
+        name = p.get("name") or " ".join(
+            x for x in (p.get("housenumber"), p.get("street")) if x
+        ) or p.get("city") or p.get("postcode")
+        if not name:
+            return None
+        parts = []
+        street = " ".join(x for x in (p.get("housenumber"), p.get("street")) if x)
+        if street and street != name:
+            parts.append(street)
+        for k in ("district", "city", "county", "state"):
+            v = p.get(k)
+            if v and v != name and v not in parts:
+                parts.append(v)
+        if p.get("postcode"):
+            parts.append(p["postcode"])
+        display = name + (", " + ", ".join(parts) if parts else "")
+        return {
+            "name": str(name),
+            "display_name": display,
+            "lat": str(lat),
+            "lon": str(lon),
+            "type": p.get("osm_value") or p.get("type") or "place",
+        }
+    except Exception:
+        return None
+
+
 @app.get("/api/geocode")
 async def proxy_geocode(q: str, accept_language: str = Header(default="en")):
-    """Proxy Nominatim geocoding. We proxy server-side so we can send the
-    descriptive User-Agent Nominatim's usage policy requires (browsers forbid
-    setting User-Agent from fetch). The caller's Accept-Language (es/en) is
-    forwarded so suggestions are localized to the UI language; limit=5 matches
-    the autocomplete dropdown the frontend renders."""
-    async with httpx.AsyncClient() as client:
+    query = q.strip()
+    # The old frontend appended ", Texas" to every query; strip it so fuzzy
+    # matching sees the user's actual words (Texas scoping is done by bbox).
+    if query.lower().endswith(", texas"):
+        query = query[:-7].rstrip(", ")
+    if not query:
+        return []
+
+    # Serve recent identical queries from cache (autocomplete hammers this).
+    ck = query.lower()
+    now = datetime.now(timezone.utc)
+    hit = _geocode_cache.get(ck)
+    if hit and now < hit["expires"]:
+        _geocode_cache.move_to_end(ck)
+        return hit["results"]
+
+    results: list = []
+    minlon, minlat, maxlon, maxlat = _TX_BBOX
+
+    async def _photon_search(client: httpx.AsyncClient, q_text: str) -> list:
         try:
             r = await client.get(
-                "https://nominatim.openstreetmap.org/search",
-                params={"q": q, "format": "json", "countrycodes": "us", "limit": 5},
-                headers={
-                    "User-Agent": "SharedSkiesInitiative/1.0 (contact@example.com)",
-                    "Accept-Language": accept_language,
+                "https://photon.komoot.io/api",
+                params={
+                    "q": q_text,
+                    "limit": 10,
+                    "lat": 31.0, "lon": -99.3,      # bias: Texas centroid
+                    "bbox": f"{minlon},{minlat},{maxlon},{maxlat}",
                 },
-                timeout=10.0
+                headers={"User-Agent": _GEOCODE_UA},
+                timeout=6.0,
             )
             r.raise_for_status()
-            return r.json()
-        except Exception:
-            raise HTTPException(status_code=502, detail="Failed to reach geocoding service")
+            return [res for f in r.json().get("features", [])
+                    if (res := _photon_to_result(f))]
+        except Exception as e:
+            print(f"[geocode] photon '{q_text}' failed: {e}")
+            return []
+
+    def _merge(*lists) -> list:
+        """Concatenate, dedupe near-identical entries, cap at 6."""
+        out, seen = [], set()
+        for lst in lists:
+            for res in lst:
+                key = (res["name"].lower(),
+                       round(float(res["lat"]), 3), round(float(res["lon"]), 3))
+                if key in seen:
+                    continue
+                seen.add(key)
+                out.append(res)
+                if len(out) >= 6:
+                    return out
+        return out
+
+    async with httpx.AsyncClient() as client:
+        # 1) Photon as typed — typo-tolerant, autocomplete-grade.
+        raw = await _photon_search(client, query)
+
+        # 2) "Did you mean": if the query looks like a misspelled Texas place,
+        #    re-query with the corrected name. Empty as-typed results -> the
+        #    correction leads; otherwise the as-typed top hit stays first and
+        #    the corrected city is injected right behind it (Google-style mix).
+        corrected_name = _spell_correct_tx(query)
+        if corrected_name:
+            fixed = await _photon_search(client, corrected_name)
+            if not raw:
+                results = _merge(fixed, raw)
+            else:
+                results = _merge(raw[:1], fixed[:2], raw[1:])
+        else:
+            results = _merge(raw)
+
+        # 2) Nominatim fallback (exact match) if Photon returned nothing.
+        if not results:
+            try:
+                r = await client.get(
+                    "https://nominatim.openstreetmap.org/search",
+                    params={
+                        "q": query, "format": "json", "countrycodes": "us",
+                        "limit": 6, "viewbox": f"{minlon},{maxlat},{maxlon},{minlat}",
+                        "bounded": 1,
+                    },
+                    headers={"User-Agent": _GEOCODE_UA, "Accept-Language": accept_language},
+                    timeout=8.0,
+                )
+                r.raise_for_status()
+                for it in r.json():
+                    results.append({
+                        "name": (it.get("display_name") or "").split(",")[0],
+                        "display_name": it.get("display_name", ""),
+                        "lat": it.get("lat"), "lon": it.get("lon"),
+                        "type": it.get("type", "place"),
+                    })
+            except Exception:
+                if not results:
+                    raise HTTPException(status_code=502, detail="Failed to reach geocoding service")
+
+    _geocode_cache[ck] = {"results": results,
+                          "expires": now + timedelta(minutes=_GEOCODE_CACHE_TTL_MIN)}
+    if len(_geocode_cache) > _GEOCODE_CACHE_MAX:
+        _geocode_cache.popitem(last=False)
+    return results

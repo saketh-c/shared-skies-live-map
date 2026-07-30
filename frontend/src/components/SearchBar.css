@@ -129,8 +129,15 @@
   transition: background var(--t-fast) var(--ease);
 }
 .suggestion-item:last-child { border-bottom: none; }
-.suggestion-item:hover {
+.suggestion-item:hover,
+.suggestion-item.active {
   background: var(--accent-soft);
+}
+.suggestion-status {
+  padding: 12px 14px;
+  color: var(--text-dim);
+  font-size: 12px;
+  text-align: center;
 }
 .suggestion-name {
   color: var(--accent);

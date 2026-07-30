@@ -62,40 +62,77 @@ function BackgroundClickHandler({ onBackgroundClick, justClickedRef }) {
   return null;
 }
 
-function SmoothWheelZoom() {
+// Input-adaptive wheel zoom (replaces BOTH the old flyTo-based handler and
+// Leaflet's native one):
+//  - Leaflet's native handler divides wheel deltas by 2x devicePixelRatio on
+//    Windows and squashes them through a sigmoid — on scaled-display laptops
+//    a trackpad's small deltas collapse to ~0 zoom ("barely zooms"), until a
+//    momentum burst punches through ("randomly starts zooming"). This handler
+//    uses RAW pixel deltas: linear, device-independent.
+//  - Mouse notches (large discrete deltas) -> one ANIMATED step per notch,
+//    cursor-anchored (same feel as a desktop mouse today).
+//  - Trackpad streams / ctrl+pinch (small rapid deltas) -> immediate zoom,
+//    batched to one update per animation frame — smooth continuous zooming.
+//  - No Math.round (no snap-back no-ops), no flyTo (no zoom-out arc flash).
+function AdaptiveWheelZoom() {
   const map = useMap();
   useEffect(() => {
     map.scrollWheelZoom.disable();
-    let accDelta = 0;
-    let lastMousePoint = null;
-    let lastMouseLatLng = null;
-    let timer = null;
+    const el = map.getContainer();
+    const PX_PER_LEVEL = 115;  // ~one mouse notch (100-120px) = ~1 zoom level
+    const NOTCH_PX = 50;       // deltas >= this are treated as mouse notches
+
+    let animTarget = null;     // zoom target while an animated step is in flight
+    let pendingDz = 0;         // trackpad delta accumulated for the next frame
+    let pendingPt = null;
+    let rafId = null;
+
+    const clampZoom = (z) =>
+      Math.max(map.getMinZoom(), Math.min(map.getMaxZoom(), z));
+
+    const onZoomEnd = () => { animTarget = null; };
+
+    const applyPending = () => {
+      rafId = null;
+      if (!pendingDz || !pendingPt) { pendingDz = 0; return; }
+      const tz = clampZoom(map.getZoom() + pendingDz);
+      const pt = pendingPt;
+      pendingDz = 0;
+      pendingPt = null;
+      map.setZoomAround(pt, tz, { animate: false });
+    };
 
     const onWheel = (e) => {
       e.preventDefault();
-      accDelta += e.deltaY < 0 ? 0.3 : -0.3;
-      accDelta = Math.max(-2.5, Math.min(2.5, accDelta));
-      lastMousePoint = map.mouseEventToContainerPoint(e);
-      lastMouseLatLng = map.containerPointToLatLng(lastMousePoint);
-      if (timer) clearTimeout(timer);
-      timer = setTimeout(() => {
-        const targetZoom = Math.round(map.getZoom() + accDelta);
-        const newZoom = Math.max(1, Math.min(18, targetZoom));
-        const mouseNewPx = map.project(lastMouseLatLng, newZoom);
-        const newCenterPx = mouseNewPx
-          .subtract(lastMousePoint)
-          .add(map.getSize().divideBy(2));
-        const newCenter = map.unproject(newCenterPx, newZoom);
-        map.flyTo(newCenter, newZoom, { animate: true, duration: 0.45, easeLinearity: 0.25 });
-        accDelta = 0;
-        timer = null;
-      }, 35);
+      let dy = e.deltaY;
+      if (e.deltaMode === 1) dy *= 33;        // lines -> px (Firefox mice)
+      else if (e.deltaMode === 2) dy *= 100;  // pages -> px
+      if (!dy) return;
+      let dz = Math.max(-1.5, Math.min(1.5, -dy / PX_PER_LEVEL));
+      const pt = map.mouseEventToContainerPoint(e);
+
+      if (Math.abs(dy) >= NOTCH_PX && !e.ctrlKey) {
+        // Mouse notch: animated cursor-anchored step. Consecutive notches
+        // build on the in-flight TARGET (getZoom() reports the animation's
+        // start zoom, not where it is heading).
+        const base = animTarget != null && map._animatingZoom ? animTarget : map.getZoom();
+        animTarget = clampZoom(base + dz);
+        map.setZoomAround(pt, animTarget, { animate: true });
+      } else {
+        // Trackpad / pinch stream: apply continuously, one map update per
+        // frame so the canvas never redraws faster than it can paint.
+        pendingDz = Math.max(-1.5, Math.min(1.5, pendingDz + dz));
+        pendingPt = pt;
+        if (rafId == null) rafId = requestAnimationFrame(applyPending);
+      }
     };
 
-    map.getContainer().addEventListener("wheel", onWheel, { passive: false });
+    map.on("zoomend", onZoomEnd);
+    el.addEventListener("wheel", onWheel, { passive: false });
     return () => {
-      map.getContainer().removeEventListener("wheel", onWheel);
-      if (timer) clearTimeout(timer);
+      el.removeEventListener("wheel", onWheel);
+      map.off("zoomend", onZoomEnd);
+      if (rafId != null) cancelAnimationFrame(rafId);
     };
   }, [map]);
   return null;
@@ -202,6 +239,15 @@ const MapViewContent = forwardRef(
     // top-of-stack pane would swallow clicks across the whole map area.
     const sensorSvgRenderer = useMemo(
       () => L.svg({ pane: "quantumSensorsPane" }),
+      []
+    );
+
+    // Default canvas renderer for the choropleth with a HALF-VIEWPORT padding:
+    // polygons are pre-rendered 50% beyond the visible edge, so panning shows
+    // painted map instead of blank canvas until the next redraw. tolerance=3
+    // widens hover/click hit-testing by 3px (nicer on thin tracts).
+    const canvasRenderer = useMemo(
+      () => L.canvas({ padding: 0.5, tolerance: 3 }),
       []
     );
 
@@ -415,25 +461,31 @@ const MapViewContent = forwardRef(
           style={{ height: "100%", width: "100%" }}
           zoomControl={true}
           zoomSnap={0}
+          zoomDelta={1}
+          scrollWheelZoom={false}
           preferCanvas={true}
+          renderer={canvasRenderer}
           touchZoom={true}
           tap={true}
           zoomAnimation={true}
+          zoomAnimationThreshold={8}
           fadeAnimation={true}
           inertia={true}
           inertiaDeceleration={3000}
           inertiaMaxSpeed={1500}
           maxZoom={13}
           minZoom={4}
+          maxBounds={[[23.5, -111.5], [39.5, -87.5]]}
+          maxBoundsViscosity={0.6}
         >
           <TileLayer
             url={CARTO_LIGHT_NOLABELS}
             attribution={ATTRIBUTION}
             zIndex={1}
-            keepBuffer={64}
+            keepBuffer={8}
             updateWhenZooming={true}
             updateWhenIdle={false}
-            updateInterval={40}
+            updateInterval={150}
             crossOrigin="anonymous"
             noWrap={true}
             maxNativeZoom={19}
@@ -441,7 +493,7 @@ const MapViewContent = forwardRef(
           />
 
           <FlyToHandler target={searchMarker} />
-          <SmoothWheelZoom />
+          <AdaptiveWheelZoom />
           <MapLifecycle />
           <BackgroundClickHandler onBackgroundClick={onBackgroundClick} justClickedRef={justClickedRef} />
           <StyleUpdater />
@@ -552,10 +604,10 @@ const MapViewContent = forwardRef(
             url={CARTO_LIGHT_LABELS}
             zIndex={650}
             pane="shadowPane"
-            keepBuffer={48}
+            keepBuffer={8}
             updateWhenZooming={true}
             updateWhenIdle={false}
-            updateInterval={40}
+            updateInterval={150}
             crossOrigin="anonymous"
             noWrap={true}
             maxNativeZoom={19}

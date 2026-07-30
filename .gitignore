@@ -43,3 +43,5 @@ backend/visits.sqlite
 # pipeline/03_train_enhanced.py, used only by pipeline/eval_calibration.py).
 # All headline numbers are in models/metrics.json.
 models/loso_oof.npz
+.vercel
+.env*
