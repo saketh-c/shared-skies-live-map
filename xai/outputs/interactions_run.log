@@ -1,0 +1,13 @@
+[interactions] 300 rows, budget 120 min/model
+[model] rf (weight 0.683)
+  [rf] probe 17.79s/row -> est 89 min for 300 rows
+  [rf] 18/300  (240s, ~4223s left)
+  [rf] 34/300  (469s, ~3897s left)
+  [rf] 50/300  (687s, ~3578s left)
+  [rf] 66/300  (909s, ~3325s left)
+  [rf] 82/300  (1128s, ~3074s left)
+  [rf] 98/300  (1305s, ~2746s left)
+  [rf] 114/300  (1484s, ~2464s left)
+  [rf] 130/300  (1660s, ~2205s left)
+  [rf] 146/300  (1846s, ~1974s left)
+  [rf] 162/300  (2021s, ~1743s left)
