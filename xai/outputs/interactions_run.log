@@ -1,13 +1,26 @@
-[interactions] 300 rows, budget 120 min/model
+[interactions] 300 rows, budget 240 min/model
 [model] rf (weight 0.683)
-  [rf] probe 17.79s/row -> est 89 min for 300 rows
-  [rf] 18/300  (240s, ~4223s left)
-  [rf] 34/300  (469s, ~3897s left)
-  [rf] 50/300  (687s, ~3578s left)
-  [rf] 66/300  (909s, ~3325s left)
-  [rf] 82/300  (1128s, ~3074s left)
-  [rf] 98/300  (1305s, ~2746s left)
-  [rf] 114/300  (1484s, ~2464s left)
-  [rf] 130/300  (1660s, ~2205s left)
-  [rf] 146/300  (1846s, ~1974s left)
-  [rf] 162/300  (2021s, ~1743s left)
+  [rf] probe 12.51s/row -> est 63 min for 300 rows
+  [lgbm] no interaction runner (weight 0.008) - skipped
+[model] cat (weight 0.309)
+  [cat] probe 0.79s/row -> est 3.9 min for 300 rows
+[combine] renormalized over: rf (w=0.68), cat (w=0.31) (covers 99% of the deployed blend)
+
+Top 15 interacting pairs (mean |interaction|, ug/m3):
+   0.5023  nbr_pm25_25km x nbr_pm25_100km
+   0.4562  nbr_pm25_50km x nbr_pm25_100km
+   0.2840  nbr_pm25_25km x nbr_pm25_50km
+   0.1591  nbr_std_50km x nbr_pm25_100km
+   0.1447  nbr_pm25_50km x nbr_std_50km
+   0.1205  nbr_pm25_25km x nbr_std_50km
+   0.0813  nbr_pm25_100km x cams_pm25
+   0.0714  nbr_pm25_50km x cams_pm25
+   0.0660  nbr_pm25_25km x cams_pm25
+   0.0525  diesel_pm_proximity x pct_ling_isolated
+   0.0467  nbr_pm25_100km x aod
+   0.0431  ejf_score x rmp_proximity
+   0.0430  dist_to_coast x nbr_pm25_25km
+   0.0426  nbr_pm25_50km x aod
+   0.0421  humidity x nbr_pm25_25km
+[fig] interaction_heatmap.png
+[fig] interaction_groups.png

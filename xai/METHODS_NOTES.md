@@ -83,3 +83,19 @@ Receipts:
   bootstrap CIs for the group ranking and grouped (jointly-shuffled)
   permutation importance, reporting the Spearman rank agreement between the
   SHAP and permutation group rankings.
+
+## 4. Interaction structure (completed run, 300 rows, RF+CatBoost = 99% of blend)
+
+- Main-effect (diagonal) attribution mass 8.904 µg/m³ vs pairwise-interaction
+  mass 6.055 µg/m³ (40.5% of total) — the ensemble is substantially
+  interactive, dominated by the multi-radius neighbor features interacting
+  with each other (top 9 pairs all within Regional PM signal).
+- Concept-group coherence, stated honestly: within-group pairs are ~4x
+  denser per pair (44.5% of pairwise mass in 16% of pairs), but the long
+  tail of small cross-group terms sums to 55.5% of pairwise mass. The
+  grouped decomposition remains EXACT (additivity), but groups are not
+  independent modules — say "exact partition of attributions," never
+  "independent factors."
+- Strongest cross-group pairs: diesel_pm_proximity x pct_ling_isolated
+  (0.053), ejf_score x rmp_proximity (0.043), dist_to_coast x nbr_pm25_25km
+  (0.043), humidity x nbr_pm25_25km (0.042 µg/m³).
