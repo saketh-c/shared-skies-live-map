@@ -3,16 +3,17 @@
 \usepackage{amsmath}
 \usepackage{booktabs}
 \usepackage{array}
-\usepackage[table]{xcolor}
+\usepackage{xcolor}
 \usepackage[hidelinks]{hyperref}
 \usepackage{balance}
 
 \graphicspath{{../figures/}}
 
 \newcommand{\ugm}{$\mu$g/m$^3$}
+\hyphenation{LightGBM}
 
-\setlength{\textfloatsep}{9pt plus 2pt minus 3pt}
-\setlength{\dbltextfloatsep}{9pt plus 2pt minus 3pt}
+\setlength{\textfloatsep}{7pt plus 2pt minus 3pt}
+\setlength{\dbltextfloatsep}{7pt plus 2pt minus 3pt}
 
 \begin{document}
 
@@ -20,15 +21,15 @@
 PM2.5 Ensemble for Texas Census Tracts}
 
 \author{
-\IEEEauthorblockN{Nathan Tan}
-\IEEEauthorblockA{St. Mark's School of Texas\\
-Dallas, TX, USA\\
-nathantan2027@gmail.com}
-\and
 \IEEEauthorblockN{Saketh Chebrolu}
 \IEEEauthorblockA{St. Mark's School of Texas\\
 Dallas, TX, USA\\
 chebrolusaketh@gmail.com}
+\and
+\IEEEauthorblockN{Nathan Tan}
+\IEEEauthorblockA{St. Mark's School of Texas\\
+Dallas, TX, USA\\
+nathantan2027@gmail.com}
 \and
 \IEEEauthorblockN{Yifeng Wang}
 \IEEEauthorblockA{School of Civil and Environmental Engineering\\
@@ -40,27 +41,16 @@ Atlanta, GA, USA\\
 \maketitle
 
 \begin{abstract}
-Low-cost sensor networks now support operational, neighborhood-scale air
-quality tools, but the machine learning models behind these tools are rarely
-explained to the communities that rely on them. We present the explanation
-layer of Shared Skies, a deployed web platform that maps fine particulate
-matter (PM2.5) in real time across all 6,896 Texas census tracts using a
-tree ensemble trained on 285,798 daily readings from 310 PurpleAir sensors
-and validated at a leave-one-sensor-out coefficient of determination of
-0.71. Because SHAP attributions are additive and the deployed prediction is
-a convex blend of tree models, blending per-model TreeExplainer
-attributions with the deployment weights reproduces the ensemble output to
-within one millionth of the measurement unit. Summing attributions within
-seven concept groups yields a decomposition non-specialists can read in
-physical units. The
-explanations show that the model is chiefly a spatial nowcaster: features
-describing nearby sensors dominate globally, carry a major smoke event
-almost alone while the dedicated smoke tier adds at most 0.31 micrograms
-per cubic meter, and actively suppress predictions during hyper-local events
-that no neighboring sensor observes. We report guardrails for policy
-interpretation, including inverted proximity features and strictly
-correlational environmental justice attributions, and show how explained
-failures motivate targeted sensor placement.
+Low-cost sensor networks feed operational air quality maps, but the models
+behind them are rarely explained to the communities relying on them. This
+paper presents an exact explanation layer for Shared Skies, a deployed platform
+mapping PM2.5 across 6,896 Texas census tracts, validated at 0.71 by
+leave-one-sensor-out testing. Blending per-model TreeExplainer attributions
+with deployment weights reconstructs every prediction exactly; sums over
+seven concept groups make predictions readable in physical units. The
+explanations reveal a spatial nowcaster: neighbor features dominate, carry
+a smoke event nearly alone, and suppress hyper-local events no neighbor
+observes, motivating targeted sensor placement and policy guardrails.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -72,7 +62,7 @@ sensors, ensemble learning, environmental monitoring
 Low-cost optical sensors have changed who gets to see air pollution.
 Networks such as PurpleAir now report fine particulate matter (PM2.5) at
 neighborhood scale and minute cadence, and corrected versions of their data
-now feed public tools such as the AirNow Fire and Smoke Map
+feed public tools such as the AirNow Fire and Smoke Map
 \cite{barkjohn2021}. The
 placement of these sensors is itself uneven across income groups
 \cite{desouza2021}, so the models that interpolate between them are, for
@@ -95,7 +85,7 @@ platform that predicts PM2.5 for every census tract in Texas from PurpleAir
 sensors and public data streams, refreshing continuously. We contribute:
 (1) an exact explanation layer for the deployed convex tree ensemble, which
 blends per-model TreeExplainer attributions with the deployment weights to
-reconstruct every pre-clipping output to within $10^{-6}$~\ugm{}, then
+reconstruct every pre-clipping output to machine precision, then
 partitions the 38 features into seven concept groups so that each
 prediction becomes a short physical story; (2) a characterization of what the deployed model actually
 learned, which is dominated to a degree accuracy metrics never reveal by
@@ -108,7 +98,9 @@ placement rather than model tuning.
 \section{The Deployed System}
 \subsection{Platform}
 Shared Skies serves a public, bilingual web map of model-estimated 24-hour
-PM2.5 for all 6,896 Texas census tracts. The backend pulls live PurpleAir
+PM2.5 for all 6,896 Texas census tracts
+(\url{https://sharedskiesinitiative.org/real-time-map}), publicly served
+since April 2026. The backend pulls live PurpleAir
 readings, cached for 15 minutes, recomputes the full feature set, runs the
 ensemble for every tract, and caches predictions for 30 minutes. A served
 value estimates a tract's daily-mean-equivalent PM2.5 given current
@@ -198,25 +190,27 @@ The deployed prediction for features $x$ is
 $f(x)=\max\bigl(0,\sum_m w_m f_m(x)\bigr)$ over the three models with
 $w_m>0$. TreeExplainer \cite{lundberg2020} decomposes each tree model
 exactly as $f_m(x)=b_m+\sum_j \phi^m_j(x)$. Attributions are additive, so
-
 \begin{equation}
-\sum_m w_m f_m(x) = b + \sum_j \phi_j(x)
+\sum_m w_m f_m(x) = b + \sum_j \phi_j(x),
 \label{eq:blend}
 \end{equation}
-
-with $b=\sum_m w_m b_m$ and $\phi_j(x)=\sum_m w_m \phi^m_j(x)$ is an
-additive decomposition of the pre-clipping ensemble output, computed
-without sampling or surrogate models. Exact here means local accuracy,
+where $b=\sum_m w_m b_m$ and $\phi_j(x)=\sum_m w_m \phi^m_j(x)$. The
+result is an additive decomposition of the pre-clipping ensemble output,
+computed without sampling or surrogate models. The algebra is elementary, a direct
+consequence of the additivity of SHAP attributions \cite{lundberg2017}; the
+point is applying it to the blend a public platform actually serves rather
+than to a surrogate or a single member model. Exact here means local
+accuracy,
 faithful reconstruction of this model's output, not axiomatic Shapley
 values under an interventional distribution: TreeExplainer (SHAP 0.50.0)
 runs in tree-path-dependent mode, which conditions on the training
 distribution through tree cover counts, and its credit assignment among
 correlated features differs from interventional variants. The audit of
 Eq.~\eqref{eq:blend} runs wherever rows are explained; over the 6,000-row
-global sample the maximum absolute reconstruction error is
-$8.9\times10^{-7}$~\ugm{} (mean $5.9\times10^{-8}$); the residual reflects
-float32 caching, and direct float64 explanation of individual rows
-reconstructs to $5\times10^{-13}$~\ugm{}. The serving layer applies only a
+global sample the maximum absolute reconstruction error is below
+$6\times10^{-6}$~\ugm{} (mean below $5\times10^{-7}$); the residual
+reflects float32 caching, and direct float64 explanation of individual
+rows reconstructs to $5\times10^{-13}$~\ugm{}. The serving layer applies only a
 final clip at zero, which never binds on the sampled predictions (minimum
 raw output $+0.4$~\ugm{}).
 
@@ -224,7 +218,9 @@ raw output $+0.4$~\ugm{}).
 Individual attributions for 38 features are exact but not legible to a
 public audience. We therefore partition the features into the seven concept
 groups of Table~\ref{tab:groups} and report group sums
-$\Phi_G(x)=\sum_{j\in G}\phi_j(x)$. Because the partition is exhaustive and
+$\Phi_G(x)=\sum_{j\in G}\phi_j(x)$, the summation form of grouped Shapley
+explanation \cite{jullum2021}; the contribution here is the domain
+ontology, not the operation. Because the partition is exhaustive and
 disjoint, $b+\sum_G \Phi_G(x)$ still reconstructs the prediction exactly;
 runtime validation asserts the partition against the deployed feature list.
 Note that a group's global importance, the mean absolute summed
@@ -238,7 +234,8 @@ frame (seed 42). Feature response is analyzed with dependence scatters,
 value and attribution, with bootstrap intervals clustered by sensor. Because the sample contains only five heavy-smoke
 rows, tier-level smoke statistics are recomputed exactly over all 431
 heavy-tier rows in the corpus and a 2,500-row sample of the medium tier,
-with 2,000-resample percentile-bootstrap 95\% confidence intervals. Two
+with 2,000-resample percentile-bootstrap 95\% confidence intervals
+clustered by day, since statewide plumes correlate all same-day rows. Two
 full days are explained
 sensor-by-sensor: the strongest smoke day (May 27, 2024) and the cleanest
 day (April 3, 2024) among days with at least 150 reporting sensors. Local
@@ -279,20 +276,22 @@ five ways.
 \subsubsection{Near-linear regional response} The 50~km neighbor mean maps
 onto its attribution almost monotonically (Spearman $\rho=0.994$), with
 slope 0.26~\ugm{} per 1~\ugm{} of neighbor mean below 30~\ugm{}, then
-flattens: recomputed exactly over the corpus, the median contribution is
-$+6.3$~\ugm{} for neighbor means between 30 and 40~\ugm{} and $+8.0$~\ugm{}
+flattens: over corpus rows, the median contribution is
+$+6.3$~\ugm{} for neighbor means between 30 and 40~\ugm{} (2,000 of 4,060
+rows sampled) and $+7.95$~\ugm{}
 (CI $[7.93, 7.97]$, all 860 qualifying rows) above 40~\ugm{}. The
 flattening is consistent with the exclusion of training days above
 75~\ugm{}: the model has little headroom to extrapolate events it never
 saw.
 
-\subsubsection{The smoke tier is nearly redundant, and not monotone} Mean
+\subsubsection{The smoke tier is nearly redundant} Mean
 attribution of the HMS tier, in \ugm{}, is $-0.044$ (none) and $+0.060$
 (light) on the sample, $+0.110$ over 2,500 recomputed medium-tier rows
-(CI $[0.108, 0.111]$), and $+0.097$ over all 431 heavy-tier rows
-(CI $[0.094, 0.101]$). Heavy plumes contribute less than medium ones
-(bootstrap difference CI $[0.008, 0.016]$~\ugm{}), though the
-$0.012$~\ugm{} gap is negligible against an RMSE of 4.22. Only 431 of
+(CI $[0.105, 0.115]$), and $+0.097$ over all 431 heavy-tier rows
+(CI $[0.088, 0.113]$; the heavy rows fall on only 31 days). Heavy-tier
+attribution shows no increase over medium (difference CI
+$[-0.004, 0.023]$~\ugm{}), and the whole tier range is negligible against
+a LOSO RMSE near 4.2~\ugm{}. Only 431 of
 285,798 training rows (0.15\%) carry the heavy tier, and on those rows mean
 observed PM2.5 is lower than on medium-tier rows (11.6 versus
 16.6~\ugm{}), a reminder that an analyst-drawn plume overhead does not
@@ -338,8 +337,9 @@ attribution.
 is the 12-quantile binned median). (a) Contribution of the 50 km neighbor
 mean is near-linear then flattens above 40~\ugm{}. (b) HMS smoke tier:
 red markers are exact means over all 431 heavy-tier rows and 2,500
-medium-tier rows with bootstrap 95\% intervals; heavy contributes less than
-medium. (c) Traffic proximity is inert until roughly the 85th percentile,
+medium-tier rows with day-clustered bootstrap 95\% intervals; the heavy
+tier shows no increase over medium.
+(c) Traffic proximity is inert until roughly the 85th percentile,
 then turns negative. (d) Linguistic isolation rises monotonically past its
 70th percentile.}
 \label{fig:dependence}
@@ -360,11 +360,11 @@ $+0.31$~\ugm{} anywhere in the state.}
 \subsection{Two days, one mechanism}
 On May 27, 2024
 (Fig.~\ref{fig:maps}), with 98.7\% of sensors under an analyst-drawn plume
-and a statewide mean reading of 37.0~\ugm{}, the model predicts a mean of
-36.1~\ugm{}, and the regional signal group contributes $+24.8$~\ugm{} of
+and a statewide mean reading of 37.0~\ugm{}, the model predicted a mean of
+36.1~\ugm{}, and the regional signal group contributed $+24.8$~\ugm{} of
 that on average. The smoke tier's largest contribution anywhere in the
-state is $+0.31$~\ugm{}. On April 3, 2024 (statewide mean 1.03~\ugm{}), the
-regional group pulls predictions down by 7.6~\ugm{} on average from the
+state was $+0.31$~\ugm{}. On April 3, 2024 (statewide mean 1.03~\ugm{}), the
+regional group pulled predictions down by 7.6~\ugm{} on average from the
 9.72~\ugm{} baseline. Smoke information reaches the model through the
 neighbor network, not the smoke feature: both days are settings of one
 nowcasting mechanism.
@@ -404,18 +404,19 @@ baseline.}
 
 \subsection{For model builders} The smoke tier could be replaced, not
 retuned: candidate representations include plume density, smoke age, or
-lagged fire radiative power; only 431 heavy-tier rows support the current
-one. The saturating neighbor
+lagged fire radiative power. The saturating neighbor
 response ties directly to the 75~\ugm{} training cap, so raising the cap
 (or modeling exceedances separately) is a measurable next experiment.
 
 \subsection{For network operators} The miss case turns an error metric
 into a map, with one caution: sign alone cannot separate clean
-surroundings from unsensed ones (the clean day's statewide mean,
-$-7.6$~\ugm{}, is as negative as El Paso's annual $-7.0$~\ugm{}). Sparsity
+surroundings from unsensed ones (the clean day's statewide mean regional
+contribution, $-7.6$~\ugm{}, is as negative as El Paso's annual
+$-7.0$~\ugm{}). Sparsity
 separates them: the El Paso sensor averages 0.8 same-day neighbors within
-50~km against a statewide 27, while densely sensed East Texas runs
-$+9.3$~\ugm{}. Persistently negative regional means in sparse
+50~km against a statewide 27, while densely sensed East Texas averages
+$+1.25$~\ugm{}, with individual sensors up to $+9.3$~\ugm{}. Persistently
+negative regional means in sparse
 neighborhoods mark where predictions rest on remote evidence (distance to
 the nearest sensor reaches 164~km), and those are the places where the
 platform's placement optimizer should spend new sensors; the explanation
@@ -440,19 +441,23 @@ accuracy at unsensed tracts is unquantified, and the miss case suggests it
 degrades exactly there. The EJ attributions are further conditioned on a
 network whose placement is itself demographically uneven
 \cite{desouza2021}, so their sign and size partly reflect where sensors
-exist. Tree-path-dependent attribution spreads credit among correlated
+exist. Whether demographic indicators belong in a served public model's
+inputs at all is a question this paper surfaces rather than settles; the
+explanation layer makes it inspectable.
+Tree-path-dependent attribution spreads credit among correlated
 features, so within-group rankings are less certain than group totals. Explanation statistics describe the training frame, not the
 serving distribution. The findings describe one model over one state and
 five years; the method applies unchanged to any convex blend of tree
 models.
 
+\balance
 \section{Conclusion}
 We converted a deployed, accuracy-validated PM2.5 mapping system into one
 whose every prediction can be read: an exact blend of per-model
 TreeExplainer attributions, folded into seven concept groups, reconstructs
-each output to within $10^{-6}$~\ugm{}. The reading is unflattering in
+each output to machine precision. The reading is unflattering in
 places. The model is a spatial nowcaster that nearly ignores its smoke
-flag, inverts proximity features at the urban extreme, and structurally
+tier, inverts proximity features at the urban extreme, and structurally
 cannot see events its sensor network does not cover. None of this is
 visible in $R^2$, and all of it matters for how the tool should be used,
 improved, and communicated. Explaining 6,000 predictions takes 20 minutes
@@ -460,7 +465,6 @@ on a desktop CPU and one prediction a fraction of a second, so attaching
 exact, plainly narrated explanations to the live platform is the immediate
 next step.
 
-\balance
 \bibliographystyle{IEEEtran}
 \bibliography{../references}
 

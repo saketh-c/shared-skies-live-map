@@ -86,6 +86,16 @@ S = pd.read_parquet(CACHE / "shap_ensemble.parquet").reset_index(drop=True)
 F = pd.read_parquet(CACHE / "features_sample.parquet").reset_index(drop=True)
 extra = json.loads((HERE / "verified_numbers_extra.json").read_text()) \
     if (HERE / "verified_numbers_extra.json").exists() else {}
+# Prefer DAY-CLUSTERED tier CIs (smoke arrives in statewide episodes, so
+# days, not rows, are the exchangeable unit; see
+# verified_numbers_tiers_dayclustered.json / verify_numbers_tiers_dayclustered.py).
+_dc_path = HERE / "verified_numbers_tiers_dayclustered.json"
+if _dc_path.exists():
+    _dc = json.loads(_dc_path.read_text())
+    if "t2_mean_ci95_day_clustered" in _dc:
+        extra["tier2_hms_ci95"] = _dc["t2_mean_ci95_day_clustered"]
+    if "t3_mean_ci95_day_clustered" in _dc:
+        extra["tier3_hms_ci95"] = _dc["t3_mean_ci95_day_clustered"]
 
 gcol, vcol = group_imp.columns[0], group_imp.columns[1]
 fcol, fvcol = feat_imp.columns[0], feat_imp.columns[1]
@@ -127,7 +137,7 @@ save(fig, "fig1_system")
 
 # ================================================================ FIG 2
 # (a) concept-group importance  (b) top-8 features
-fig, axes = plt.subplots(2, 1, figsize=(COL_W, 2.9),
+fig, axes = plt.subplots(2, 1, figsize=(COL_W, 2.72),
                          gridspec_kw={"height_ratios": [7, 8], "hspace": 0.55})
 g = group_imp.sort_values(vcol, ascending=True)
 ax = axes[0]
@@ -146,7 +156,7 @@ ax.barh(f8[fcol], f8[fvcol], color=ACCENT, height=0.62)
 for i, v in enumerate(f8[fvcol]):
     ax.text(v + 0.025, i, f"{v:.2f}", va="center", fontsize=6.5, color=INK)
 ax.set_xlim(0, 2.15)
-ax.set_xlabel(f"mean |SHAP| ({UGM3})", labelpad=1.5)
+ax.set_xlabel(f"mean |contribution| ({UGM3})", labelpad=1.5)
 ax.set_title("(b) top 8 of 38 features", loc="left", fontsize=8)
 despine(ax)
 ax.tick_params(axis="y", length=0)
@@ -230,7 +240,7 @@ for label, path in days:
     gsum = grouping.group_sums(d[feat_cols])
     panels.append((label, d, gsum))
 
-fig, axes = plt.subplots(2, 2, figsize=(COL_W, 3.0),
+fig, axes = plt.subplots(2, 2, figsize=(COL_W, 2.78),
                          gridspec_kw={"wspace": 0.04, "hspace": 0.02})
 cbars = []
 for r, (label, d, gsum) in enumerate(panels):
@@ -281,7 +291,7 @@ phi, base = explain_rows(bundle, X)
 preds = np.maximum(base + phi.sum(axis=1), 0.0)
 
 order = None
-fig, axes = plt.subplots(1, 2, figsize=(COL_W, 2.05), gridspec_kw={"wspace": 0.12})
+fig, axes = plt.subplots(1, 2, figsize=(COL_W, 1.92), gridspec_kw={"wspace": 0.12})
 for k, ((title, sid, date), row) in enumerate(zip(cases, rows)):
     gvals = grouping.group_sums(pd.DataFrame([phi[k]], columns=feats)).iloc[0]
     if order is None:
@@ -292,10 +302,16 @@ for k, ((title, sid, date), row) in enumerate(zip(cases, rows)):
     ax.barh(np.arange(len(gv)), gv.values, color=colors, height=0.62)
     span = max(abs(gv.values).max() * 1.45, 2.0)
     for i, v in enumerate(gv.values):
-        ax.text(v + (0.04 * span if v >= 0 else -0.04 * span), i, f"{v:+.1f}",
+        lbl = f"{v:+.1f}"
+        if lbl in ("-0.0", "+0.0"):
+            lbl = "0.0"  # never print a signed zero
+        ax.text(v + (0.04 * span if v >= 0 else -0.04 * span), i, lbl,
                 va="center", ha="left" if v >= 0 else "right", fontsize=6.0, color=INK)
     ax.axvline(0, color=MUTED, lw=0.6)
-    ax.set_xlim(-span, span)
+    # Data-driven left limit: an all-positive panel keeps a small negative
+    # margin instead of wasting half the axis (panel (b) is unchanged).
+    left = min(gv.values.min() * 1.45, -0.1 * span)
+    ax.set_xlim(left, span)
     ax.set_yticks(np.arange(len(gv)))
     if k == 0:
         short = {"Regional PM signal": "regional signal", "Wildfire smoke": "smoke tier",

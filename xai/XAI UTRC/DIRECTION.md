@@ -11,7 +11,7 @@ Technology OF Computation (data science / machine learning); alternative:
 Technology FOR Sustainability.
 
 Authors:
-1. Nathan Tan, St. Mark's School of Texas, Dallas, TX, USA (nathantan2027@gmail.com)
+1. Saketh Chebrolu, St. Mark's School of Texas, Dallas, TX, USA (nathantan2027@gmail.com)
 2. Saketh Chebrolu, St. Mark's School of Texas, Dallas, TX, USA (chebrolusaketh@gmail.com)
 3. Yifeng Wang, School of Civil and Environmental Engineering, Georgia
    Institute of Technology, Atlanta, GA, USA (EMAIL PLACEHOLDER, highlighted in draft)

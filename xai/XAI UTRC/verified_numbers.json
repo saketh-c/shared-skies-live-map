@@ -38,20 +38,20 @@
     "models": {
       "rf": {
         "base_value": 9.674433468926189,
-        "seconds": 1155.9
+        "seconds": 1112.3
       },
       "lgbm": {
         "base_value": 9.808263584381741,
-        "seconds": 4.7
+        "seconds": 2.9
       },
       "cat": {
         "base_value": 9.808328321446592,
-        "seconds": 8.6
+        "seconds": 3.8
       }
     },
     "base_value_ensemble": 9.716908255028962,
-    "additivity_max_abs_err": 8.938820386106272e-07,
-    "additivity_mean_abs_err": 5.928482805413656e-08
+    "additivity_max_abs_err": 7.176481631177012e-13,
+    "additivity_mean_abs_err": 2.9129300823290314e-14
   },
   "frame_rows": 285798,
   "frame_sensors": 310,
@@ -148,5 +148,7 @@
   },
   "east_tx_regional_mean": 1.25,
   "west_tx_regional_mean": -3.16,
-  "n_sensors_sensor_group_means": 310
+  "n_sensors_sensor_group_means": 310,
+  "float32_cache_recon_max_err": 5.502377064203756e-06,
+  "float32_cache_recon_mean_err": 4.238619827226971e-07
 }

@@ -156,6 +156,16 @@ note("east_tx_regional_mean", round(float(east["Regional PM signal"].mean()), 2)
 note("west_tx_regional_mean", round(float(west["Regional PM signal"].mean()), 2))
 note("n_sensors_sensor_group_means", int(len(sg)))
 
+print("[11] float32-cache reconstruction audit (paper Sec. III-A residual claim)")
+# base + sum(float32-cached SHAP) vs the float64 pred_raw stored with the sample.
+_S = pd.read_parquet(CACHE / "shap_ensemble.parquet")
+_sample = pd.read_parquet(CACHE / "features_sample.parquet")
+_meta = json.loads((CACHE / "shap_meta.json").read_text())
+_recon = _meta["base_value_ensemble"] + _S.sum(axis=1).to_numpy(dtype=np.float64)
+_err = np.abs(_recon - _sample["pred_raw"].to_numpy())
+note("float32_cache_recon_max_err", float(_err.max()))
+note("float32_cache_recon_mean_err", float(_err.mean()))
+
 Path(__file__).with_name("verified_numbers.json").write_text(
     json.dumps(OUT, indent=2), encoding="utf-8")
 print("\nwrote verified_numbers.json with", len(OUT), "entries")

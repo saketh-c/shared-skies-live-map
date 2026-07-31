@@ -43,6 +43,11 @@ explanation layer. The manuscript is `paper/main.pdf`.
   case-row reconstruction in float64 (5e-13), and fixes a sensor-id dtype
   bug that had silently emptied the earlier cap check (241 pre-cap rows
   above 75 exist among the 310 sensors; the miss row is genuinely 75.0).
+- `verify_numbers_tiers_dayclustered.py` / `verified_numbers_tiers_dayclustered.json`:
+  day-clustered bootstrap for the smoke-tier means and the medium-vs-heavy
+  difference (heavy rows fall on only 31 days; the iid difference CI
+  [0.008, 0.016] widens to [-0.004, 0.023] under day clustering, so the
+  paper claims "no increase over medium" rather than a strict decrease).
 - `DIRECTION.md`: the direction memo (thesis, outline, figure plan,
   verified-numbers policy) the paper was built from.
 - `citation_verification_notes.md`: per-reference verification evidence.
