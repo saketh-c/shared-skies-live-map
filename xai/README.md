@@ -46,14 +46,25 @@ outputs/
   *.csv             importance tables
 ```
 
-## Running (from `xai/`, Python 3.14 w/ shap + catboost)
+## Running (from `xai/`, Python 3.11+ w/ shap + catboost)
 
 ```
 python engine/explain_shap.py --probe 64     # timing estimate
-python engine/explain_shap.py --sample 6000  # ~30 min (RF dominates), cached
+python engine/explain_shap.py --sample 6000  # ~20-30 min (RF dominates), cached
 python analysis/01_global_importance.py
 python analysis/02_local_waterfalls.py
+python analysis/03_spatial_maps.py
+python analysis/04_dependence.py
+python analysis/05_interactions.py --sample 300 --budget-min 240
+python analysis/06_robustness.py             # bootstrap CIs + method agreement
 ```
+
+Verification status (2026-07-26 run, seed 42): additivity max |err| = 0.0000
+µg/m³ (base + Σφ reconstructs the raw margin exactly; ensemble base 9.717).
+An earlier committed run showed a constant 3.03 offset — that was the CatBoost
+expected_value read-order bug, fixed in `explain_shap.py`; figures and logs in
+this repo are from the corrected run. The frame cache is fingerprinted against
+the deployed bundle and auto-invalidates on model change.
 
 If `p2_processed_v2.xls` is missing (it is gitignored), regenerate it first:
 `python pipeline/07_align_for_training.py` from the repo root.
@@ -129,5 +140,13 @@ If `p2_processed_v2.xls` is missing (it is gitignored), regenerate it first:
       backend integration (phase 5), which builds tract feature rows.
 - [ ] Phase 3 — narration layer (`narrate.py`) + counterfactual scenarios
       (physical features only) + backend `/explain` endpoint
-- [ ] Phase 4 — ALE, permutation importance, method-agreement analysis
+- [~] Phase 4 — method agreement STARTED (`analysis/06_robustness.py`):
+      sensor-clustered bootstrap CIs on the group ranking (89.3% full-ranking
+      stability, B=1000) + grouped joint-shuffle permutation importance —
+      Spearman rank agreement with the SHAP group ranking = 1.000 (note: EJ
+      context vs Geography is a near-tie in the permutation view, 0.0510 vs
+      0.0507 ΔR²). Direction table now ships clustered bootstrap CIs instead
+      of i.i.d. p-values. Remaining: ALE curves, interventional-SHAP
+      comparison, leave-one-group-out retrains. See also METHODS_NOTES.md for
+      code-verified LOSO-leakage and PurpleAir/Barkjohn statements.
 - [ ] Phase 5 — dashboard integration + policy brief generator

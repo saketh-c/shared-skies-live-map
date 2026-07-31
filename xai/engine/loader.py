@@ -7,8 +7,13 @@ reimplementation), then applying the same cap + in-Texas filters as that
 script's __main__, so SHAP values always explain the model on the data it
 actually saw. The built frame is cached to parquet because the rebuild takes
 a few minutes (neighbor-feature computation over 400k rows).
+
+The frame cache is guarded by a bundle FINGERPRINT (ensemble.joblib mtime +
+size + feature list): if the deployed model changes, the cached frame is
+invalidated automatically instead of silently explaining a stale pairing.
 """
 import importlib.util
+import json
 import warnings
 from pathlib import Path
 
@@ -22,6 +27,16 @@ CACHE_DIR = ROOT / "xai" / "outputs" / "cache"
 FIGURES_DIR = ROOT / "xai" / "outputs" / "figures"
 
 FRAME_CACHE = CACHE_DIR / "training_frame.parquet"
+FRAME_META = CACHE_DIR / "training_frame.meta.json"
+
+
+def bundle_fingerprint():
+    """Identity of the deployed bundle the cache was built against."""
+    p = MODELS_DIR / "ensemble.joblib"
+    st = p.stat()
+    feats = load_bundle()["feature_names"]
+    return {"mtime_ns": st.st_mtime_ns, "size": st.st_size,
+            "n_features": len(feats), "features": list(feats)}
 
 # Row-identity columns kept alongside the model features (when present).
 ID_COLS = ["sensor_id", "date", "GEOID", "pm25"]
@@ -72,7 +87,14 @@ def load_training_frame(rebuild=False):
     mirroring that script's __main__ line for line.
     """
     if FRAME_CACHE.exists() and not rebuild:
-        return pd.read_parquet(FRAME_CACHE)
+        # Cache only valid for the bundle it was built against.
+        try:
+            cached_fp = json.loads(FRAME_META.read_text())
+            if cached_fp == bundle_fingerprint():
+                return pd.read_parquet(FRAME_CACHE)
+            print("[loader] bundle changed since frame cache was built - rebuilding")
+        except (FileNotFoundError, json.JSONDecodeError):
+            print("[loader] frame cache has no fingerprint (pre-guard cache) - rebuilding")
 
     print("[loader] rebuilding training frame via pipeline/03_train_enhanced.load_data() ...")
     mod = _load_training_module()
@@ -102,5 +124,6 @@ def load_training_frame(rebuild=False):
 
     CACHE_DIR.mkdir(parents=True, exist_ok=True)
     frame.to_parquet(FRAME_CACHE, index=False)
+    FRAME_META.write_text(json.dumps(bundle_fingerprint(), indent=2))
     print(f"[loader] cached {len(frame):,} rows x {len(frame.columns)} cols -> {FRAME_CACHE}")
     return frame

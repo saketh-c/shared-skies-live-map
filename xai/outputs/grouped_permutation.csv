@@ -1,0 +1,8 @@
+group,baseline_r2,delta_r2_mean,delta_r2_sd,n_repeats
+Regional PM signal,0.8084,1.37568,0.02624,8
+Community & EJ context,0.8084,0.051,0.0015,8
+Geography,0.8084,0.05074,0.00073,8
+Local sources,0.8084,0.04437,0.00123,8
+Meteorology,0.8084,0.01731,0.00052,8
+Season & calendar,0.8084,0.0084,0.00053,8
+Wildfire smoke,0.8084,0.00159,0.00013,8

@@ -82,7 +82,11 @@ def main():
     g["lat"] = sample["latitude"].to_numpy()
     g["lon"] = sample["longitude"].to_numpy()
     g["pred"] = sample["pred"].to_numpy()
-    per_sensor = g.groupby("sensor_id").mean()
+    per_sensor = g.groupby("sensor_id").mean(numeric_only=True)
+    # Census-tract join key for downstream tract-level integration: GEOID is
+    # constant per sensor, so carry it alongside the numeric means.
+    if "GEOID" in sample.columns:
+        per_sensor["GEOID"] = sample.groupby("sensor_id")["GEOID"].first()
 
     order = (per_sensor[list(grouping.GROUPS)].abs().mean()
              .sort_values(ascending=False).index.tolist())
