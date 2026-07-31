@@ -1,0 +1,152 @@
+{
+  "loso_r2_optimized": 0.7136,
+  "loso_weights": {
+    "rf": 0.6827,
+    "lgbm": 0.0079,
+    "xgb": 0.0,
+    "cat": 0.3094
+  },
+  "loso_baseline": {
+    "rmse": 4.2218,
+    "mae": 2.6176,
+    "r2": 0.7126,
+    "n_sites": 310
+  },
+  "single_model_loso_r2": {
+    "rf": 0.7138,
+    "lgbm": 0.7031,
+    "xgb": 0.7022,
+    "cat": 0.7078
+  },
+  "equal_weight_r2": 0.7114,
+  "n_oof_rows": 285798,
+  "n_features": 38,
+  "pm25_train_cap": 75.0,
+  "random_split_ensemble": {
+    "rmse": 3.1646,
+    "r2": 0.8392,
+    "mae": 1.7211
+  },
+  "shap_meta": {
+    "n_sample": 6000,
+    "seed": 42,
+    "weights": {
+      "rf": 0.682698,
+      "lgbm": 0.007879,
+      "cat": 0.309422
+    },
+    "models": {
+      "rf": {
+        "base_value": 9.674433468926189,
+        "seconds": 1155.9
+      },
+      "lgbm": {
+        "base_value": 9.808263584381741,
+        "seconds": 4.7
+      },
+      "cat": {
+        "base_value": 9.808328321446592,
+        "seconds": 8.6
+      }
+    },
+    "base_value_ensemble": 9.716908255028962,
+    "additivity_max_abs_err": 8.938820386106272e-07,
+    "additivity_mean_abs_err": 5.928482805413656e-08
+  },
+  "frame_rows": 285798,
+  "frame_sensors": 310,
+  "frame_date_min": "2021-01-01",
+  "frame_date_max": "2026-05-01",
+  "frame_pm25_max": 75.0,
+  "hms_tier_counts_training_frame": {
+    "0": 171080,
+    "1": 104343,
+    "2": 9944,
+    "3": 431
+  },
+  "rows_over_cap_310_sensors": 0,
+  "rows_over_cap_pct": 0.0,
+  "group_importance_recomputed": {
+    "Regional PM signal": 4.8425,
+    "Community & EJ context": 0.3939,
+    "Geography": 0.3241,
+    "Local sources": 0.2883,
+    "Meteorology": 0.2046,
+    "Season & calendar": 0.066,
+    "Wildfire smoke": 0.0525
+  },
+  "feature_importance_top10": {
+    "nbr_pm25_100km": 1.857,
+    "nbr_pm25_50km": 1.3709,
+    "nbr_pm25_25km": 1.3579,
+    "nbr_std_50km": 0.303,
+    "cams_pm25": 0.2113,
+    "pct_ling_isolated": 0.1536,
+    "rmp_proximity": 0.1322,
+    "longitude": 0.1315,
+    "pct_people_of_color": 0.12,
+    "aod": 0.1166
+  },
+  "spearman_pct_ling_isolated": {
+    "rho": 0.622,
+    "p": 0.0
+  },
+  "spearman_pct_people_of_color": {
+    "rho": 0.628,
+    "p": 0.0
+  },
+  "spearman_traffic_proximity": {
+    "rho": -0.292,
+    "p": 2.00272737571851e-118
+  },
+  "spearman_nbr_pm25_50km": {
+    "rho": 0.994,
+    "p": 0.0
+  },
+  "pct_ling_isolated_mean_shap_above_p70": 0.249,
+  "traffic_mean_shap_above_p85": -0.361,
+  "traffic_min_binned_median": -0.353,
+  "traffic_binned_medians_last3": [
+    0.046,
+    -0.112,
+    -0.353
+  ],
+  "traffic_mean_shap_top2pct": -1.146,
+  "hms_tier_mean_shap": {
+    "0": -0.044,
+    "1": 0.06,
+    "2": 0.109,
+    "3": 0.093
+  },
+  "hms_tier_counts_sample": {
+    "0": 3593,
+    "1": 2188,
+    "2": 214,
+    "3": 5
+  },
+  "nbr50_slope_below30": 0.261,
+  "nbr50_median_shap_30_40": 6.16,
+  "nbr50_median_shap_40plus": 8.2,
+  "nbr50_n_40plus": 13,
+  "smoke_20240527": {
+    "n_sensors": 156,
+    "mean_actual_pm25": 37.0,
+    "mean_pred": 36.08,
+    "regional_mean_contrib": 24.82,
+    "smoke_flag_mean_contrib": 0.202,
+    "smoke_flag_max_contrib": 0.306,
+    "plume_share": 0.9872
+  },
+  "clean_20240403": {
+    "n_sensors": 154,
+    "mean_actual_pm25": 1.03,
+    "mean_pred": 1.65,
+    "regional_mean_contrib": -7.58,
+    "smoke_flag_mean_contrib": -0.05,
+    "smoke_flag_max_contrib": 0.158,
+    "plume_share": 0.0195
+  },
+  "east_tx_regional_mean": 1.25,
+  "west_tx_regional_mean": -3.16,
+  "n_sensors_sensor_group_means": 310
+}

@@ -1,0 +1,108 @@
+{
+  "ready_rows_matched_310_sensors": 286039,
+  "ready_pm25_max_310sensors": 163.8,
+  "rows_over_cap_310_sensors": 241,
+  "rows_over_cap_pct_of_precap": 0.0843,
+  "miss_row_pm25_in_parquet": 75.0,
+  "miss_row_is_exactly_cap": true,
+  "n_candidates_pm25_ge_40": 1655,
+  "worst_miss_sensor": "242357",
+  "worst_miss_date": "2024-11-19",
+  "worst_miss_actual": 75.0,
+  "worst_miss_pred": 6.22,
+  "smoke_day_selected": "2024-05-27",
+  "clean_day_selected": "2024-04-03",
+  "clip_active_fraction_sample": 0.0,
+  "min_pred_raw_sample": 0.378,
+  "n_corpus_rows_nbr50_ge_40": 860,
+  "n_corpus_rows_nbr50_30_40": 4060,
+  "sat40_n_explained": 860,
+  "sat40_median_contrib": 7.95,
+  "sat40_median_ci95": [
+    7.93,
+    7.97
+  ],
+  "mid3040_n_explained": 2000,
+  "mid3040_median_contrib": 6.29,
+  "mid3040_median_ci95": [
+    6.24,
+    6.33
+  ],
+  "n_failure_class_rows": 46,
+  "failure_class_regional_negative_count": 46,
+  "failure_class_regional_mean": -5.21,
+  "failure_class_mean_actual": 54.1,
+  "failure_class_mean_pred": 5.89,
+  "failure_class_max_pred": 9.09,
+  "regional_min_sensor": {
+    "sensor_id": "131903",
+    "Regional PM signal": -6.998,
+    "lat": 31.786,
+    "lon": -106.36
+  },
+  "regional_max_sensor": {
+    "sensor_id": "255423",
+    "Regional PM signal": 9.329,
+    "lat": 30.959,
+    "lon": -94.413
+  },
+  "elpaso_mean_nbr_count_50km": 0.8,
+  "statewide_mean_nbr_count_50km": 27.1,
+  "elpaso_mean_dist_to_nearest": 3.1,
+  "dist_to_nearest_sensor_max": 164.3,
+  "case_recon_max_err": 4.831690603168681e-13,
+  "case_217461": {
+    "actual": 71.1,
+    "pred": 49.6,
+    "groups": {
+      "Wildfire smoke": 0.29,
+      "Regional PM signal": 34.58,
+      "Meteorology": 1.47,
+      "Local sources": 0.87,
+      "Community & EJ context": 0.72,
+      "Geography": 0.85,
+      "Season & calendar": 1.09
+    },
+    "nbr_shap": {
+      "nbr_pm25_25km": 7.97,
+      "nbr_pm25_50km": 8.9,
+      "nbr_pm25_100km": 13.26
+    },
+    "nbr_values": {
+      "nbr_pm25_25km": 60.2,
+      "nbr_pm25_50km": 60.2,
+      "nbr_pm25_100km": 59.267
+    }
+  },
+  "case_242357": {
+    "actual": 75.0,
+    "pred": 6.22,
+    "groups": {
+      "Wildfire smoke": -0.03,
+      "Regional PM signal": -6.09,
+      "Meteorology": 0.44,
+      "Local sources": 1.04,
+      "Community & EJ context": 0.45,
+      "Geography": 0.57,
+      "Season & calendar": 0.12
+    },
+    "nbr_shap": {
+      "nbr_pm25_25km": -1.68,
+      "nbr_pm25_50km": -1.78,
+      "nbr_pm25_100km": -2.49
+    },
+    "nbr_values": {
+      "nbr_pm25_25km": 1.45,
+      "nbr_pm25_50km": 1.789,
+      "nbr_pm25_100km": 1.646
+    }
+  },
+  "tier2_minus_tier3_mean_diff": 0.0124,
+  "tier2_minus_tier3_diff_ci95": [
+    0.0084,
+    0.0161
+  ],
+  "log_partial_base_rf_lgbm_only": 6.682,
+  "log_missing_cat_term": 3.0349,
+  "true_base": 9.7169
+}
