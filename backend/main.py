@@ -48,7 +48,14 @@ MODELS_DIR = os.path.join(ROOT, "models")
 # from same-day live readings to match training. TTL 60 min: with the 24h-mean
 # field a 1-hour cadence tracks events closely while staying cheap (24 small
 # bbox pulls/day). Set PURPLEAIR_API_KEY in Render env to override the key.
-PURPLEAIR_CACHE_TTL_MIN = int(os.environ.get("PURPLEAIR_CACHE_TTL_MIN", "15"))
+# PurpleAir bills 1 + (sensors x fields) points per call: ~430 TX sensors x 6
+# billed fields = ~2,580 points each. This TTL is deliberately set EQUAL to the
+# Texas prediction cache TTL (30 min) rather than below it. At 15 min the feed
+# refreshed twice per prediction cycle, so every other fetch was paid for and
+# then superseded before any prediction consumed it — ~124k points/day of pure
+# waste. Matching the cycle halves spend with no loss of freshness: predictions
+# still use air that is at most one cycle old.
+PURPLEAIR_CACHE_TTL_MIN = int(os.environ.get("PURPLEAIR_CACHE_TTL_MIN", "30"))
 # Clip dist_to_nearest_sensor to the training-network max so rural tracts (which
 # can be 195km from any sensor vs the 164km training max) don't push the tree
 # models out of distribution.
@@ -400,11 +407,27 @@ async def lifespan(app: FastAPI):
     pa_snap = _load_snapshot(PURPLEAIR_SNAPSHOT_PATH)
     if pa_snap is not None:
         global _purpleair_cache
-        _purpleair_cache = {
-            "data": pa_snap,
-            "expires": datetime.min.replace(tzinfo=timezone.utc),
-        }
-        print(f"Loaded PurpleAir snapshot ({pa_snap.get('count', 0)} live sensors)")
+        # Honour the snapshot's real age instead of marking it already-expired.
+        # Every process start used to force a fresh ~2,580-point fetch even when
+        # the snapshot on disk was seconds old, so a dev server on --reload billed
+        # a full call per file save, and each Render redeploy/cold start billed
+        # another. Carrying the true expiry means a restart re-fetches only when
+        # the data is genuinely stale.
+        snap_expiry = datetime.min.replace(tzinfo=timezone.utc)
+        fetched_raw = pa_snap.get("fetched_at")
+        if fetched_raw:
+            try:
+                fetched = datetime.fromisoformat(fetched_raw)
+                if fetched.tzinfo is None:
+                    fetched = fetched.replace(tzinfo=timezone.utc)
+                snap_expiry = fetched + timedelta(minutes=PURPLEAIR_CACHE_TTL_MIN)
+            except (TypeError, ValueError):
+                pass
+        _purpleair_cache = {"data": pa_snap, "expires": snap_expiry}
+        age_min = (datetime.now(timezone.utc) - (snap_expiry - timedelta(
+            minutes=PURPLEAIR_CACHE_TTL_MIN))).total_seconds() / 60 if fetched_raw else None
+        print(f"Loaded PurpleAir snapshot ({pa_snap.get('count', 0)} live sensors"
+              + (f", {age_min:.0f} min old)" if age_min is not None else ")"))
 
     # Open-Meteo grid snapshots — hydrate as already-expired: the first cycle
     # tries a fresh fetch, and if the daily quota is exhausted it falls back to
@@ -474,9 +497,19 @@ async def lifespan(app: FastAPI):
 
             # Warm the live PurpleAir cache FIRST (before the deferred full-Texas
             # recompute below) so the neighbor features reflect current air.
+            # Gated on the hydrated snapshot's real expiry: an unconditional warm
+            # here billed a full call on every single process start, which is what
+            # made a --reload dev loop expensive.
             try:
-                print("Background: warming live PurpleAir sensors...")
-                await _revalidate_purpleair_background()
+                pa_exp = _purpleair_cache.get(
+                    "expires", datetime.min.replace(tzinfo=timezone.utc))
+                if datetime.now(timezone.utc) >= pa_exp:
+                    print("Background: warming live PurpleAir sensors...")
+                    await _revalidate_purpleair_background()
+                else:
+                    mins = (pa_exp - datetime.now(timezone.utc)).total_seconds() / 60
+                    print(f"PurpleAir snapshot still fresh ({mins:.0f} min left) "
+                          f"- skipping warm fetch")
             except Exception as e:
                 print(f"Background PurpleAir precompute failed: {e}")
         except Exception as e:
