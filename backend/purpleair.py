@@ -55,17 +55,29 @@ MIN_LIVE_SENSORS = 20        # below this we don't trust the live snapshot
 EARTH_R_KM = 6371.0
 
 
-# Fallback READ key so the live path works out-of-the-box on Render without a
-# manual env-var step. This is the same key already committed (and therefore
-# already public) in pipeline/06_pull_purpleair_full.py — using it here does not
-# change the security posture. SET PURPLEAIR_API_KEY in the Render dashboard to
-# override it, and rotate this key when convenient (see deploy notes).
-_FALLBACK_READ_KEY = "8E76496A-3C3D-11F1-B596-4201AC1DC123"
+# The READ key is supplied ONLY through the environment. A fallback key used to
+# be hardcoded here so the live path worked without a dashboard step; that key
+# sat in a public repository, where credential scrapers find keys within minutes
+# of a push, and PurpleAir bills per call against the account that owns it. Any
+# key committed here is compromised the moment it lands, so there is no safe
+# fallback value — the correct failure mode is to degrade to the climatological
+# neighbor features and say so loudly.
+_MISSING_KEY_MSG = (
+    "PURPLEAIR_API_KEY is not set. Live same-day neighbor features are DISABLED "
+    "and predictions will fall back to climatology. Set it in the Render "
+    "dashboard (Environment -> Add Environment Variable). Never commit the key."
+)
+_warned_missing_key = False
 
 
 def _get_api_key() -> str:
-    """Read the PurpleAir READ key: env var first, committed fallback otherwise."""
-    return os.environ.get("PURPLEAIR_API_KEY", "").strip() or _FALLBACK_READ_KEY
+    """The PurpleAir READ key from the environment, or "" if unset."""
+    global _warned_missing_key
+    key = os.environ.get("PURPLEAIR_API_KEY", "").strip()
+    if not key and not _warned_missing_key:
+        print(f"[purpleair] {_MISSING_KEY_MSG}")
+        _warned_missing_key = True
+    return key
 
 
 async def fetch_live_sensors() -> list[dict]:

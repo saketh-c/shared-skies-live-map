@@ -36,7 +36,17 @@ import requests
 # Config
 # --------------------------------------------------------------------------------------
 
-API_KEY = "8E76496A-3C3D-11F1-B596-4201AC1DC123"
+# Read key comes from the environment only. It was previously hardcoded here and
+# in backend/purpleair.py, in a public repository — scrapers harvest keys from
+# public pushes within minutes, and PurpleAir bills per call against the owning
+# account. Export PURPLEAIR_API_KEY before running a pull.
+API_KEY = os.environ.get("PURPLEAIR_API_KEY", "").strip()
+if not API_KEY:
+    raise SystemExit(
+        "PURPLEAIR_API_KEY is not set. Export your PurpleAir READ key before "
+        "running this pull, e.g.  export PURPLEAIR_API_KEY=... "
+        "(PowerShell: $env:PURPLEAIR_API_KEY='...')"
+    )
 ROOT = Path(__file__).resolve().parents[1]
 CACHE_DIR = ROOT / "pipeline" / "data_pull_cache"
 PA_CACHE = CACHE_DIR / "purpleair"
