@@ -1,57 +1,57 @@
 {
-  "loso_r2_optimized": 0.7136,
+  "loso_r2_optimized": 0.7134,
   "loso_weights": {
-    "rf": 0.6827,
-    "lgbm": 0.0079,
+    "rf": 0.7935,
+    "lgbm": 0.0702,
     "xgb": 0.0,
-    "cat": 0.3094
+    "cat": 0.1363
   },
   "loso_baseline": {
-    "rmse": 4.2218,
-    "mae": 2.6176,
-    "r2": 0.7126,
+    "rmse": 4.2486,
+    "mae": 2.6112,
+    "r2": 0.709,
     "n_sites": 310
   },
   "single_model_loso_r2": {
     "rf": 0.7138,
-    "lgbm": 0.7031,
-    "xgb": 0.7022,
-    "cat": 0.7078
+    "lgbm": 0.7029,
+    "xgb": 0.6849,
+    "cat": 0.6985
   },
-  "equal_weight_r2": 0.7114,
+  "equal_weight_r2": 0.7084,
   "n_oof_rows": 285798,
-  "n_features": 38,
+  "n_features": 30,
   "pm25_train_cap": 75.0,
   "random_split_ensemble": {
-    "rmse": 3.1646,
-    "r2": 0.8392,
-    "mae": 1.7211
+    "rmse": 3.5161,
+    "r2": 0.8033,
+    "mae": 1.939
   },
   "shap_meta": {
     "n_sample": 6000,
     "seed": 42,
     "weights": {
-      "rf": 0.682698,
-      "lgbm": 0.007879,
-      "cat": 0.309422
+      "rf": 0.79352,
+      "lgbm": 0.070187,
+      "cat": 0.136293
     },
     "models": {
       "rf": {
-        "base_value": 9.674433468926189,
-        "seconds": 1112.3
+        "base_value": 9.676808094573207,
+        "seconds": 324.0
       },
       "lgbm": {
-        "base_value": 9.808263584381741,
-        "seconds": 2.9
+        "base_value": 9.431315176987365,
+        "seconds": 2.8
       },
       "cat": {
-        "base_value": 9.808328321446592,
-        "seconds": 3.8
+        "base_value": 9.590156608691235,
+        "seconds": 5.3
       }
     },
-    "base_value_ensemble": 9.716908255028962,
-    "additivity_max_abs_err": 7.176481631177012e-13,
-    "additivity_mean_abs_err": 2.9129300823290314e-14
+    "base_value_ensemble": 9.647767692201299,
+    "additivity_max_abs_err": 3.765876499528531e-13,
+    "additivity_mean_abs_err": 3.3023611623050895e-14
   },
   "frame_rows": 285798,
   "frame_sensors": 310,
@@ -67,56 +67,49 @@
   "rows_over_cap_310_sensors": 0,
   "rows_over_cap_pct": 0.0,
   "group_importance_recomputed": {
-    "Regional PM signal": 4.8425,
-    "Community & EJ context": 0.3939,
-    "Geography": 0.3241,
-    "Local sources": 0.2883,
-    "Meteorology": 0.2046,
-    "Season & calendar": 0.066,
-    "Wildfire smoke": 0.0525
+    "Regional PM signal": 4.8161,
+    "Geography": 0.4718,
+    "Meteorology": 0.2484,
+    "Season & calendar": 0.0907,
+    "Wildfire smoke": 0.0898
   },
   "feature_importance_top10": {
-    "nbr_pm25_100km": 1.857,
-    "nbr_pm25_50km": 1.3709,
-    "nbr_pm25_25km": 1.3579,
-    "nbr_std_50km": 0.303,
-    "cams_pm25": 0.2113,
-    "pct_ling_isolated": 0.1536,
-    "rmp_proximity": 0.1322,
-    "longitude": 0.1315,
-    "pct_people_of_color": 0.12,
-    "aod": 0.1166
-  },
-  "spearman_pct_ling_isolated": {
-    "rho": 0.622,
-    "p": 0.0
-  },
-  "spearman_pct_people_of_color": {
-    "rho": 0.628,
-    "p": 0.0
-  },
-  "spearman_traffic_proximity": {
-    "rho": -0.292,
-    "p": 2.00272737571851e-118
+    "nbr_pm25_100km": 1.7547,
+    "nbr_pm25_25km": 1.4289,
+    "nbr_pm25_50km": 1.2951,
+    "nbr_std_50km": 0.4001,
+    "cams_pm25": 0.2237,
+    "longitude": 0.1878,
+    "dist_to_coast": 0.1664,
+    "humidity": 0.1359,
+    "latitude": 0.129,
+    "aod": 0.1258
   },
   "spearman_nbr_pm25_50km": {
-    "rho": 0.994,
+    "rho": 0.993,
     "p": 0.0
   },
-  "pct_ling_isolated_mean_shap_above_p70": 0.249,
-  "traffic_mean_shap_above_p85": -0.361,
-  "traffic_min_binned_median": -0.353,
-  "traffic_binned_medians_last3": [
-    0.046,
-    -0.112,
-    -0.353
-  ],
-  "traffic_mean_shap_top2pct": -1.146,
+  "spearman_nbr_pm25_100km": {
+    "rho": 0.992,
+    "p": 0.0
+  },
+  "spearman_cams_pm25": {
+    "rho": 0.97,
+    "p": 0.0
+  },
+  "spearman_humidity": {
+    "rho": 0.878,
+    "p": 0.0
+  },
+  "spearman_dist_to_coast": {
+    "rho": -0.496,
+    "p": 0.0
+  },
   "hms_tier_mean_shap": {
-    "0": -0.044,
-    "1": 0.06,
-    "2": 0.109,
-    "3": 0.093
+    "0": -0.074,
+    "1": 0.101,
+    "2": 0.23,
+    "3": 0.195
   },
   "hms_tier_counts_sample": {
     "0": 3593,
@@ -124,31 +117,31 @@
     "2": 214,
     "3": 5
   },
-  "nbr50_slope_below30": 0.261,
-  "nbr50_median_shap_30_40": 6.16,
-  "nbr50_median_shap_40plus": 8.2,
+  "nbr50_slope_below30": 0.25,
+  "nbr50_median_shap_30_40": 5.7,
+  "nbr50_median_shap_40plus": 7.88,
   "nbr50_n_40plus": 13,
   "smoke_20240527": {
     "n_sensors": 156,
     "mean_actual_pm25": 37.0,
-    "mean_pred": 36.08,
-    "regional_mean_contrib": 24.82,
-    "smoke_flag_mean_contrib": 0.202,
-    "smoke_flag_max_contrib": 0.306,
+    "mean_pred": 36.04,
+    "regional_mean_contrib": 24.32,
+    "smoke_flag_mean_contrib": 0.4,
+    "smoke_flag_max_contrib": 0.643,
     "plume_share": 0.9872
   },
   "clean_20240403": {
     "n_sensors": 154,
     "mean_actual_pm25": 1.03,
-    "mean_pred": 1.65,
-    "regional_mean_contrib": -7.58,
-    "smoke_flag_mean_contrib": -0.05,
-    "smoke_flag_max_contrib": 0.158,
+    "mean_pred": 1.52,
+    "regional_mean_contrib": -7.55,
+    "smoke_flag_mean_contrib": -0.089,
+    "smoke_flag_max_contrib": 0.193,
     "plume_share": 0.0195
   },
-  "east_tx_regional_mean": 1.25,
-  "west_tx_regional_mean": -3.16,
+  "east_tx_regional_mean": 1.34,
+  "west_tx_regional_mean": -3.05,
   "n_sensors_sensor_group_means": 310,
-  "float32_cache_recon_max_err": 5.502377064203756e-06,
-  "float32_cache_recon_mean_err": 4.238619827226971e-07
+  "float32_cache_recon_max_err": 6.71968316723337e-06,
+  "float32_cache_recon_mean_err": 4.193862305838421e-07
 }

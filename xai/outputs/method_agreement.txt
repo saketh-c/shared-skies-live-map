@@ -1,4 +1,4 @@
 Method agreement between SHAP group importance and grouped permutation importance (joint shuffle, R=8):
-  Spearman rank correlation over the 7 concept groups: 1.000
-  Bootstrap full-ranking stability (B=1000, sensor-clustered): 89.3%
-  Baseline in-sample R^2: 0.8084
+  Spearman rank correlation over the 5 concept groups: 1.000
+  Bootstrap full-ranking stability (B=1000, sensor-clustered): 65.8%
+  Baseline in-sample R^2: 0.7881

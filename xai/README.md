@@ -25,8 +25,6 @@ prediction:
 | Wildfire smoke | hms_smoke | NOAA HMS plume tier |
 | Regional PM signal | nbr_* (7), aod, cams_pm25 | what nearby sensors/satellites already see — predictive, **not** policy-actionable |
 | Meteorology | temp, humidity, wind, pressure, precip + interactions | |
-| Local sources | traffic/superfund/RMP/diesel proximity | EJSCREEN, policy-relevant |
-| Community & EJ context | ejf_score, % people of color, % low income, % ling. isolated | learned correlation, **never** causal |
 | Geography | lat, lon, dist to coast / nearest sensor | |
 | Season & calendar | month/dow/doy + sin/cos | |
 
@@ -71,9 +69,10 @@ If `p2_processed_v2.xls` is missing (it is gitignored), regenerate it first:
 
 ## Findings so far (phase 1)
 
-- Global group ranking (mean |contribution|, 6,000-row sample): Regional PM
-  signal **4.84** µg/m³, then Community & EJ context 0.39, Geography 0.32,
-  Local sources 0.29, Meteorology 0.21, Season 0.07, Wildfire smoke 0.05.
+- Global group ranking (mean |contribution|, 6,000-row sample, 30-feature
+  model): Regional PM signal **4.82** µg/m³ [4.71, 4.93], then Geography
+  0.47 [0.41, 0.53], Meteorology 0.25, Season & calendar 0.091, Wildfire
+  smoke 0.090. The last two are a statistical tie.
   The ensemble is dominated by the **Regional PM signal** group: on both
   showcase event days (+34.6 and +32.5 µg/m³ of the prediction), the model
   is mostly nowcasting from neighboring sensors' same-day readings.
@@ -91,15 +90,6 @@ If `p2_processed_v2.xls` is missing (it is gitignored), regenerate it first:
 
 ## Findings (phase 2 — spatial maps, dependence, interactions)
 
-- **Traffic mystery resolved (descriptively):** `traffic_proximity` SHAP is
-  flat until ~the 85th percentile, then plunges to −3.5 µg/m³. The model
-  uses extreme traffic proximity as an *urban-core identity marker* and
-  corrects downward, not as an emissions signal. `diesel_pm_proximity`
-  shows a similar inversion. Genuine caution for policy use of raw SHAP.
-- **EJ directions are monotonic and positive:** `pct_ling_isolated`
-  (ρ=+0.62, up to +0.5 µg/m³ past its 70th pct) and `pct_people_of_color`
-  (ρ=+0.63) — the model consistently predicts more pollution in these
-  communities, holding its other inputs fixed. Descriptive association only.
 - **Event vs clean day maps** (2024-05-27 smoke event, 99% of sensors under
   plume, statewide mean 37 µg/m³ vs 2024-04-03, mean 1.0): the entire event
   is carried by the Regional PM signal group (+24.8 statewide mean); the
@@ -121,8 +111,9 @@ If `p2_processed_v2.xls` is missing (it is gitignored), regenerate it first:
 
 1. **SHAP explains the model, not the atmosphere.** Contributions are
    attributions of a learned function, not causal effects.
-2. **Community & EJ contributions are learned correlations.** Never present
-   them as "demographics cause pollution", and never counterfactual them.
+2. **No EJScreen variable is a model input.** All eight (four demographic,
+   four source-proximity) were removed before this study; the EJ analysis is
+   post-hoc, correlating predictions against demographics after the fact.
 3. Training rows with PM2.5 > 75 µg/m³ were capped out of training
    (`pm25_train_cap`), so extreme-event explanations describe a model that
    never saw the most extreme days.
@@ -141,11 +132,10 @@ If `p2_processed_v2.xls` is missing (it is gitignored), regenerate it first:
 - [ ] Phase 3 — narration layer (`narrate.py`) + counterfactual scenarios
       (physical features only) + backend `/explain` endpoint
 - [~] Phase 4 — method agreement STARTED (`analysis/06_robustness.py`):
-      sensor-clustered bootstrap CIs on the group ranking (89.3% full-ranking
-      stability, B=1000) + grouped joint-shuffle permutation importance —
-      Spearman rank agreement with the SHAP group ranking = 1.000 (note: EJ
-      context vs Geography is a near-tie in the permutation view, 0.0510 vs
-      0.0507 ΔR²). Direction table now ships clustered bootstrap CIs instead
+      sensor-clustered bootstrap CIs on the group ranking (65.8% full-ranking
+      stability, B=1000 — the instability is entirely the season/smoke tie at
+      the bottom) + grouped joint-shuffle permutation importance — Spearman
+      rank agreement with the SHAP group ranking = 1.000. Direction table now ships clustered bootstrap CIs instead
       of i.i.d. p-values. Remaining: ALE curves, interventional-SHAP
       comparison, leave-one-group-out retrains. See also METHODS_NOTES.md for
       code-verified LOSO-leakage and PurpleAir/Barkjohn statements.

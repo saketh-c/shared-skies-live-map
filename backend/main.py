@@ -743,35 +743,6 @@ def _active_models(weights: dict, models) -> list:
     return active or list(models)  # defensive: never return an empty model set
 
 
-def run_prediction(tract_row: pd.Series, weather: dict, temporal: dict) -> float:
-    bundle = state["bundle"]
-    features = bundle["feature_names"]
-    weights  = bundle["weights"]
-    models   = bundle["models"]
-
-    row = _compute_v3_shared(weather, temporal)
-
-    # Add tract-level features
-    for feat in features:
-        if feat not in row:
-            row[feat] = float(tract_row.get(feat, 0.0) or 0.0)
-
-    # v3 spatial features for single tract
-    if "elevation" in features and "elevation" not in row:
-        elev_path = os.path.join(ROOT, "pipeline", "elevations.json")
-        if os.path.exists(elev_path):
-            with open(elev_path) as f:
-                elev_data = json.load(f)
-            geoid = str(tract_row.get("GEOID", ""))
-            row["elevation"] = elev_data.get("tracts", {}).get(geoid, 0.0)
-    if "dist_to_coast" in features:
-        row.setdefault("dist_to_coast", abs(float(tract_row.get("lon", -97)) - (-94.0)))
-    if "dist_to_border" in features:
-        row.setdefault("dist_to_border", abs(float(tract_row.get("lat", 31)) - 26.0))
-
-    X = np.array([[row.get(f, 0.0) for f in features]])
-    pred = sum(weights[n] * models[n].predict(X)[0] for n in _active_models(weights, models))
-    return max(0.0, float(pred))
 
 
 def _compute_v3_shared(weather: dict, temporal: dict) -> dict:
@@ -797,7 +768,7 @@ def _compute_v3_shared(weather: dict, temporal: dict) -> dict:
     shared["doy_cos"] = np.cos(2 * np.pi * doy / 365)
     # Interactions: ONLY the two the deployed model actually uses (features 36-37
     # in feature_names.json). Formulas mirror pipeline/03_train_enhanced.py exactly.
-    # run_prediction() (single-tract cold-start path) reads these from `shared`;
+    # The cold-start single-tract path reads these from `shared`;
     # without them the model would silently receive 0.0 → train/serve skew. The
     # three previously-computed extras (wind_x_season / humidity_x_season /
     # precip_x_temp) were never model features — dead compute — so they stay gone.
@@ -1633,8 +1604,14 @@ async def get_tract(geoid: str):
         raise HTTPException(503, "Model still loading. Please retry in a moment.")
     else:
         # Cold-start only (no texas batch yet): model-unit fallback weather.
+        # Routed through run_predictions_batch — the SAME construction the map
+        # uses — rather than a second single-row builder. The old run_prediction()
+        # helper defaulted absent features to 0.0 instead of the training fills
+        # and never renamed lat/lon -> latitude/longitude, so it fed the model
+        # latitude=0, longitude=0, aod=0 (far outside the Texas training domain)
+        # and moved 16% of tracts across a public color-band boundary.
         temporal = get_temporal(tz)
-        pm25 = run_prediction(row, _weather_fallback(), temporal)
+        pm25 = float(run_predictions_batch(row.to_frame().T, _weather_fallback(), temporal)[0])
     info = pm25_info(pm25)
 
     return {
@@ -1755,24 +1732,16 @@ def _compute_model_disagreement(df: pd.DataFrame, weather: dict, temporal: dict)
     bundle = state.get("bundle")
     if bundle is None:
         raise ValueError("Model bundle not loaded")
-    features = bundle["feature_names"]
-    weights = bundle["weights"]
-    models_dict = bundle["models"]
-
-    n = len(df)
-
     def _predict_with_weather(w):
-        shared = {**w, **temporal}
-        X = np.zeros((n, len(features)), dtype=np.float64)
-        for i, feat in enumerate(features):
-            if feat in shared:
-                X[:, i] = shared[feat]
-            elif feat in df.columns:
-                X[:, i] = pd.to_numeric(df[feat], errors="coerce").fillna(0.0).values
-        raw = sum(weights[name] * models_dict[name].predict(X) for name in _active_models(weights, models_dict))
-        if bundle.get("target_transform") == "log1p":
-            raw = np.expm1(raw)
-        return np.maximum(0.0, raw)
+        # Delegate to the one construction the map itself uses. The previous
+        # inline builder used `{**w, **temporal}` instead of _compute_v3_shared(),
+        # so month_sin/cos, dow_sin/cos, doy_sin/cos, temp_x_humidity and
+        # wind_x_temp were absent from `shared` AND from df.columns and stayed at
+        # the np.zeros() initialisation; it also skipped the lat/lon ->
+        # latitude/longitude rename and filled gaps with 0.0 rather than the
+        # training medians. That made the sensitivity probe read the model at a
+        # point it was never trained on.
+        return run_predictions_batch(df, w, temporal)
 
     # Predict under several weather perturbations
     base_pred = _predict_with_weather(weather)

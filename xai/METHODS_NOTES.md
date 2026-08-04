@@ -6,7 +6,7 @@ prose) into the Methods section.
 
 ## 1. LOSO cross-validation and neighbor-feature leakage
 
-**Claim the paper can make:** the reported LOSO-CV R² = 0.7136 is free of
+**Claim the paper can make:** the reported LOSO-CV R² = 0.7134 is free of
 same-day target leakage through the neighbor-PM features.
 
 Receipts:

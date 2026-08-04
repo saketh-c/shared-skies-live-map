@@ -69,9 +69,12 @@ def pick_cases(frame, bundle, feats):
     if not clean.empty:
         cases["clean"] = clean.sample(1, random_state=SEED).index[0]
 
-    traffic_hi = frame["traffic_proximity"].quantile(0.90)
+    # Urban proxy: dense local sensor coverage. traffic_proximity (EJScreen) was
+    # removed from the model, so nbr_count_25km — high where the network is
+    # dense, i.e. in cities — is the closest in-model stand-in.
+    urban_hi = frame["nbr_count_25km"].quantile(0.90)
     urban = frame[(frame["hms_smoke"] == 0)
-                  & (frame["traffic_proximity"] >= traffic_hi)]
+                  & (frame["nbr_count_25km"] >= urban_hi)]
     if not urban.empty:
         urban = with_pred(urban)
         cases["urban"] = accurate(urban, pm_floor=15.0)["_pred"].idxmax()

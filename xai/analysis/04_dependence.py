@@ -40,11 +40,10 @@ PANELS = {
     "dependence_weather.png": (
         "Meteorology features",
         ["humidity", "temperature", "wind_speed", "pressure"]),
-    "dependence_policy_ej.png": (
-        "Local-source & community features (policy layer)",
-        ["traffic_proximity", "rmp_proximity", "superfund_proximity",
-         "diesel_pm_proximity", "pct_people_of_color", "pct_low_income",
-         "pct_ling_isolated", "ejf_score"]),
+    "dependence_season.png": (
+        "Season & calendar features",
+        ["day_of_year", "doy_sin", "doy_cos", "month",
+         "dow", "dow_sin"]),
     "dependence_geography.png": (
         "Geography features",
         ["dist_to_coast", "longitude", "latitude", "dist_to_nearest_sensor"]),

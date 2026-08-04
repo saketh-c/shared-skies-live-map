@@ -31,18 +31,10 @@ print("[A] tail statistics on the cached 6000-row sample")
 S = pd.read_parquet(CACHE / "shap_ensemble.parquet").reset_index(drop=True)
 F = pd.read_parquet(CACHE / "features_sample.parquet").reset_index(drop=True)
 
-t = F["traffic_proximity"]
-note("traffic_min_shap_sample", round(float(S["traffic_proximity"].min()), 2))
-note("traffic_mean_shap_top10pct", round(float(S.loc[t >= t.quantile(0.90), "traffic_proximity"].mean()), 3))
-note("diesel_min_shap_sample", round(float(S["diesel_pm_proximity"].min()), 2))
-note("diesel_mean_shap_top10pct", round(float(
-    S.loc[F["diesel_pm_proximity"] >= F["diesel_pm_proximity"].quantile(0.90), "diesel_pm_proximity"].mean()), 3))
-
-li = F["pct_ling_isolated"]
-bins = pd.qcut(li, 12, duplicates="drop")
-med = S.groupby(bins, observed=True)["pct_ling_isolated"].median()
-note("ling_binned_median_max", round(float(med.max()), 3))
-note("ling_mean_shap_top10pct", round(float(S.loc[li >= li.quantile(0.90), "pct_ling_isolated"].mean()), 3))
+# The eight EJScreen features (traffic/diesel/Superfund/RMP proximity and the
+# four demographic columns) were removed from the model, so the tail statistics
+# that used to live here no longer have inputs. The paper's corresponding
+# subsections were removed with them.
 
 print("[B] miss-case row in the training-ready parquet (working tree)")
 ready = pd.read_parquet(ROOT / "pipeline" / "purpleair_training_ready.parquet")

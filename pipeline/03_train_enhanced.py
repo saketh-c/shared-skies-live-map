@@ -193,6 +193,8 @@ def _to_orig_scale(pred):
 
 
 def load_file(path):
+    if str(path).endswith(".parquet"):
+        return pd.read_parquet(path)
     try:
         return pd.read_csv(path, encoding="utf-8-sig", low_memory=False)
     except Exception:
@@ -207,12 +209,35 @@ def load_data():
     print("LOADING AND ENGINEERING FEATURES")
     print("=" * 70)
 
-    # Load main training data. Prefer the v2 file (408k rows / 467 sensors /
-    # 2021-2026) produced by pipeline/08_finish_pull.py; fall back to the old
-    # 61k-row file if v2 isn't present yet.
+    # Load main training data, in order of preference:
+    #   1. p2_processed_v2.xls          — the 412k-row / 467-sensor / 2021-2026
+    #      pull from pipeline/08_finish_pull.py. 146 MB, so it is gitignored and
+    #      exists only on machines that ran the pull.
+    #   2. pipeline/purpleair_training_ready.parquet — the same pull, committed
+    #      to the repo (9 MB). This is what makes a clean clone reproducible;
+    #      without it the code silently fell through to (3). Measured against
+    #      (1) it yields 400,998 vs 400,757 post-dropna rows — a 0.06% delta
+    #      from float/NaN round-tripping through .xls, so metrics rebuilt from
+    #      it match published values to ~3 decimal places but are not bitwise
+    #      identical. Prefer (1) when reproducing a published number exactly.
+    #   3. p2_processed.xls             — a 61k-row 2025-only LEGACY file. It
+    #      trains a completely different model. Never silently acceptable, so
+    #      reaching it now prints a loud warning.
     v2_path = os.path.join(DATA_DIR, "p2_processed_v2.xls")
+    parquet_path = os.path.join(DATA_DIR, "pipeline", "purpleair_training_ready.parquet")
     legacy_path = os.path.join(DATA_DIR, "p2_processed.xls")
-    src_path = v2_path if os.path.exists(v2_path) else legacy_path
+    if os.path.exists(v2_path):
+        src_path = v2_path
+    elif os.path.exists(parquet_path):
+        src_path = parquet_path
+    else:
+        src_path = legacy_path
+        print("\n" + "!" * 70)
+        print("WARNING: falling back to the LEGACY p2_processed.xls (61k rows, 2025 only).")
+        print("This is NOT the dataset the deployed model was trained on and any")
+        print("metric or SHAP value produced from it is not comparable to published")
+        print("results. Expected pipeline/purpleair_training_ready.parquet to exist.")
+        print("!" * 70)
     print(f"\nLoading {os.path.basename(src_path)}...")
     df = load_file(src_path)
     print(f"  Raw rows: {len(df)}, columns: {len(df.columns)}")

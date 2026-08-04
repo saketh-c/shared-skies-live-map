@@ -4,11 +4,11 @@ Real-time PM2.5 air quality predictions for every census tract in Texas.
 
 ## What it does
 
-The app displays a live map of estimated ground-level PM2.5 concentrations across all 6,896 Texas census tracts. Predictions update every 15 minutes using live sensor readings, current weather, and NOAA smoke polygons. A second tab shows an optimized quantum-inspired placement plan for new low-cost sensors to maximize coverage in underserved areas.
+The app displays a live map of estimated ground-level PM2.5 concentrations across all 6,896 Texas census tracts. Predictions recompute every 30 minutes from live sensor readings, current weather, and NOAA smoke polygons; the underlying PurpleAir sensor feed refreshes every 15 minutes. A second tab shows an optimized quantum-inspired placement plan for new low-cost sensors to maximize coverage in underserved areas.
 
 ## How it works
 
-**Model:** A 4-model ML ensemble (Random Forest, LightGBM, XGBoost, CatBoost) trained on 285,798 daily readings from 310 PurpleAir sensors across Texas. Blend weights are simplex-optimized via GroupKFold-over-sensors cross-validation. Honest leave-one-sensor-out (LOSO) CV R² = **0.7134** (RMSE 4.21, MAE 2.61 µg/m³).
+**Model:** A 4-model ML ensemble (Random Forest, LightGBM, XGBoost, CatBoost) trained on 285,798 daily readings from 310 PurpleAir sensors across Texas. Blend weights are simplex-optimized via GroupKFold-over-sensors cross-validation. Honest leave-one-sensor-out (LOSO) CV R² = **0.7134** over all 310 in-Texas sensors. (The RMSE/MAE quoted in the ablation table below come from the 10-fold GroupKFold protocol and are not interchangeable with this figure — see Methodology.)
 
 **Other features (30 total):** Open-Meteo weather (temperature, humidity, wind, pressure, precipitation), NOAA HMS smoke, CAMS AOD, geographic features (latitude/longitude, distance to coast, distance to nearest sensor), and cyclical time encodings. No EPA EJScreen variable is a model input — see Methodology.
 
@@ -22,7 +22,7 @@ The reason is that this model is used to study PM2.5 disparities across demograp
 
 The accuracy cost was measured, not assumed. Three arms were run on frozen folds — identical data, folds, seed, models and blend weights, varying only the feature list — under 10-fold GroupKFold over sensors on 285,798 rows / 310 sensors, with 95% CIs from a 2000-repetition per-sensor cluster bootstrap on the paired delta:
 
-| Arm | Features | LOSO R² | RMSE | MAE | ΔR² vs production | 95% CI |
+| Arm | Features | 10-fold GroupKFold R² | RMSE | MAE | ΔR² vs production | 95% CI |
 |---|---|---|---|---|---|---|
 | A — production | 38 | 0.71359 | 4.2146 | 2.6204 | — | — |
 | B — no demographic | 34 | 0.71141 | 4.2307 | 2.6295 | +0.00218 | [−0.00315, +0.00833] |
@@ -30,7 +30,9 @@ The accuracy cost was measured, not assumed. Three arms were run on frozen folds
 
 Both confidence intervals include zero, so neither removal is distinguishable from noise. Arm C — the deployed configuration — has a slightly *better* point estimate than the 38-feature model and lower RMSE and MAE, and beats it in 7 of 10 folds. Removing all eight EJScreen features carries no measurable accuracy cost.
 
-The full 310-site LOSO retrain agrees: the deployed 30-feature model scores **0.7134** against the previous 38-feature model's **0.7136**, a difference of −0.0002.
+These three arms hold the blend weights **frozen** at the previous deployment's values (rf 0.6827 / lgbm 0.0079 / xgb 0 / cat 0.3094) so that the only thing varying is the feature list. That is why arm C's 0.71407 is not the same number as the deployed model's 0.7134: the deployed retrain re-optimizes its own simplex weights (rf 0.79352 / lgbm 0.070187 / xgb 0 / cat 0.136293) on the new out-of-fold predictions, and is evaluated under the 310-site LOSO protocol rather than 10-fold GroupKFold. Both protocols agree on the conclusion: the deployed 30-feature model scores **0.7134** against the previous 38-feature model's **0.7136**, a difference of −0.0002.
+
+**Loss function.** The same retrain also switched LightGBM to `objective="huber"` and XGBoost to `objective="reg:pseudohubererror"`. PM2.5 is heavy-tailed and a squared-error objective lets a handful of smoke and dust days dominate the fit; the Huber losses bound that influence. This is disclosed here because it means the deployed model differs from its predecessor in **two** ways — feature set and loss — not one. The ablation above isolates the feature effect correctly (all three arms use the same models), but it should not be read as a full accounting of the change from the 38-feature deployment.
 
 **Post-hoc environmental-justice analysis.** Because the model never receives a demographic variable, any disparity in its output is inferred from atmospheric measurements and geography alone. Predicting all 6,896 tracts across 365 days (2025-05-02 → 2026-05-01, mean field 8.92 µg/m³) and correlating against tract demographics afterwards:
 

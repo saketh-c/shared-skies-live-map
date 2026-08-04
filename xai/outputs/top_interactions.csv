@@ -1,704 +1,436 @@
 feature_a,feature_b,group_a,group_b,mean_abs_interaction
-nbr_pm25_25km,nbr_pm25_100km,Regional PM signal,Regional PM signal,0.5023302668757954
-nbr_pm25_50km,nbr_pm25_100km,Regional PM signal,Regional PM signal,0.4561787187137651
-nbr_pm25_25km,nbr_pm25_50km,Regional PM signal,Regional PM signal,0.28401126864421894
-nbr_std_50km,nbr_pm25_100km,Regional PM signal,Regional PM signal,0.15910511217810772
-nbr_pm25_50km,nbr_std_50km,Regional PM signal,Regional PM signal,0.1446757412683523
-nbr_pm25_25km,nbr_std_50km,Regional PM signal,Regional PM signal,0.12046795886970241
-nbr_pm25_100km,cams_pm25,Regional PM signal,Regional PM signal,0.0813449005315488
-nbr_pm25_50km,cams_pm25,Regional PM signal,Regional PM signal,0.0713694995327192
-nbr_pm25_25km,cams_pm25,Regional PM signal,Regional PM signal,0.06602626734196246
-diesel_pm_proximity,pct_ling_isolated,Local sources,Community & EJ context,0.05247010828393836
-nbr_pm25_100km,aod,Regional PM signal,Regional PM signal,0.046693647604684405
-ejf_score,rmp_proximity,Community & EJ context,Local sources,0.0430925921749333
-dist_to_coast,nbr_pm25_25km,Geography,Regional PM signal,0.04300662856636041
-nbr_pm25_50km,aod,Regional PM signal,Regional PM signal,0.042632826719728345
-humidity,nbr_pm25_25km,Meteorology,Regional PM signal,0.042121467819286544
-humidity,nbr_pm25_100km,Meteorology,Regional PM signal,0.03676173128378446
-rmp_proximity,nbr_pm25_100km,Local sources,Regional PM signal,0.03564452268773182
-humidity,nbr_pm25_50km,Meteorology,Regional PM signal,0.03512750714931396
-nbr_pm25_25km,aod,Regional PM signal,Regional PM signal,0.03452606885336028
-longitude,nbr_pm25_100km,Geography,Regional PM signal,0.03394896283697456
-pct_low_income,rmp_proximity,Community & EJ context,Local sources,0.03283576226157047
-latitude,dist_to_coast,Geography,Geography,0.03257271637434062
-nbr_pm25_100km,temp_x_humidity,Regional PM signal,Meteorology,0.03242303372047982
-traffic_proximity,longitude,Local sources,Geography,0.032025215952918934
-nbr_std_50km,cams_pm25,Regional PM signal,Regional PM signal,0.030449196915233425
-rmp_proximity,dist_to_coast,Local sources,Geography,0.029565186263753283
-pct_people_of_color,nbr_pm25_25km,Community & EJ context,Regional PM signal,0.029551685322298703
-pct_low_income,longitude,Community & EJ context,Geography,0.0293145465533785
-dist_to_coast,nbr_pm25_100km,Geography,Regional PM signal,0.029087740596469083
-latitude,longitude,Geography,Geography,0.02728807458463955
-nbr_pm25_50km,temp_x_humidity,Regional PM signal,Meteorology,0.027041203516862417
-latitude,nbr_pm25_25km,Geography,Regional PM signal,0.027004331485767558
-pct_people_of_color,rmp_proximity,Community & EJ context,Local sources,0.02662162792078903
-nbr_pm25_25km,temp_x_humidity,Regional PM signal,Meteorology,0.024903458606951135
-pct_people_of_color,longitude,Community & EJ context,Geography,0.02457387516554336
-longitude,nbr_pm25_50km,Geography,Regional PM signal,0.02431419629821801
-rmp_proximity,pct_ling_isolated,Local sources,Community & EJ context,0.02382791460581555
-dist_to_coast,nbr_pm25_50km,Geography,Regional PM signal,0.02326828271190046
-dist_to_nearest_sensor,nbr_pm25_25km,Geography,Regional PM signal,0.023138113968065734
-dist_to_nearest_sensor,dist_to_coast,Geography,Geography,0.02303937482859248
-pct_people_of_color,latitude,Community & EJ context,Geography,0.022826170083249032
-ejf_score,pct_ling_isolated,Community & EJ context,Community & EJ context,0.022151294499059893
-longitude,nbr_pm25_25km,Geography,Regional PM signal,0.022134510604082083
-nbr_pm25_100km,hms_smoke,Regional PM signal,Wildfire smoke,0.022018227008046336
-superfund_proximity,rmp_proximity,Local sources,Local sources,0.021311103546155757
-longitude,dist_to_coast,Geography,Geography,0.020421184752323865
-pct_low_income,nbr_pm25_25km,Community & EJ context,Regional PM signal,0.020412568433330294
-traffic_proximity,nbr_pm25_100km,Local sources,Regional PM signal,0.02031689080197962
-ejf_score,dist_to_coast,Community & EJ context,Geography,0.020222461749993578
-rmp_proximity,nbr_count_100km,Local sources,Regional PM signal,0.0198648603601362
-diesel_pm_proximity,dist_to_coast,Local sources,Geography,0.01954223114158947
-pct_people_of_color,nbr_pm25_100km,Community & EJ context,Regional PM signal,0.019540782008910844
-nbr_pm25_100km,nbr_count_100km,Regional PM signal,Regional PM signal,0.019425250033174205
-diesel_pm_proximity,dist_to_nearest_sensor,Local sources,Geography,0.0190711953524784
-pct_ling_isolated,nbr_pm25_25km,Community & EJ context,Regional PM signal,0.019031434995501195
-pct_ling_isolated,latitude,Community & EJ context,Geography,0.019010166868632924
-rmp_proximity,longitude,Local sources,Geography,0.018994752647730557
-ejf_score,pct_low_income,Community & EJ context,Community & EJ context,0.018856836199727563
-pct_people_of_color,nbr_pm25_50km,Community & EJ context,Regional PM signal,0.018795577776169633
-pct_people_of_color,pct_ling_isolated,Community & EJ context,Community & EJ context,0.01869410622386511
-nbr_pm25_25km,hms_smoke,Regional PM signal,Wildfire smoke,0.018567475430536374
-pct_ling_isolated,dist_to_coast,Community & EJ context,Geography,0.018115259522329185
-pct_low_income,nbr_pm25_100km,Community & EJ context,Regional PM signal,0.018107929044818564
-pct_ling_isolated,longitude,Community & EJ context,Geography,0.018020595356088933
-pressure,nbr_pm25_100km,Meteorology,Regional PM signal,0.017878184156847773
-traffic_proximity,pct_ling_isolated,Local sources,Community & EJ context,0.017498834560033424
-pct_ling_isolated,nbr_pm25_50km,Community & EJ context,Regional PM signal,0.01749566367981784
-nbr_pm25_50km,hms_smoke,Regional PM signal,Wildfire smoke,0.017306306616338595
-nbr_pm25_25km,nbr_count_100km,Regional PM signal,Regional PM signal,0.01730247603643864
-nbr_pm25_50km,day_of_year,Regional PM signal,Season & calendar,0.01724865714924014
-pct_people_of_color,dist_to_coast,Community & EJ context,Geography,0.01714739646265627
-ejf_score,longitude,Community & EJ context,Geography,0.016903527469111848
-ejf_score,pct_people_of_color,Community & EJ context,Community & EJ context,0.016753687051732948
-traffic_proximity,superfund_proximity,Local sources,Local sources,0.016215275684340988
-rmp_proximity,latitude,Local sources,Geography,0.01620917796155365
-humidity,temp_x_humidity,Meteorology,Meteorology,0.016195354090586728
-nbr_count_50km,nbr_pm25_100km,Regional PM signal,Regional PM signal,0.016089992563032035
-pct_people_of_color,superfund_proximity,Community & EJ context,Local sources,0.01598886109779533
-rmp_proximity,nbr_pm25_50km,Local sources,Regional PM signal,0.01598729160426826
-diesel_pm_proximity,latitude,Local sources,Geography,0.015937348676699607
-rmp_proximity,nbr_pm25_25km,Local sources,Regional PM signal,0.015850738752727897
-nbr_pm25_50km,nbr_count_100km,Regional PM signal,Regional PM signal,0.01579732331313679
-humidity,nbr_std_50km,Meteorology,Regional PM signal,0.0157901516274712
-pct_ling_isolated,nbr_pm25_100km,Community & EJ context,Regional PM signal,0.015756640251558075
-pct_people_of_color,pct_low_income,Community & EJ context,Community & EJ context,0.01564671443869176
-diesel_pm_proximity,aod,Local sources,Regional PM signal,0.015551580351888292
-pct_people_of_color,nbr_std_50km,Community & EJ context,Regional PM signal,0.01552369988263389
-pct_people_of_color,dist_to_nearest_sensor,Community & EJ context,Geography,0.014961629278838703
-traffic_proximity,nbr_pm25_25km,Local sources,Regional PM signal,0.014876053088031478
-latitude,nbr_pm25_100km,Geography,Regional PM signal,0.014842427331522521
-pct_ling_isolated,nbr_std_50km,Community & EJ context,Regional PM signal,0.014816823414256443
-diesel_pm_proximity,temp_x_humidity,Local sources,Meteorology,0.014796901148466993
-superfund_proximity,diesel_pm_proximity,Local sources,Local sources,0.014753066536519463
-latitude,nbr_count_25km,Geography,Regional PM signal,0.01458664431673443
-ejf_score,nbr_pm25_25km,Community & EJ context,Regional PM signal,0.01452612770980323
-pct_low_income,diesel_pm_proximity,Community & EJ context,Local sources,0.014504072594699463
-precipitation,nbr_pm25_50km,Meteorology,Regional PM signal,0.014377825069346394
-latitude,dist_to_nearest_sensor,Geography,Geography,0.014285835217556803
-nbr_std_50km,aod,Regional PM signal,Regional PM signal,0.014273475286499238
-traffic_proximity,dist_to_coast,Local sources,Geography,0.014171117313161452
-diesel_pm_proximity,longitude,Local sources,Geography,0.014153383357240803
-superfund_proximity,dist_to_nearest_sensor,Local sources,Geography,0.013735747445426787
-pct_low_income,traffic_proximity,Community & EJ context,Local sources,0.013730134831799351
-ejf_score,nbr_pm25_100km,Community & EJ context,Regional PM signal,0.013714996793652106
-dist_to_nearest_sensor,nbr_pm25_50km,Geography,Regional PM signal,0.013690189421791482
-nbr_count_50km,cams_pm25,Regional PM signal,Regional PM signal,0.013646143952745098
-longitude,dist_to_nearest_sensor,Geography,Geography,0.013601412495780053
-nbr_pm25_25km,nbr_count_25km,Regional PM signal,Regional PM signal,0.013446133878601566
-nbr_count_50km,nbr_std_50km,Regional PM signal,Regional PM signal,0.013211896821006708
-rmp_proximity,diesel_pm_proximity,Local sources,Local sources,0.013192265979923404
-pct_low_income,dist_to_nearest_sensor,Community & EJ context,Geography,0.013163111861755552
-temperature,nbr_pm25_100km,Meteorology,Regional PM signal,0.013138218266465246
-dist_to_nearest_sensor,nbr_pm25_100km,Geography,Regional PM signal,0.013036320394321045
-nbr_pm25_25km,nbr_count_50km,Regional PM signal,Regional PM signal,0.013008878101484999
-nbr_pm25_25km,doy_sin,Regional PM signal,Season & calendar,0.01291457881928056
-pct_low_income,nbr_count_25km,Community & EJ context,Regional PM signal,0.012913560932735164
-pct_low_income,dist_to_coast,Community & EJ context,Geography,0.012694950117647942
-rmp_proximity,dist_to_nearest_sensor,Local sources,Geography,0.012607541120431259
-precipitation,nbr_pm25_25km,Meteorology,Regional PM signal,0.012543852484419723
-traffic_proximity,rmp_proximity,Local sources,Local sources,0.012533054858813347
-longitude,nbr_count_100km,Geography,Regional PM signal,0.012519317389918662
-ejf_score,traffic_proximity,Community & EJ context,Local sources,0.012370252262823223
-rmp_proximity,nbr_count_25km,Local sources,Regional PM signal,0.012292590884485376
-pct_low_income,nbr_pm25_50km,Community & EJ context,Regional PM signal,0.01221537311482039
-pct_people_of_color,traffic_proximity,Community & EJ context,Local sources,0.0120768588173168
-ejf_score,nbr_pm25_50km,Community & EJ context,Regional PM signal,0.012063551832855738
-dist_to_nearest_sensor,nbr_count_100km,Geography,Regional PM signal,0.012004596773584487
-aod,cams_pm25,Regional PM signal,Regional PM signal,0.011887304281680562
-dist_to_nearest_sensor,nbr_count_50km,Geography,Regional PM signal,0.011877723152102455
-nbr_pm25_25km,day_of_year,Regional PM signal,Season & calendar,0.011848015007675166
-dist_to_nearest_sensor,nbr_count_25km,Geography,Regional PM signal,0.011847185991514091
-pressure,nbr_pm25_50km,Meteorology,Regional PM signal,0.01182351662791072
-latitude,nbr_count_50km,Geography,Regional PM signal,0.011644131627204644
-pct_people_of_color,diesel_pm_proximity,Community & EJ context,Local sources,0.011619067242053902
-nbr_count_100km,cams_pm25,Regional PM signal,Regional PM signal,0.011571008388365658
-traffic_proximity,latitude,Local sources,Geography,0.011507132014474532
-nbr_pm25_100km,day_of_year,Regional PM signal,Season & calendar,0.0114504254666693
-superfund_proximity,nbr_pm25_100km,Local sources,Regional PM signal,0.011412922770694875
-nbr_pm25_100km,doy_sin,Regional PM signal,Season & calendar,0.011359785485363105
-pct_ling_isolated,nbr_count_25km,Community & EJ context,Regional PM signal,0.011309298327978532
-superfund_proximity,pct_ling_isolated,Local sources,Community & EJ context,0.011161422974103517
-latitude,nbr_pm25_50km,Geography,Regional PM signal,0.0111218532463839
-dist_to_coast,nbr_std_50km,Geography,Regional PM signal,0.011082839215163422
-diesel_pm_proximity,nbr_pm25_100km,Local sources,Regional PM signal,0.011024365367375546
-pct_people_of_color,nbr_count_25km,Community & EJ context,Regional PM signal,0.01085049764025493
-longitude,nbr_std_50km,Geography,Regional PM signal,0.01081393618661084
-nbr_count_50km,nbr_count_100km,Regional PM signal,Regional PM signal,0.010812068580936729
-nbr_pm25_50km,nbr_count_50km,Regional PM signal,Regional PM signal,0.010668158433792391
-superfund_proximity,nbr_count_50km,Local sources,Regional PM signal,0.010644032925835639
-traffic_proximity,nbr_pm25_50km,Local sources,Regional PM signal,0.01063579843563966
-longitude,nbr_count_25km,Geography,Regional PM signal,0.010439826823187455
-humidity,hms_smoke,Meteorology,Wildfire smoke,0.010404957481862534
-pressure,latitude,Meteorology,Geography,0.010372251946543037
-latitude,nbr_count_100km,Geography,Regional PM signal,0.010368111464657522
-pct_low_income,pct_ling_isolated,Community & EJ context,Community & EJ context,0.010351460225229519
-superfund_proximity,nbr_count_25km,Local sources,Regional PM signal,0.010296638382241685
-nbr_pm25_25km,month_sin,Regional PM signal,Season & calendar,0.0102671268423821
-superfund_proximity,nbr_pm25_25km,Local sources,Regional PM signal,0.010210941076956592
-nbr_std_50km,nbr_count_100km,Regional PM signal,Regional PM signal,0.010200706847768928
-pct_low_income,latitude,Community & EJ context,Geography,0.010105056688542453
-diesel_pm_proximity,nbr_pm25_25km,Local sources,Regional PM signal,0.010067297864312603
-precipitation,nbr_pm25_100km,Meteorology,Regional PM signal,0.009880353627100982
-humidity,cams_pm25,Meteorology,Regional PM signal,0.009718252171115877
-ejf_score,diesel_pm_proximity,Community & EJ context,Local sources,0.009677984911307103
-pct_low_income,superfund_proximity,Community & EJ context,Local sources,0.009621657424686842
-pct_low_income,nbr_count_100km,Community & EJ context,Regional PM signal,0.009572915089342188
-pct_ling_isolated,nbr_count_50km,Community & EJ context,Regional PM signal,0.009552400602792315
-longitude,nbr_count_50km,Geography,Regional PM signal,0.009440525831510064
-pct_people_of_color,nbr_count_50km,Community & EJ context,Regional PM signal,0.00940205100147651
-latitude,nbr_std_50km,Geography,Regional PM signal,0.009368393799444473
-dist_to_coast,nbr_count_25km,Geography,Regional PM signal,0.00930595000577427
-nbr_count_25km,nbr_pm25_100km,Regional PM signal,Regional PM signal,0.00930521379093991
-pressure,nbr_pm25_25km,Meteorology,Regional PM signal,0.009301638388747221
-hms_smoke,aod,Wildfire smoke,Regional PM signal,0.009293172741707836
-nbr_std_50km,hms_smoke,Regional PM signal,Wildfire smoke,0.009240949842508641
-nbr_count_50km,aod,Regional PM signal,Regional PM signal,0.009191778314619894
-diesel_pm_proximity,nbr_pm25_50km,Local sources,Regional PM signal,0.009120628112212405
-temperature,nbr_pm25_25km,Meteorology,Regional PM signal,0.009056921385044155
-pressure,dist_to_coast,Meteorology,Geography,0.00905065651650331
-superfund_proximity,latitude,Local sources,Geography,0.009023077677965435
-ejf_score,nbr_count_100km,Community & EJ context,Regional PM signal,0.008978140846916647
-traffic_proximity,dist_to_nearest_sensor,Local sources,Geography,0.00897259773547129
-dist_to_coast,nbr_count_50km,Geography,Regional PM signal,0.008962016425002113
-diesel_pm_proximity,cams_pm25,Local sources,Regional PM signal,0.008958439036146053
-traffic_proximity,diesel_pm_proximity,Local sources,Local sources,0.008894188955295505
-pct_people_of_color,cams_pm25,Community & EJ context,Regional PM signal,0.00880873484232703
-ejf_score,latitude,Community & EJ context,Geography,0.008629316630053268
-superfund_proximity,longitude,Local sources,Geography,0.008618637506716466
-humidity,dist_to_coast,Meteorology,Geography,0.008597534861510653
-pct_ling_isolated,nbr_count_100km,Community & EJ context,Regional PM signal,0.008534724264345414
-humidity,nbr_count_50km,Meteorology,Regional PM signal,0.008510784129495876
-nbr_std_50km,temp_x_humidity,Regional PM signal,Meteorology,0.008471772468816056
-pct_low_income,nbr_std_50km,Community & EJ context,Regional PM signal,0.008452428729697517
-superfund_proximity,nbr_pm25_50km,Local sources,Regional PM signal,0.008420259606576257
-dist_to_coast,nbr_count_100km,Geography,Regional PM signal,0.00840879687026963
-longitude,aod,Geography,Regional PM signal,0.008260240346588546
-nbr_count_25km,nbr_count_100km,Regional PM signal,Regional PM signal,0.008206365918410641
-nbr_count_50km,temp_x_humidity,Regional PM signal,Meteorology,0.00816911909653855
-longitude,cams_pm25,Geography,Regional PM signal,0.008105060531035345
-temperature,nbr_pm25_50km,Meteorology,Regional PM signal,0.008030740430536734
-longitude,temp_x_humidity,Geography,Meteorology,0.00801806947824053
-nbr_count_25km,nbr_pm25_50km,Regional PM signal,Regional PM signal,0.007952823126479935
-rmp_proximity,nbr_std_50km,Local sources,Regional PM signal,0.007941914267366635
-ejf_score,superfund_proximity,Community & EJ context,Local sources,0.007888451244189139
-pct_people_of_color,nbr_count_100km,Community & EJ context,Regional PM signal,0.007842628410200937
-humidity,aod,Meteorology,Regional PM signal,0.00783334961602834
-pct_ling_isolated,dist_to_nearest_sensor,Community & EJ context,Geography,0.007829765567945922
-rmp_proximity,nbr_count_50km,Local sources,Regional PM signal,0.0077901633752315656
-cams_pm25,temp_x_humidity,Regional PM signal,Meteorology,0.007723277805477271
-ejf_score,nbr_count_25km,Community & EJ context,Regional PM signal,0.0075618593991834526
-humidity,longitude,Meteorology,Geography,0.00755440969297084
-nbr_count_25km,nbr_std_50km,Regional PM signal,Regional PM signal,0.007531562431666356
-pressure,pct_ling_isolated,Meteorology,Community & EJ context,0.007507553299536956
-diesel_pm_proximity,nbr_count_50km,Local sources,Regional PM signal,0.0074901070491825315
-pressure,nbr_std_50km,Meteorology,Regional PM signal,0.007382547806382352
-dist_to_nearest_sensor,nbr_std_50km,Geography,Regional PM signal,0.007371811168228863
-dist_to_coast,cams_pm25,Geography,Regional PM signal,0.007312342804292017
-nbr_pm25_50km,doy_sin,Regional PM signal,Season & calendar,0.007273438112902021
-ejf_score,dist_to_nearest_sensor,Community & EJ context,Geography,0.007232469637843932
-ejf_score,nbr_std_50km,Community & EJ context,Regional PM signal,0.007217378678688972
-humidity,temperature,Meteorology,Meteorology,0.007169210653276319
-nbr_count_25km,aod,Regional PM signal,Regional PM signal,0.0070827016364078624
-hms_smoke,cams_pm25,Wildfire smoke,Regional PM signal,0.007080476521396818
-traffic_proximity,cams_pm25,Local sources,Regional PM signal,0.007078015091870088
-cams_pm25,doy_sin,Regional PM signal,Season & calendar,0.007040277675962184
-humidity,nbr_count_100km,Meteorology,Regional PM signal,0.007030834242741419
-nbr_count_100km,aod,Regional PM signal,Regional PM signal,0.006977046719455605
-aod,temp_x_humidity,Regional PM signal,Meteorology,0.006963814876370485
-superfund_proximity,dist_to_coast,Local sources,Geography,0.006931263111750631
-traffic_proximity,nbr_count_100km,Local sources,Regional PM signal,0.006905511376408932
-dist_to_nearest_sensor,cams_pm25,Geography,Regional PM signal,0.0068979614223951425
-pressure,nbr_count_100km,Meteorology,Regional PM signal,0.006800120426826309
-nbr_count_25km,cams_pm25,Regional PM signal,Regional PM signal,0.006647981852028339
-humidity,rmp_proximity,Meteorology,Local sources,0.006633116732590022
-diesel_pm_proximity,nbr_std_50km,Local sources,Regional PM signal,0.006502111106142058
-diesel_pm_proximity,hms_smoke,Local sources,Wildfire smoke,0.0064715471377577
-pct_low_income,cams_pm25,Community & EJ context,Regional PM signal,0.006279839618334689
-diesel_pm_proximity,nbr_count_25km,Local sources,Regional PM signal,0.006267300054745736
-temperature,diesel_pm_proximity,Meteorology,Local sources,0.006264923378781689
-ejf_score,nbr_count_50km,Community & EJ context,Regional PM signal,0.00625044039833649
-traffic_proximity,nbr_count_25km,Local sources,Regional PM signal,0.006245992268617351
-traffic_proximity,nbr_count_50km,Local sources,Regional PM signal,0.0062047448824732974
-pct_low_income,nbr_count_50km,Community & EJ context,Regional PM signal,0.0061914987724705755
-diesel_pm_proximity,nbr_count_100km,Local sources,Regional PM signal,0.006172397348542209
-nbr_pm25_100km,month_sin,Regional PM signal,Season & calendar,0.006153934565353378
-pct_ling_isolated,cams_pm25,Community & EJ context,Regional PM signal,0.0060535533720039204
-pressure,rmp_proximity,Meteorology,Local sources,0.00573901527711188
-dist_to_coast,aod,Geography,Regional PM signal,0.005720319616371106
-precipitation,aod,Meteorology,Regional PM signal,0.005715792492000432
-pct_people_of_color,aod,Community & EJ context,Regional PM signal,0.005638715495976307
-nbr_pm25_50km,month_sin,Regional PM signal,Season & calendar,0.005628049895601369
-latitude,cams_pm25,Geography,Regional PM signal,0.005569896960849397
-nbr_pm25_50km,month,Regional PM signal,Season & calendar,0.00550528563643143
-rmp_proximity,temp_x_humidity,Local sources,Meteorology,0.005478963248926541
-cams_pm25,day_of_year,Regional PM signal,Season & calendar,0.005470021768668479
-dist_to_nearest_sensor,aod,Geography,Regional PM signal,0.005435466907312912
-nbr_count_50km,hms_smoke,Regional PM signal,Wildfire smoke,0.005383796493322364
-doy_sin,temp_x_humidity,Season & calendar,Meteorology,0.005351904193948301
-traffic_proximity,aod,Local sources,Regional PM signal,0.005248593086841684
-traffic_proximity,temp_x_humidity,Local sources,Meteorology,0.005242106075709888
-nbr_std_50km,day_of_year,Regional PM signal,Season & calendar,0.0052026288653215114
-dist_to_nearest_sensor,temp_x_humidity,Geography,Meteorology,0.00516520576695327
-pct_ling_isolated,temp_x_humidity,Community & EJ context,Meteorology,0.005154154086903395
-humidity,diesel_pm_proximity,Meteorology,Local sources,0.005140321654906426
-rmp_proximity,aod,Local sources,Regional PM signal,0.00512051598191872
-pressure,cams_pm25,Meteorology,Regional PM signal,0.00508446612793304
-temperature,day_of_year,Meteorology,Season & calendar,0.005062647691856292
-traffic_proximity,nbr_std_50km,Local sources,Regional PM signal,0.005056520835806325
-ejf_score,cams_pm25,Community & EJ context,Regional PM signal,0.005054641866731214
-nbr_count_25km,nbr_count_50km,Regional PM signal,Regional PM signal,0.005038532132095982
-rmp_proximity,cams_pm25,Local sources,Regional PM signal,0.005029435148872178
-day_of_year,temp_x_humidity,Season & calendar,Meteorology,0.004902275708169753
-nbr_pm25_100km,doy_cos,Regional PM signal,Season & calendar,0.004821665690435356
-nbr_count_25km,temp_x_humidity,Regional PM signal,Meteorology,0.004726462821841648
-pct_people_of_color,temp_x_humidity,Community & EJ context,Meteorology,0.004715199461922006
-nbr_pm25_50km,doy_cos,Regional PM signal,Season & calendar,0.004703447943386983
-humidity,nbr_count_25km,Meteorology,Regional PM signal,0.004700546418030996
-latitude,aod,Geography,Regional PM signal,0.004677007373042745
-dist_to_coast,temp_x_humidity,Geography,Meteorology,0.004673816137143406
-pressure,temp_x_humidity,Meteorology,Meteorology,0.004541835666651511
-pressure,longitude,Meteorology,Geography,0.004538581905735931
-humidity,latitude,Meteorology,Geography,0.004448236833015758
-precipitation,temp_x_humidity,Meteorology,Meteorology,0.00444101418413783
-superfund_proximity,nbr_std_50km,Local sources,Regional PM signal,0.004399360762826283
-humidity,traffic_proximity,Meteorology,Local sources,0.004376712181430707
-humidity,pressure,Meteorology,Meteorology,0.00436022455558485
-nbr_pm25_25km,doy_cos,Regional PM signal,Season & calendar,0.004357509970431924
-pressure,pct_people_of_color,Meteorology,Community & EJ context,0.004338450581283888
-nbr_std_50km,doy_sin,Regional PM signal,Season & calendar,0.004322583409383094
-pressure,aod,Meteorology,Regional PM signal,0.0042920768878050766
-humidity,month_sin,Meteorology,Season & calendar,0.004280336664996256
-temperature,nbr_std_50km,Meteorology,Regional PM signal,0.0042267619336263385
-pct_low_income,aod,Community & EJ context,Regional PM signal,0.004190059903908974
-pct_low_income,temp_x_humidity,Community & EJ context,Meteorology,0.004170700888708144
-cams_pm25,doy_cos,Regional PM signal,Season & calendar,0.004170035637832314
-temperature,aod,Meteorology,Regional PM signal,0.0041693099684427274
-temperature,traffic_proximity,Meteorology,Local sources,0.004152460087987071
-temperature,dist_to_nearest_sensor,Meteorology,Geography,0.003965773336295905
-temperature,doy_sin,Meteorology,Season & calendar,0.003936729066294557
-nbr_count_100km,hms_smoke,Regional PM signal,Wildfire smoke,0.003933318153353938
-nbr_pm25_100km,wind_x_temp,Regional PM signal,Meteorology,0.00390733669459412
-humidity,day_of_year,Meteorology,Season & calendar,0.0038823535893093607
-pressure,nbr_count_50km,Meteorology,Regional PM signal,0.0038054274164241782
-humidity,pct_ling_isolated,Meteorology,Community & EJ context,0.003776947888922753
-ejf_score,aod,Community & EJ context,Regional PM signal,0.0037414185297708277
-pct_ling_isolated,aod,Community & EJ context,Regional PM signal,0.0036275751310127606
-pressure,diesel_pm_proximity,Meteorology,Local sources,0.003626868517908168
-nbr_pm25_100km,month,Regional PM signal,Season & calendar,0.0036076369366699573
-humidity,precipitation,Meteorology,Meteorology,0.0035736068489728478
-nbr_count_100km,temp_x_humidity,Regional PM signal,Meteorology,0.003563867699430439
-nbr_std_50km,month_sin,Regional PM signal,Season & calendar,0.0035523827826005054
-nbr_pm25_50km,wind_x_temp,Regional PM signal,Meteorology,0.0035418614966462483
-ejf_score,temp_x_humidity,Community & EJ context,Meteorology,0.003526631866127287
-precipitation,nbr_std_50km,Meteorology,Regional PM signal,0.0034484471002850783
-precipitation,cams_pm25,Meteorology,Regional PM signal,0.0034253873029475466
-latitude,temp_x_humidity,Geography,Meteorology,0.00340332818270856
-superfund_proximity,aod,Local sources,Regional PM signal,0.003380910555526597
-temperature,rmp_proximity,Meteorology,Local sources,0.0033117353416121965
-humidity,pct_people_of_color,Meteorology,Community & EJ context,0.0032065860002422255
-superfund_proximity,nbr_count_100km,Local sources,Regional PM signal,0.0031989455821487024
-nbr_std_50km,doy_cos,Regional PM signal,Season & calendar,0.0031192749505756876
-temperature,cams_pm25,Meteorology,Regional PM signal,0.0031167866089502304
-cams_pm25,month_sin,Regional PM signal,Season & calendar,0.003038809256847715
-nbr_pm25_100km,month_cos,Regional PM signal,Season & calendar,0.0030074936436086234
-temperature,temp_x_humidity,Meteorology,Meteorology,0.0029420979997441554
-aod,doy_sin,Regional PM signal,Season & calendar,0.00289607395684592
-nbr_pm25_25km,wind_x_temp,Regional PM signal,Meteorology,0.00286476409496795
-humidity,ejf_score,Meteorology,Community & EJ context,0.002805326355069672
-nbr_count_100km,day_of_year,Regional PM signal,Season & calendar,0.002793347355068381
-month_sin,temp_x_humidity,Season & calendar,Meteorology,0.0027900341294605424
-aod,day_of_year,Regional PM signal,Season & calendar,0.0027556667154467382
-superfund_proximity,cams_pm25,Local sources,Regional PM signal,0.002746941213177141
-nbr_pm25_25km,month,Regional PM signal,Season & calendar,0.0026731405961409383
-rmp_proximity,wind_x_temp,Local sources,Meteorology,0.0026414524739981834
-pressure,traffic_proximity,Meteorology,Local sources,0.0026365170333949024
-humidity,pct_low_income,Meteorology,Community & EJ context,0.002636147991042348
-pressure,pct_low_income,Meteorology,Community & EJ context,0.002633821800033219
-superfund_proximity,temp_x_humidity,Local sources,Meteorology,0.0025745158920270337
-temperature,nbr_count_50km,Meteorology,Regional PM signal,0.002567706775982975
-latitude,day_of_year,Geography,Season & calendar,0.0025458328239193408
-longitude,hms_smoke,Geography,Wildfire smoke,0.0025393916047703486
-dist_to_nearest_sensor,hms_smoke,Geography,Wildfire smoke,0.002524293886832711
-temperature,hms_smoke,Meteorology,Wildfire smoke,0.002517096516589996
-pressure,dist_to_nearest_sensor,Meteorology,Geography,0.0024852584519014
-hms_smoke,temp_x_humidity,Wildfire smoke,Meteorology,0.0024754846929216853
-pct_people_of_color,doy_cos,Community & EJ context,Season & calendar,0.0024676265466083954
-humidity,dist_to_nearest_sensor,Meteorology,Geography,0.002467521699514196
-temperature,pct_ling_isolated,Meteorology,Community & EJ context,0.0024554587216268423
-temp_x_humidity,wind_x_temp,Meteorology,Meteorology,0.0024516875508060467
-humidity,doy_cos,Meteorology,Season & calendar,0.0024487513168419996
-humidity,doy_sin,Meteorology,Season & calendar,0.002446666680667809
-hms_smoke,doy_sin,Wildfire smoke,Season & calendar,0.0024386712530251
-temperature,nbr_count_25km,Meteorology,Regional PM signal,0.0024194234154124644
-temperature,dist_to_coast,Meteorology,Geography,0.0023607367513873677
-pressure,ejf_score,Meteorology,Community & EJ context,0.002337336786857376
-wind_speed,nbr_pm25_50km,Meteorology,Regional PM signal,0.002337334453500866
-dist_to_coast,hms_smoke,Geography,Wildfire smoke,0.0023001165516997684
-latitude,doy_sin,Geography,Season & calendar,0.0022801355099253406
-rmp_proximity,hms_smoke,Local sources,Wildfire smoke,0.0022747110943066146
-nbr_std_50km,wind_x_temp,Regional PM signal,Meteorology,0.0022526682061609184
-nbr_pm25_50km,month_cos,Regional PM signal,Season & calendar,0.002192972685888305
-wind_speed,nbr_pm25_100km,Meteorology,Regional PM signal,0.0021849187024754043
-pct_low_income,day_of_year,Community & EJ context,Season & calendar,0.002149397711708867
-precipitation,rmp_proximity,Meteorology,Local sources,0.002148018969644938
-temperature,longitude,Meteorology,Geography,0.0021464528399075516
-wind_speed,nbr_pm25_25km,Meteorology,Regional PM signal,0.0021421546771784945
-longitude,day_of_year,Geography,Season & calendar,0.0021192354732585956
-nbr_count_100km,doy_sin,Regional PM signal,Season & calendar,0.0021175138443381074
-pct_low_income,hms_smoke,Community & EJ context,Wildfire smoke,0.002113281051075777
-temperature,pct_people_of_color,Meteorology,Community & EJ context,0.002080352222474413
-cams_pm25,month_cos,Regional PM signal,Season & calendar,0.0020621293760733597
-temperature,latitude,Meteorology,Geography,0.002053814940586907
-pressure,nbr_count_25km,Meteorology,Regional PM signal,0.002032614210325248
-latitude,hms_smoke,Geography,Wildfire smoke,0.0020042765230060774
-pct_ling_isolated,hms_smoke,Community & EJ context,Wildfire smoke,0.001999675039317423
-traffic_proximity,hms_smoke,Local sources,Wildfire smoke,0.00199682457425812
-traffic_proximity,day_of_year,Local sources,Season & calendar,0.0019936849963282923
-precipitation,dist_to_coast,Meteorology,Geography,0.0019436148277808573
-temperature,nbr_count_100km,Meteorology,Regional PM signal,0.0019249073924327803
-diesel_pm_proximity,doy_sin,Local sources,Season & calendar,0.0019195423845900774
-precipitation,longitude,Meteorology,Geography,0.001908754783505063
-cams_pm25,month,Regional PM signal,Season & calendar,0.00189259214075633
-cams_pm25,wind_x_temp,Regional PM signal,Meteorology,0.0018651610824686297
-nbr_count_50km,day_of_year,Regional PM signal,Season & calendar,0.0018650063907371694
-nbr_pm25_25km,month_cos,Regional PM signal,Season & calendar,0.0018447166912846707
-dist_to_coast,day_of_year,Geography,Season & calendar,0.001829149043343888
-dist_to_coast,doy_sin,Geography,Season & calendar,0.0018078041962725012
-pct_ling_isolated,wind_x_temp,Community & EJ context,Meteorology,0.0018072175410309963
-latitude,wind_x_temp,Geography,Meteorology,0.0018063128615865664
-longitude,wind_x_temp,Geography,Meteorology,0.0018027270923806548
-doy_cos,temp_x_humidity,Season & calendar,Meteorology,0.001796316029547319
-nbr_count_25km,hms_smoke,Regional PM signal,Wildfire smoke,0.0017938725842893155
-nbr_std_50km,month,Regional PM signal,Season & calendar,0.001787877999852132
-longitude,doy_sin,Geography,Season & calendar,0.0017694115793923933
-doy_sin,doy_cos,Season & calendar,Season & calendar,0.001753750817874613
-ejf_score,doy_cos,Community & EJ context,Season & calendar,0.0017468449094790598
-pct_people_of_color,hms_smoke,Community & EJ context,Wildfire smoke,0.0017353785428553083
-temperature,precipitation,Meteorology,Meteorology,0.0017325286131768764
-pct_ling_isolated,day_of_year,Community & EJ context,Season & calendar,0.0016912303530644802
-wind_speed,nbr_std_50km,Meteorology,Regional PM signal,0.001689025095497417
-nbr_std_50km,month_cos,Regional PM signal,Season & calendar,0.0016875026571686199
-precipitation,hms_smoke,Meteorology,Wildfire smoke,0.0016749252277430502
-aod,doy_cos,Regional PM signal,Season & calendar,0.0016693561555336152
-day_of_year,doy_sin,Season & calendar,Season & calendar,0.001654861570548327
-nbr_count_50km,doy_sin,Regional PM signal,Season & calendar,0.0016395892146050738
-temperature,pct_low_income,Meteorology,Community & EJ context,0.0016254305047577356
-pct_people_of_color,doy_sin,Community & EJ context,Season & calendar,0.0016231427643217497
-day_of_year,doy_cos,Season & calendar,Season & calendar,0.0016159386832018873
-month_cos,temp_x_humidity,Season & calendar,Meteorology,0.001602093662517111
-humidity,superfund_proximity,Meteorology,Local sources,0.001583258371950718
-longitude,month_sin,Geography,Season & calendar,0.001574121976633269
-hms_smoke,doy_cos,Wildfire smoke,Season & calendar,0.0015520640721240597
-wind_speed,longitude,Meteorology,Geography,0.0015502494736179969
-precipitation,pct_low_income,Meteorology,Community & EJ context,0.0015464153482076233
-rmp_proximity,doy_sin,Local sources,Season & calendar,0.0015370012819572714
-diesel_pm_proximity,day_of_year,Local sources,Season & calendar,0.001533145137708368
-pressure,day_of_year,Meteorology,Season & calendar,0.0015207059212390519
-nbr_count_100km,month_sin,Regional PM signal,Season & calendar,0.0015143448356492984
-pressure,doy_sin,Meteorology,Season & calendar,0.001510632060130845
-day_of_year,wind_x_temp,Season & calendar,Meteorology,0.0014980540578325915
-humidity,wind_x_temp,Meteorology,Meteorology,0.0014962254617088488
-nbr_count_25km,day_of_year,Regional PM signal,Season & calendar,0.0014946414746443658
-pct_low_income,doy_sin,Community & EJ context,Season & calendar,0.0014815044987281814
-traffic_proximity,wind_x_temp,Local sources,Meteorology,0.0014789551563775408
-precipitation,ejf_score,Meteorology,Community & EJ context,0.0014711169506175443
-pct_people_of_color,day_of_year,Community & EJ context,Season & calendar,0.0014708040612179311
-precipitation,pct_people_of_color,Meteorology,Community & EJ context,0.0014613581992974152
-month,temp_x_humidity,Season & calendar,Meteorology,0.0014580412338420562
-diesel_pm_proximity,wind_x_temp,Local sources,Meteorology,0.0014565972329345794
-precipitation,latitude,Meteorology,Geography,0.0014422953358441016
-rmp_proximity,doy_cos,Local sources,Season & calendar,0.0014285870706603212
-temperature,doy_cos,Meteorology,Season & calendar,0.001406750625573443
-temperature,ejf_score,Meteorology,Community & EJ context,0.0013856412311272926
-dist_to_coast,month,Geography,Season & calendar,0.001383365352098688
-precipitation,nbr_count_50km,Meteorology,Regional PM signal,0.0013740588229371811
-pressure,hms_smoke,Meteorology,Wildfire smoke,0.0013716505842296931
-traffic_proximity,doy_sin,Local sources,Season & calendar,0.0013674705677576837
-aod,month_sin,Regional PM signal,Season & calendar,0.0013664822491573027
-precipitation,pct_ling_isolated,Meteorology,Community & EJ context,0.0013590429229541382
-precipitation,diesel_pm_proximity,Meteorology,Local sources,0.001357950753731028
-pressure,precipitation,Meteorology,Meteorology,0.0013458159233744938
-pct_ling_isolated,doy_cos,Community & EJ context,Season & calendar,0.001322201651278268
-precipitation,nbr_count_100km,Meteorology,Regional PM signal,0.0013204615318377958
-humidity,month_cos,Meteorology,Season & calendar,0.0013118256860340956
-ejf_score,hms_smoke,Community & EJ context,Wildfire smoke,0.001283512791840153
-rmp_proximity,day_of_year,Local sources,Season & calendar,0.001271830334989881
-nbr_count_50km,month_sin,Regional PM signal,Season & calendar,0.0012716608767887943
-hms_smoke,day_of_year,Wildfire smoke,Season & calendar,0.0012715195991574424
-nbr_count_100km,month,Regional PM signal,Season & calendar,0.0012677298245389748
-traffic_proximity,doy_cos,Local sources,Season & calendar,0.0012625893578981648
-pressure,superfund_proximity,Meteorology,Local sources,0.0012622248294820828
-precipitation,doy_sin,Meteorology,Season & calendar,0.001255440773207377
-aod,month_cos,Regional PM signal,Season & calendar,0.0012388074718658543
-dist_to_coast,month_sin,Geography,Season & calendar,0.0012385309121804957
-doy_sin,wind_x_temp,Season & calendar,Meteorology,0.0012357495235172159
-temperature,month_sin,Meteorology,Season & calendar,0.0012354240287610872
-ejf_score,doy_sin,Community & EJ context,Season & calendar,0.00123507271376456
-longitude,doy_cos,Geography,Season & calendar,0.0012302234300677678
-humidity,month,Meteorology,Season & calendar,0.0012289394016479292
-precipitation,month_sin,Meteorology,Season & calendar,0.0012212029213540937
-aod,wind_x_temp,Regional PM signal,Meteorology,0.001220542560494601
-precipitation,day_of_year,Meteorology,Season & calendar,0.0012186855405829106
-temperature,pressure,Meteorology,Meteorology,0.0012173457075430583
-dist_to_coast,doy_cos,Geography,Season & calendar,0.001211108905106161
-aod,month,Regional PM signal,Season & calendar,0.0011961312942421428
-nbr_count_100km,doy_cos,Regional PM signal,Season & calendar,0.0011948406436334605
-latitude,month,Geography,Season & calendar,0.0011899378410233793
-ejf_score,day_of_year,Community & EJ context,Season & calendar,0.0011874698715874544
-nbr_count_25km,doy_sin,Regional PM signal,Season & calendar,0.0011721107153499744
-pct_low_income,wind_x_temp,Community & EJ context,Meteorology,0.001164305457197338
-dist_to_coast,wind_x_temp,Geography,Meteorology,0.0011618726576581848
-wind_speed,dist_to_coast,Meteorology,Geography,0.0011456276375914807
-month_sin,doy_sin,Season & calendar,Season & calendar,0.0011370667455085821
-precipitation,traffic_proximity,Meteorology,Local sources,0.0011288880734157223
-wind_speed,aod,Meteorology,Regional PM signal,0.001124786971506609
-day_of_year,month_cos,Season & calendar,Season & calendar,0.0011216082005055437
-wind_speed,cams_pm25,Meteorology,Regional PM signal,0.0011124150197934551
-wind_speed,pct_low_income,Meteorology,Community & EJ context,0.0011087071207513946
-precipitation,doy_cos,Meteorology,Season & calendar,0.0011024607820726948
-nbr_count_50km,wind_x_temp,Regional PM signal,Meteorology,0.0010954981251383748
-pct_people_of_color,wind_x_temp,Community & EJ context,Meteorology,0.0010875559571632324
-latitude,month_sin,Geography,Season & calendar,0.0010671056605603912
-wind_speed,nbr_count_50km,Meteorology,Regional PM signal,0.0010648357060084952
-latitude,doy_cos,Geography,Season & calendar,0.0010647933211881244
-pct_ling_isolated,month_sin,Community & EJ context,Season & calendar,0.001059921818971743
-dist_to_nearest_sensor,doy_sin,Geography,Season & calendar,0.0010570550114254833
-wind_speed,latitude,Meteorology,Geography,0.0010352526757391265
-longitude,month,Geography,Season & calendar,0.001035058835419829
-dist_to_nearest_sensor,day_of_year,Geography,Season & calendar,0.0010346237076043418
-nbr_count_50km,month,Regional PM signal,Season & calendar,0.0010294423657960523
-month,day_of_year,Season & calendar,Season & calendar,0.001029303512938128
-pct_low_income,doy_cos,Community & EJ context,Season & calendar,0.0010156515605713211
-nbr_count_50km,doy_cos,Regional PM signal,Season & calendar,0.0010083316507486617
-temperature,superfund_proximity,Meteorology,Local sources,0.0010057542465020108
-pct_ling_isolated,doy_sin,Community & EJ context,Season & calendar,0.000998539935626736
-month,doy_cos,Season & calendar,Season & calendar,0.0009985111285085717
-precipitation,superfund_proximity,Meteorology,Local sources,0.0009863883473892584
-dist_to_coast,month_cos,Geography,Season & calendar,0.0009735175805206909
-nbr_count_100km,wind_x_temp,Regional PM signal,Meteorology,0.0009697842298473487
-superfund_proximity,wind_x_temp,Local sources,Meteorology,0.0009531392691751132
-humidity,wind_speed,Meteorology,Meteorology,0.0009304656235250857
-precipitation,dist_to_nearest_sensor,Meteorology,Geography,0.0009242922796127478
-precipitation,nbr_count_25km,Meteorology,Regional PM signal,0.0009226130732716927
-wind_speed,temp_x_humidity,Meteorology,Meteorology,0.0009081579693007673
-pressure,doy_cos,Meteorology,Season & calendar,0.0009003169889245327
-nbr_count_25km,doy_cos,Regional PM signal,Season & calendar,0.0008958045994690451
-pct_people_of_color,month_sin,Community & EJ context,Season & calendar,0.0008821548746689815
-hms_smoke,month_cos,Wildfire smoke,Season & calendar,0.0008820630276133433
-pct_people_of_color,month,Community & EJ context,Season & calendar,0.0008700514995405816
-superfund_proximity,day_of_year,Local sources,Season & calendar,0.0008698240218238933
-pressure,wind_x_temp,Meteorology,Meteorology,0.000869042502100399
-pressure,month,Meteorology,Season & calendar,0.0008581429894927089
-nbr_count_25km,wind_x_temp,Regional PM signal,Meteorology,0.0008556921755840101
-rmp_proximity,month,Local sources,Season & calendar,0.000839415468850545
-ejf_score,wind_x_temp,Community & EJ context,Meteorology,0.0008388573444733443
-diesel_pm_proximity,doy_cos,Local sources,Season & calendar,0.0008317315500925393
-month_sin,wind_x_temp,Season & calendar,Meteorology,0.0008297544086024232
-dist_to_nearest_sensor,wind_x_temp,Geography,Meteorology,0.0008159009268057983
-hms_smoke,month,Wildfire smoke,Season & calendar,0.0008136583220374103
-rmp_proximity,month_sin,Local sources,Season & calendar,0.0008032023493574537
-pressure,month_sin,Meteorology,Season & calendar,0.0008031921253566623
-hms_smoke,month_sin,Wildfire smoke,Season & calendar,0.0008030758376321564
-month,doy_sin,Season & calendar,Season & calendar,0.0007897288794541101
-temperature,wind_x_temp,Meteorology,Meteorology,0.0007803674059038161
-month_sin,doy_cos,Season & calendar,Season & calendar,0.0007787524826930355
-pct_people_of_color,month_cos,Community & EJ context,Season & calendar,0.00077035350455065
-nbr_count_100km,month_cos,Regional PM signal,Season & calendar,0.0007548215240901411
-nbr_pm25_100km,dow_sin,Regional PM signal,Season & calendar,0.0007510791114016876
-superfund_proximity,hms_smoke,Local sources,Wildfire smoke,0.0007500398988653801
-hms_smoke,wind_x_temp,Wildfire smoke,Meteorology,0.000749074168074391
-doy_cos,wind_x_temp,Season & calendar,Meteorology,0.0007471774312030826
-pct_low_income,month_sin,Community & EJ context,Season & calendar,0.000746751350271326
-pct_ling_isolated,month,Community & EJ context,Season & calendar,0.0007415862443816699
-temperature,month_cos,Meteorology,Season & calendar,0.0007283159176949345
-precipitation,month,Meteorology,Season & calendar,0.0007144475836276462
-diesel_pm_proximity,month_sin,Local sources,Season & calendar,0.0007111553415764954
-precipitation,wind_x_temp,Meteorology,Meteorology,0.0007048131272814257
-month,wind_x_temp,Season & calendar,Meteorology,0.0006945285267011675
-wind_speed,nbr_count_100km,Meteorology,Regional PM signal,0.000692443942980827
-wind_speed,rmp_proximity,Meteorology,Local sources,0.000691070620755742
-dist_to_nearest_sensor,month,Geography,Season & calendar,0.0006859341986279958
-dist_to_nearest_sensor,month_sin,Geography,Season & calendar,0.0006819637197926894
-month,month_sin,Season & calendar,Season & calendar,0.0006816101000489554
-dist_to_nearest_sensor,doy_cos,Geography,Season & calendar,0.0006762348514493424
-wind_speed,pct_people_of_color,Meteorology,Community & EJ context,0.0006741636809137364
-day_of_year,month_sin,Season & calendar,Season & calendar,0.0006664457888326974
-nbr_pm25_25km,dow,Regional PM signal,Season & calendar,0.0006636114150695536
-ejf_score,month_sin,Community & EJ context,Season & calendar,0.0006635728694758058
-nbr_count_25km,month_sin,Regional PM signal,Season & calendar,0.0006621545485283914
-nbr_pm25_50km,dow_sin,Regional PM signal,Season & calendar,0.0006616108626755194
-wind_speed,diesel_pm_proximity,Meteorology,Local sources,0.0006609735434086264
-temperature,month,Meteorology,Season & calendar,0.0006534504086830997
-nbr_pm25_100km,dow,Regional PM signal,Season & calendar,0.0006532338130152061
-longitude,month_cos,Geography,Season & calendar,0.0006529554421004166
-nbr_pm25_25km,dow_sin,Regional PM signal,Season & calendar,0.0006526864188457356
-wind_speed,ejf_score,Meteorology,Community & EJ context,0.000648057030281378
-wind_speed,day_of_year,Meteorology,Season & calendar,0.0006418651487218196
-pressure,month_cos,Meteorology,Season & calendar,0.0006396845924610007
-wind_speed,doy_sin,Meteorology,Season & calendar,0.0006369911402436827
-nbr_pm25_50km,dow_cos,Regional PM signal,Season & calendar,0.0006350741391290273
-wind_speed,pct_ling_isolated,Meteorology,Community & EJ context,0.0006335446968924833
-nbr_count_25km,month_cos,Regional PM signal,Season & calendar,0.0006280828714309428
-ejf_score,month,Community & EJ context,Season & calendar,0.0006218424141922915
-diesel_pm_proximity,month,Local sources,Season & calendar,0.000619932638570342
-traffic_proximity,month_sin,Local sources,Season & calendar,0.0006195355238918175
-temperature,wind_speed,Meteorology,Meteorology,0.0006016828880784155
-pressure,wind_speed,Meteorology,Meteorology,0.0006012010165861698
-pct_low_income,month_cos,Community & EJ context,Season & calendar,0.0006006796704169222
-nbr_std_50km,dow,Regional PM signal,Season & calendar,0.0005975271228818738
-nbr_count_50km,month_cos,Regional PM signal,Season & calendar,0.0005968438323317919
-month_cos,doy_sin,Season & calendar,Season & calendar,0.0005947794211007718
-pct_ling_isolated,month_cos,Community & EJ context,Season & calendar,0.0005935273108432792
-cams_pm25,dow_sin,Regional PM signal,Season & calendar,0.0005923047397851768
-nbr_std_50km,dow_sin,Regional PM signal,Season & calendar,0.0005830069644354763
-superfund_proximity,doy_sin,Local sources,Season & calendar,0.0005711358397548977
-nbr_pm25_100km,dow_cos,Regional PM signal,Season & calendar,0.0005668370144981
-wind_speed,month_sin,Meteorology,Season & calendar,0.0005624844849744659
-nbr_pm25_50km,dow,Regional PM signal,Season & calendar,0.0005609793295524048
-latitude,month_cos,Geography,Season & calendar,0.0005455453050221788
-wind_speed,traffic_proximity,Meteorology,Local sources,0.0005429492448052939
-superfund_proximity,month_sin,Local sources,Season & calendar,0.0005411732673718218
-cams_pm25,dow,Regional PM signal,Season & calendar,0.0005324574200504925
-rmp_proximity,month_cos,Local sources,Season & calendar,0.0005321093512496583
-wind_speed,dist_to_nearest_sensor,Meteorology,Geography,0.0005293960605074064
-wind_speed,precipitation,Meteorology,Meteorology,0.000528213781416107
-superfund_proximity,month,Local sources,Season & calendar,0.0005188752671289231
-traffic_proximity,month,Local sources,Season & calendar,0.0005184999977917991
-nbr_std_50km,dow_cos,Regional PM signal,Season & calendar,0.0005086242431688043
-month_cos,doy_cos,Season & calendar,Season & calendar,0.0005084118085409328
-ejf_score,month_cos,Community & EJ context,Season & calendar,0.0005083198388846918
-pct_low_income,month,Community & EJ context,Season & calendar,0.0005049539896767787
-wind_speed,nbr_count_25km,Meteorology,Regional PM signal,0.000500432713834459
-wind_speed,hms_smoke,Meteorology,Wildfire smoke,0.0004991738049093514
-superfund_proximity,doy_cos,Local sources,Season & calendar,0.00047630021317902665
-traffic_proximity,month_cos,Local sources,Season & calendar,0.0004640355303531375
-nbr_pm25_25km,dow_cos,Regional PM signal,Season & calendar,0.0004547433020176751
-humidity,dow_sin,Meteorology,Season & calendar,0.0004508922474624832
-diesel_pm_proximity,month_cos,Local sources,Season & calendar,0.0004485322107919431
-nbr_count_25km,month,Regional PM signal,Season & calendar,0.0004480214538484282
-cams_pm25,dow_cos,Regional PM signal,Season & calendar,0.0004454898805669
-dist_to_nearest_sensor,month_cos,Geography,Season & calendar,0.00043524811656526217
-wind_speed,doy_cos,Meteorology,Season & calendar,0.0004259231921530853
-wind_speed,superfund_proximity,Meteorology,Local sources,0.0004170916277678552
-aod,dow_sin,Regional PM signal,Season & calendar,0.00040811126364961463
-dow,temp_x_humidity,Season & calendar,Meteorology,0.0003864197194966882
-aod,dow,Regional PM signal,Season & calendar,0.00037679213391039816
-dow_sin,temp_x_humidity,Season & calendar,Meteorology,0.0003522852525768759
-dow,day_of_year,Season & calendar,Season & calendar,0.0003478789881967912
-humidity,dow,Meteorology,Season & calendar,0.0003444619880982557
-month,month_cos,Season & calendar,Season & calendar,0.0003416470020775588
-dist_to_coast,dow_sin,Geography,Season & calendar,0.0003349083389950878
-longitude,dow_sin,Geography,Season & calendar,0.00030510569715965765
-dist_to_coast,dow,Geography,Season & calendar,0.00030436053795781967
-longitude,dow,Geography,Season & calendar,0.0003026056851395001
-dow_cos,temp_x_humidity,Season & calendar,Meteorology,0.0003009245715096807
-wind_speed,wind_x_temp,Meteorology,Meteorology,0.0002985310389132816
-precipitation,month_cos,Meteorology,Season & calendar,0.0002984539767273241
-aod,dow_cos,Regional PM signal,Season & calendar,0.0002884684910040222
-temperature,dow_sin,Meteorology,Season & calendar,0.00028403472676628426
-dow,doy_sin,Season & calendar,Season & calendar,0.00027311214281084295
-humidity,dow_cos,Meteorology,Season & calendar,0.00025791493483271974
-temperature,dow,Meteorology,Season & calendar,0.00025682908571649535
-month_cos,wind_x_temp,Season & calendar,Meteorology,0.0002482808629907064
-nbr_count_100km,dow,Regional PM signal,Season & calendar,0.00024726338148764167
-day_of_year,dow_sin,Season & calendar,Season & calendar,0.00024526575219232486
-superfund_proximity,month_cos,Local sources,Season & calendar,0.00024256718373490412
-latitude,dow_sin,Geography,Season & calendar,0.00023965566635824036
-dist_to_coast,dow_cos,Geography,Season & calendar,0.0002377760802628855
-dow_sin,doy_sin,Season & calendar,Season & calendar,0.00023606454398373978
-rmp_proximity,dow,Local sources,Season & calendar,0.00023182151036100322
-wind_speed,month_cos,Meteorology,Season & calendar,0.00022766291274831395
-wind_speed,month,Meteorology,Season & calendar,0.00022470551224571317
-pct_people_of_color,dow,Community & EJ context,Season & calendar,0.0002241801274487067
-precipitation,dow_sin,Meteorology,Season & calendar,0.00022411933627660465
-pct_people_of_color,dow_sin,Community & EJ context,Season & calendar,0.00022153080734214897
-rmp_proximity,dow_sin,Local sources,Season & calendar,0.00021750049589804813
-ejf_score,dow_sin,Community & EJ context,Season & calendar,0.00021579852519328655
-hms_smoke,dow,Wildfire smoke,Season & calendar,0.00021486451844832908
-dow_cos,doy_sin,Season & calendar,Season & calendar,0.00021440590732073778
-month_sin,month_cos,Season & calendar,Season & calendar,0.00021401013852800931
-pct_low_income,dow_sin,Community & EJ context,Season & calendar,0.0002101301670239679
-month_sin,dow_sin,Season & calendar,Season & calendar,0.00020595594474177745
-nbr_count_50km,dow_sin,Regional PM signal,Season & calendar,0.00020573401147081237
-nbr_count_50km,dow,Regional PM signal,Season & calendar,0.00020563724298870424
-diesel_pm_proximity,dow,Local sources,Season & calendar,0.0002056000518016481
-pct_ling_isolated,dow_sin,Community & EJ context,Season & calendar,0.00020229548314235928
-latitude,dow,Geography,Season & calendar,0.00020081947276262996
-diesel_pm_proximity,dow_sin,Local sources,Season & calendar,0.00020015032849091176
-nbr_count_100km,dow_sin,Regional PM signal,Season & calendar,0.00019526808164154315
-longitude,dow_cos,Geography,Season & calendar,0.0001916469338878996
-pct_low_income,dow,Community & EJ context,Season & calendar,0.0001898346375236289
-dow,doy_cos,Season & calendar,Season & calendar,0.00018853383467339063
-pct_ling_isolated,dow,Community & EJ context,Season & calendar,0.00018802950441342895
-pressure,dow_sin,Meteorology,Season & calendar,0.0001850770141615975
-ejf_score,dow,Community & EJ context,Season & calendar,0.00018378759477672414
-rmp_proximity,dow_cos,Local sources,Season & calendar,0.0001821465940509496
-temperature,dow_cos,Meteorology,Season & calendar,0.0001808786285093695
-pct_people_of_color,dow_cos,Community & EJ context,Season & calendar,0.0001807593358304546
-nbr_count_100km,dow_cos,Regional PM signal,Season & calendar,0.00018072641839650782
-pressure,dow,Meteorology,Season & calendar,0.0001803423406950884
-latitude,dow_cos,Geography,Season & calendar,0.00017783851545044875
-dow_sin,doy_cos,Season & calendar,Season & calendar,0.0001773044880971687
-hms_smoke,dow_sin,Wildfire smoke,Season & calendar,0.00017707214722840757
-dist_to_nearest_sensor,dow_sin,Geography,Season & calendar,0.00017592836443594746
-precipitation,dow_cos,Meteorology,Season & calendar,0.00017213760280666106
-pct_low_income,dow_cos,Community & EJ context,Season & calendar,0.00016656826919995022
-dow,wind_x_temp,Season & calendar,Meteorology,0.00016148726102596208
-month,dow,Season & calendar,Season & calendar,0.00015871336096835218
-nbr_count_25km,dow,Regional PM signal,Season & calendar,0.00015703536357628627
-traffic_proximity,dow_sin,Local sources,Season & calendar,0.0001566516559769904
-traffic_proximity,dow,Local sources,Season & calendar,0.0001564629907768262
-ejf_score,dow_cos,Community & EJ context,Season & calendar,0.00015549292167526253
-dist_to_nearest_sensor,dow,Geography,Season & calendar,0.0001535603885598478
-hms_smoke,dow_cos,Wildfire smoke,Season & calendar,0.0001531801202215782
-pct_ling_isolated,dow_cos,Community & EJ context,Season & calendar,0.00015272789323237808
-dow_cos,doy_cos,Season & calendar,Season & calendar,0.00014795318333167727
-day_of_year,dow_cos,Season & calendar,Season & calendar,0.00014641169577184833
-dow_sin,wind_x_temp,Season & calendar,Meteorology,0.0001417064609338187
-nbr_count_50km,dow_cos,Regional PM signal,Season & calendar,0.00013958568762999552
-superfund_proximity,dow_sin,Local sources,Season & calendar,0.00013703108106151083
-pressure,dow_cos,Meteorology,Season & calendar,0.0001328726505410794
-month,dow_sin,Season & calendar,Season & calendar,0.00013285632117199196
-month_cos,dow_sin,Season & calendar,Season & calendar,0.0001328406937834647
-wind_speed,dow_sin,Meteorology,Season & calendar,0.0001322258195257573
-precipitation,dow,Meteorology,Season & calendar,0.00012987593303339534
-nbr_count_25km,dow_sin,Regional PM signal,Season & calendar,0.00012953228806873577
-wind_speed,dow,Meteorology,Season & calendar,0.00012154882469670579
-diesel_pm_proximity,dow_cos,Local sources,Season & calendar,0.00011420687137481437
-dist_to_nearest_sensor,dow_cos,Geography,Season & calendar,0.0001134385060164782
-nbr_count_25km,dow_cos,Regional PM signal,Season & calendar,0.00011313687232411672
-traffic_proximity,dow_cos,Local sources,Season & calendar,0.00011278802542477132
-dow,month_sin,Season & calendar,Season & calendar,0.00010790786052485125
-month,dow_cos,Season & calendar,Season & calendar,0.0001076644012692974
-dow_cos,wind_x_temp,Season & calendar,Meteorology,0.00010182033610507728
-month_sin,dow_cos,Season & calendar,Season & calendar,9.820357701527698e-05
-dow,month_cos,Season & calendar,Season & calendar,9.576050561428725e-05
-month_cos,dow_cos,Season & calendar,Season & calendar,9.12230341235104e-05
-superfund_proximity,dow,Local sources,Season & calendar,8.979251411642937e-05
-superfund_proximity,dow_cos,Local sources,Season & calendar,7.722925531649931e-05
-wind_speed,dow_cos,Meteorology,Season & calendar,7.443578992185578e-05
-dow,dow_sin,Season & calendar,Season & calendar,3.379391068619415e-05
-dow_sin,dow_cos,Season & calendar,Season & calendar,3.3179677529558894e-05
-dow,dow_cos,Season & calendar,Season & calendar,1.7994276362521014e-05
+nbr_pm25_25km,nbr_pm25_100km,Regional PM signal,Regional PM signal,0.48315285886767273
+nbr_pm25_50km,nbr_pm25_100km,Regional PM signal,Regional PM signal,0.4116230917547978
+nbr_pm25_25km,nbr_pm25_50km,Regional PM signal,Regional PM signal,0.30190395323251445
+nbr_std_50km,nbr_pm25_100km,Regional PM signal,Regional PM signal,0.23101882038728747
+nbr_pm25_50km,nbr_std_50km,Regional PM signal,Regional PM signal,0.2153800850512945
+nbr_pm25_25km,nbr_std_50km,Regional PM signal,Regional PM signal,0.19407745547554445
+nbr_pm25_100km,cams_pm25,Regional PM signal,Regional PM signal,0.0964479357200022
+nbr_pm25_50km,cams_pm25,Regional PM signal,Regional PM signal,0.08822330846142007
+nbr_pm25_25km,cams_pm25,Regional PM signal,Regional PM signal,0.07666031403006907
+longitude,dist_to_coast,Geography,Geography,0.06176378616761005
+humidity,nbr_pm25_100km,Meteorology,Regional PM signal,0.06169592596682935
+latitude,dist_to_coast,Geography,Geography,0.05978124460854581
+dist_to_coast,nbr_pm25_25km,Geography,Regional PM signal,0.0565466750146253
+nbr_pm25_100km,aod,Regional PM signal,Regional PM signal,0.05312568128357922
+nbr_pm25_100km,temp_x_humidity,Regional PM signal,Meteorology,0.05099462638481314
+nbr_pm25_100km,hms_smoke,Regional PM signal,Wildfire smoke,0.049591066054234
+nbr_std_50km,cams_pm25,Regional PM signal,Regional PM signal,0.0474239642962962
+latitude,longitude,Geography,Geography,0.04559760815662818
+nbr_pm25_50km,aod,Regional PM signal,Regional PM signal,0.04558915391487735
+longitude,dist_to_nearest_sensor,Geography,Geography,0.04493260279462266
+latitude,nbr_pm25_25km,Geography,Regional PM signal,0.04476347754927703
+humidity,nbr_pm25_50km,Meteorology,Regional PM signal,0.04394183261003226
+nbr_pm25_25km,aod,Regional PM signal,Regional PM signal,0.03760616672565517
+nbr_pm25_50km,temp_x_humidity,Regional PM signal,Meteorology,0.03673365489754723
+latitude,dist_to_nearest_sensor,Geography,Geography,0.03617267047832598
+dist_to_coast,nbr_pm25_100km,Geography,Regional PM signal,0.035594471138937746
+nbr_pm25_50km,hms_smoke,Regional PM signal,Wildfire smoke,0.03522954551963164
+dist_to_nearest_sensor,nbr_pm25_25km,Geography,Regional PM signal,0.03509454437713995
+humidity,nbr_pm25_25km,Meteorology,Regional PM signal,0.03482913790625124
+dist_to_nearest_sensor,dist_to_coast,Geography,Geography,0.0348018669066663
+nbr_pm25_25km,hms_smoke,Regional PM signal,Wildfire smoke,0.03170538238879769
+longitude,nbr_pm25_25km,Geography,Regional PM signal,0.029734142093287393
+nbr_pm25_25km,temp_x_humidity,Regional PM signal,Meteorology,0.029422074039708847
+longitude,nbr_pm25_100km,Geography,Regional PM signal,0.02893613063253788
+longitude,nbr_pm25_50km,Geography,Regional PM signal,0.026691320540510516
+nbr_pm25_25km,nbr_count_25km,Regional PM signal,Regional PM signal,0.02512368529869844
+longitude,nbr_count_25km,Geography,Regional PM signal,0.024450654599775575
+humidity,nbr_std_50km,Meteorology,Regional PM signal,0.02433383796915897
+nbr_count_50km,nbr_pm25_100km,Regional PM signal,Regional PM signal,0.02417807317354862
+nbr_count_50km,nbr_std_50km,Regional PM signal,Regional PM signal,0.023378539810801763
+dist_to_nearest_sensor,nbr_count_25km,Geography,Regional PM signal,0.02295777899742014
+dist_to_nearest_sensor,nbr_pm25_100km,Geography,Regional PM signal,0.022894890430564304
+dist_to_coast,nbr_pm25_50km,Geography,Regional PM signal,0.022285374202681202
+dist_to_nearest_sensor,nbr_count_50km,Geography,Regional PM signal,0.02213576161480705
+humidity,temp_x_humidity,Meteorology,Meteorology,0.02209807829317669
+dist_to_nearest_sensor,nbr_pm25_50km,Geography,Regional PM signal,0.02193953701891681
+nbr_pm25_100km,day_of_year,Regional PM signal,Season & calendar,0.021562711627984003
+nbr_pm25_100km,nbr_count_100km,Regional PM signal,Regional PM signal,0.020928208956591615
+temperature,nbr_pm25_100km,Meteorology,Regional PM signal,0.020810448317221706
+precipitation,nbr_pm25_100km,Meteorology,Regional PM signal,0.019503371216601652
+latitude,nbr_pm25_100km,Geography,Regional PM signal,0.0193431599488086
+nbr_pm25_25km,nbr_count_100km,Regional PM signal,Regional PM signal,0.018908000769867043
+dist_to_nearest_sensor,nbr_count_100km,Geography,Regional PM signal,0.018777143790897205
+precipitation,nbr_pm25_50km,Meteorology,Regional PM signal,0.018096384581961833
+nbr_std_50km,aod,Regional PM signal,Regional PM signal,0.017916550545672927
+nbr_pm25_25km,nbr_count_50km,Regional PM signal,Regional PM signal,0.017906911482440006
+latitude,nbr_std_50km,Geography,Regional PM signal,0.017880652508179794
+nbr_pm25_50km,nbr_count_100km,Regional PM signal,Regional PM signal,0.017522791817465053
+longitude,nbr_std_50km,Geography,Regional PM signal,0.017465783261073457
+humidity,hms_smoke,Meteorology,Wildfire smoke,0.016368999200926507
+pressure,nbr_pm25_100km,Meteorology,Regional PM signal,0.016364723237320043
+dist_to_coast,nbr_std_50km,Geography,Regional PM signal,0.016334895326058675
+latitude,nbr_count_25km,Geography,Regional PM signal,0.016102393318383635
+longitude,nbr_count_50km,Geography,Regional PM signal,0.016029944189507307
+nbr_count_50km,nbr_count_100km,Regional PM signal,Regional PM signal,0.01585173201343504
+latitude,nbr_count_100km,Geography,Regional PM signal,0.015636431554509347
+dist_to_coast,nbr_count_25km,Geography,Regional PM signal,0.015072974840839531
+nbr_pm25_50km,doy_sin,Regional PM signal,Season & calendar,0.014992358440308986
+nbr_count_50km,cams_pm25,Regional PM signal,Regional PM signal,0.01498456882214557
+pressure,dist_to_coast,Meteorology,Geography,0.01496266878005925
+nbr_pm25_50km,nbr_count_50km,Regional PM signal,Regional PM signal,0.014842621645707597
+humidity,cams_pm25,Meteorology,Regional PM signal,0.014788642975284387
+latitude,nbr_pm25_50km,Geography,Regional PM signal,0.014652517731380937
+dist_to_coast,nbr_count_50km,Geography,Regional PM signal,0.014262051659300185
+dist_to_nearest_sensor,nbr_std_50km,Geography,Regional PM signal,0.01383931251239303
+precipitation,nbr_pm25_25km,Meteorology,Regional PM signal,0.013819952630608612
+pressure,nbr_pm25_50km,Meteorology,Regional PM signal,0.013456977774785255
+nbr_std_50km,temp_x_humidity,Regional PM signal,Meteorology,0.013441318864645392
+pressure,longitude,Meteorology,Geography,0.01342520912192847
+nbr_count_50km,aod,Regional PM signal,Regional PM signal,0.013364161654861116
+longitude,cams_pm25,Geography,Regional PM signal,0.013362240287715045
+aod,cams_pm25,Regional PM signal,Regional PM signal,0.013119198541833134
+dist_to_nearest_sensor,aod,Geography,Regional PM signal,0.01297337927705819
+pressure,latitude,Meteorology,Geography,0.01294977598871897
+latitude,nbr_count_50km,Geography,Regional PM signal,0.012941200956166705
+nbr_pm25_50km,day_of_year,Regional PM signal,Season & calendar,0.0125302280264677
+hms_smoke,cams_pm25,Wildfire smoke,Regional PM signal,0.01250145972023782
+nbr_count_50km,temp_x_humidity,Regional PM signal,Meteorology,0.012182417599386937
+nbr_pm25_25km,day_of_year,Regional PM signal,Season & calendar,0.012069146602383674
+longitude,temp_x_humidity,Geography,Meteorology,0.011968342398459777
+nbr_count_25km,nbr_std_50km,Regional PM signal,Regional PM signal,0.011801772322288257
+pressure,nbr_pm25_25km,Meteorology,Regional PM signal,0.011567356277252609
+cams_pm25,temp_x_humidity,Regional PM signal,Meteorology,0.01150054685994388
+humidity,longitude,Meteorology,Geography,0.011398778807296594
+nbr_count_25km,nbr_pm25_100km,Regional PM signal,Regional PM signal,0.011317263346997812
+humidity,dist_to_coast,Meteorology,Geography,0.011159816609105573
+dist_to_nearest_sensor,temp_x_humidity,Geography,Meteorology,0.011076495198243386
+pressure,nbr_std_50km,Meteorology,Regional PM signal,0.011074385988778548
+nbr_count_25km,nbr_pm25_50km,Regional PM signal,Regional PM signal,0.01091027778904665
+dist_to_coast,nbr_count_100km,Geography,Regional PM signal,0.010892723378401739
+nbr_std_50km,nbr_count_100km,Regional PM signal,Regional PM signal,0.010879094289384687
+nbr_count_100km,cams_pm25,Regional PM signal,Regional PM signal,0.010810124778092083
+temperature,nbr_pm25_25km,Meteorology,Regional PM signal,0.010658457152148724
+nbr_pm25_25km,doy_sin,Regional PM signal,Season & calendar,0.010574339173276857
+nbr_pm25_100km,doy_sin,Regional PM signal,Season & calendar,0.010528889573840596
+temperature,nbr_pm25_50km,Meteorology,Regional PM signal,0.010507605662960518
+nbr_count_25km,nbr_count_50km,Regional PM signal,Regional PM signal,0.010480856821922489
+humidity,aod,Meteorology,Regional PM signal,0.010427398106808747
+nbr_count_25km,cams_pm25,Regional PM signal,Regional PM signal,0.010258594633154235
+longitude,nbr_count_100km,Geography,Regional PM signal,0.01016698135666846
+dist_to_nearest_sensor,cams_pm25,Geography,Regional PM signal,0.00985151287049111
+aod,temp_x_humidity,Regional PM signal,Meteorology,0.009830098512390655
+hms_smoke,aod,Wildfire smoke,Regional PM signal,0.009718199874769842
+longitude,aod,Geography,Regional PM signal,0.009667148959503146
+latitude,cams_pm25,Geography,Regional PM signal,0.009523665109944058
+humidity,nbr_count_50km,Meteorology,Regional PM signal,0.009101357486655472
+nbr_count_25km,aod,Regional PM signal,Regional PM signal,0.009094734068987954
+nbr_pm25_25km,doy_cos,Regional PM signal,Season & calendar,0.008989316234447724
+nbr_std_50km,day_of_year,Regional PM signal,Season & calendar,0.008929106555288358
+dist_to_coast,temp_x_humidity,Geography,Meteorology,0.008859391559612885
+nbr_pm25_100km,month_sin,Regional PM signal,Season & calendar,0.008754053929717042
+nbr_std_50km,hms_smoke,Regional PM signal,Wildfire smoke,0.00874192064074202
+humidity,temperature,Meteorology,Meteorology,0.008721797591617177
+day_of_year,temp_x_humidity,Season & calendar,Meteorology,0.008705816371417617
+dist_to_coast,aod,Geography,Regional PM signal,0.008611473348110577
+dist_to_coast,cams_pm25,Geography,Regional PM signal,0.008520729033797974
+temperature,nbr_std_50km,Meteorology,Regional PM signal,0.008220185456854408
+pressure,temp_x_humidity,Meteorology,Meteorology,0.008067977896991433
+nbr_count_25km,nbr_count_100km,Regional PM signal,Regional PM signal,0.008040946344811832
+nbr_count_25km,temp_x_humidity,Regional PM signal,Meteorology,0.007999523743985661
+cams_pm25,day_of_year,Regional PM signal,Season & calendar,0.007835374105365053
+nbr_std_50km,doy_sin,Regional PM signal,Season & calendar,0.00775116780019587
+temperature,dist_to_nearest_sensor,Meteorology,Geography,0.007570060890204026
+humidity,nbr_count_100km,Meteorology,Regional PM signal,0.007503319539140758
+humidity,dist_to_nearest_sensor,Meteorology,Geography,0.0072529772886445855
+nbr_count_50km,hms_smoke,Regional PM signal,Wildfire smoke,0.007028538877698926
+pressure,aod,Meteorology,Regional PM signal,0.007022822332428346
+nbr_pm25_50km,doy_cos,Regional PM signal,Season & calendar,0.0069953499394930395
+nbr_std_50km,month_sin,Regional PM signal,Season & calendar,0.006917785468346966
+nbr_pm25_100km,doy_cos,Regional PM signal,Season & calendar,0.006858630600847591
+nbr_pm25_100km,month,Regional PM signal,Season & calendar,0.0067836371969982314
+precipitation,nbr_std_50km,Meteorology,Regional PM signal,0.006742144573059411
+humidity,latitude,Meteorology,Geography,0.006701115299293299
+nbr_pm25_50km,month_sin,Regional PM signal,Season & calendar,0.0066407973330891885
+latitude,aod,Geography,Regional PM signal,0.0065582244062452185
+pressure,dist_to_nearest_sensor,Meteorology,Geography,0.006531206565199859
+nbr_pm25_50km,month,Regional PM signal,Season & calendar,0.006505440759345564
+nbr_pm25_25km,month_sin,Regional PM signal,Season & calendar,0.00644234120101772
+pressure,cams_pm25,Meteorology,Regional PM signal,0.006429690730061174
+doy_sin,temp_x_humidity,Season & calendar,Meteorology,0.00638372099008425
+nbr_pm25_100km,wind_x_temp,Regional PM signal,Meteorology,0.006380541479031356
+humidity,day_of_year,Meteorology,Season & calendar,0.006336615097225388
+nbr_count_100km,aod,Regional PM signal,Regional PM signal,0.006276579169278734
+temperature,day_of_year,Meteorology,Season & calendar,0.006267707877353551
+cams_pm25,doy_sin,Regional PM signal,Season & calendar,0.006228538563128408
+precipitation,aod,Meteorology,Regional PM signal,0.006081238714785893
+pressure,nbr_count_50km,Meteorology,Regional PM signal,0.006066100740169547
+temperature,doy_sin,Meteorology,Season & calendar,0.005990799959511735
+nbr_std_50km,doy_cos,Regional PM signal,Season & calendar,0.005919964231828111
+pressure,nbr_count_25km,Meteorology,Regional PM signal,0.005839399351799346
+pressure,nbr_count_100km,Meteorology,Regional PM signal,0.005819927656451455
+temperature,dist_to_coast,Meteorology,Geography,0.005725055103284403
+wind_speed,longitude,Meteorology,Geography,0.005690725267111892
+humidity,pressure,Meteorology,Meteorology,0.005656579594827513
+humidity,precipitation,Meteorology,Meteorology,0.005649579793186055
+precipitation,cams_pm25,Meteorology,Regional PM signal,0.005648419816327798
+latitude,temp_x_humidity,Geography,Meteorology,0.005644069005754502
+nbr_count_100km,hms_smoke,Regional PM signal,Wildfire smoke,0.0056327856305446325
+temperature,hms_smoke,Meteorology,Wildfire smoke,0.005565213293252433
+precipitation,temp_x_humidity,Meteorology,Meteorology,0.005512895364078838
+humidity,nbr_count_25km,Meteorology,Regional PM signal,0.005505764456388455
+wind_speed,nbr_pm25_50km,Meteorology,Regional PM signal,0.005489891992293483
+cams_pm25,doy_cos,Regional PM signal,Season & calendar,0.005374987576196806
+temperature,aod,Meteorology,Regional PM signal,0.005370661989659814
+wind_speed,nbr_pm25_25km,Meteorology,Regional PM signal,0.005302410215703662
+temperature,cams_pm25,Meteorology,Regional PM signal,0.005282819546569498
+nbr_count_100km,temp_x_humidity,Regional PM signal,Meteorology,0.005262567027872815
+hms_smoke,temp_x_humidity,Wildfire smoke,Meteorology,0.005245530800331927
+nbr_pm25_25km,wind_x_temp,Regional PM signal,Meteorology,0.00518464417265533
+longitude,doy_sin,Geography,Season & calendar,0.005098803702712854
+doy_cos,temp_x_humidity,Season & calendar,Meteorology,0.004927172319708353
+nbr_std_50km,wind_x_temp,Regional PM signal,Meteorology,0.004892430340092666
+nbr_std_50km,month,Regional PM signal,Season & calendar,0.00471304483141747
+longitude,hms_smoke,Geography,Wildfire smoke,0.004615569913871573
+nbr_count_25km,hms_smoke,Regional PM signal,Wildfire smoke,0.004613798718859987
+humidity,doy_cos,Meteorology,Season & calendar,0.0045810514179694785
+humidity,doy_sin,Meteorology,Season & calendar,0.0045802045389674575
+nbr_pm25_100km,month_cos,Regional PM signal,Season & calendar,0.004571221503440045
+aod,day_of_year,Regional PM signal,Season & calendar,0.004535500301652751
+dist_to_nearest_sensor,hms_smoke,Geography,Wildfire smoke,0.0044809674947764
+wind_speed,nbr_pm25_100km,Meteorology,Regional PM signal,0.004431170085720101
+nbr_pm25_25km,month,Regional PM signal,Season & calendar,0.004390386758484639
+nbr_count_100km,day_of_year,Regional PM signal,Season & calendar,0.004330711946277959
+temperature,temp_x_humidity,Meteorology,Meteorology,0.004303955658224633
+month_sin,temp_x_humidity,Season & calendar,Meteorology,0.004303909002657647
+longitude,day_of_year,Geography,Season & calendar,0.004216078545115003
+temperature,nbr_count_50km,Meteorology,Regional PM signal,0.0041794245060300245
+temperature,longitude,Meteorology,Geography,0.004162465895103074
+temp_x_humidity,wind_x_temp,Meteorology,Meteorology,0.004151534167520547
+cams_pm25,month,Regional PM signal,Season & calendar,0.00411699886642097
+temperature,nbr_count_25km,Meteorology,Regional PM signal,0.0040672882356331316
+temperature,month,Meteorology,Season & calendar,0.00402328307560869
+nbr_pm25_50km,wind_x_temp,Regional PM signal,Meteorology,0.004021612940099493
+wind_speed,nbr_std_50km,Meteorology,Regional PM signal,0.0038732328029617087
+temperature,latitude,Meteorology,Geography,0.003871475454385173
+nbr_count_100km,doy_sin,Regional PM signal,Season & calendar,0.003868310830715987
+aod,doy_sin,Regional PM signal,Season & calendar,0.0038577006605242698
+month,temp_x_humidity,Season & calendar,Meteorology,0.0038106963145171178
+dist_to_coast,hms_smoke,Geography,Wildfire smoke,0.0036884753979518803
+latitude,day_of_year,Geography,Season & calendar,0.003593948581741167
+cams_pm25,month_sin,Regional PM signal,Season & calendar,0.0035726415320206295
+dist_to_coast,doy_sin,Geography,Season & calendar,0.0035525281080312087
+latitude,doy_sin,Geography,Season & calendar,0.0035163661016253743
+latitude,hms_smoke,Geography,Wildfire smoke,0.0034965679209030738
+precipitation,longitude,Meteorology,Geography,0.0034917920493939113
+nbr_count_50km,doy_sin,Regional PM signal,Season & calendar,0.003409370410893949
+day_of_year,doy_sin,Season & calendar,Season & calendar,0.0033974858588528274
+hms_smoke,doy_cos,Wildfire smoke,Season & calendar,0.0033518867164361653
+longitude,wind_x_temp,Geography,Meteorology,0.0033409800422584297
+precipitation,dist_to_coast,Meteorology,Geography,0.003340080319252394
+precipitation,hms_smoke,Meteorology,Wildfire smoke,0.003243694314623198
+precipitation,nbr_count_100km,Meteorology,Regional PM signal,0.003214317229877037
+aod,doy_cos,Regional PM signal,Season & calendar,0.0032098687640799007
+nbr_count_25km,day_of_year,Regional PM signal,Season & calendar,0.003184595883708825
+day_of_year,wind_x_temp,Season & calendar,Meteorology,0.0031314325196902504
+nbr_pm25_25km,month_cos,Regional PM signal,Season & calendar,0.003112635158223181
+nbr_pm25_50km,month_cos,Regional PM signal,Season & calendar,0.0030956930584766645
+dist_to_coast,day_of_year,Geography,Season & calendar,0.003083456497012413
+humidity,month_sin,Meteorology,Season & calendar,0.0030625068911576364
+humidity,month,Meteorology,Season & calendar,0.003037042497696541
+dist_to_nearest_sensor,doy_sin,Geography,Season & calendar,0.0029771747724914154
+hms_smoke,day_of_year,Wildfire smoke,Season & calendar,0.00293868884945735
+nbr_count_25km,doy_sin,Regional PM signal,Season & calendar,0.002922117529661275
+nbr_count_100km,doy_cos,Regional PM signal,Season & calendar,0.0028885568322384054
+cams_pm25,month_cos,Regional PM signal,Season & calendar,0.002881643369234726
+temperature,nbr_count_100km,Meteorology,Regional PM signal,0.002866684406739582
+precipitation,nbr_count_50km,Meteorology,Regional PM signal,0.002865338075722174
+temperature,pressure,Meteorology,Meteorology,0.0027538603580148243
+wind_speed,latitude,Meteorology,Geography,0.002712267111265197
+dist_to_coast,wind_x_temp,Geography,Meteorology,0.0026737462219841167
+aod,wind_x_temp,Regional PM signal,Meteorology,0.002662579337820144
+wind_speed,dist_to_coast,Meteorology,Geography,0.0026504646377823295
+cams_pm25,wind_x_temp,Regional PM signal,Meteorology,0.0026454744914737706
+latitude,doy_cos,Geography,Season & calendar,0.0026269427579454375
+temperature,doy_cos,Meteorology,Season & calendar,0.0026222683556133193
+nbr_count_50km,day_of_year,Regional PM signal,Season & calendar,0.002617817962173941
+nbr_std_50km,month_cos,Regional PM signal,Season & calendar,0.0025904758349705524
+precipitation,latitude,Meteorology,Geography,0.002570514488476813
+longitude,month_sin,Geography,Season & calendar,0.0025317207574357876
+latitude,month_sin,Geography,Season & calendar,0.002495339022234344
+hms_smoke,doy_sin,Wildfire smoke,Season & calendar,0.0024647575858712783
+dist_to_coast,doy_cos,Geography,Season & calendar,0.002441024088736385
+latitude,wind_x_temp,Geography,Meteorology,0.0023466564725122853
+longitude,doy_cos,Geography,Season & calendar,0.002316759005194506
+humidity,wind_x_temp,Meteorology,Meteorology,0.002303975135327578
+day_of_year,doy_cos,Season & calendar,Season & calendar,0.0022538944632499234
+dist_to_nearest_sensor,day_of_year,Geography,Season & calendar,0.002228295377895019
+aod,month_cos,Regional PM signal,Season & calendar,0.002220764172174459
+precipitation,nbr_count_25km,Meteorology,Regional PM signal,0.0021302596535383075
+pressure,hms_smoke,Meteorology,Wildfire smoke,0.00208619275260222
+nbr_count_50km,wind_x_temp,Regional PM signal,Meteorology,0.0020485175867611754
+wind_speed,aod,Meteorology,Regional PM signal,0.0020461553063508132
+temperature,precipitation,Meteorology,Meteorology,0.0020454206253117547
+wind_speed,cams_pm25,Meteorology,Regional PM signal,0.0020450969761786515
+pressure,day_of_year,Meteorology,Season & calendar,0.0020006504748789084
+humidity,month_cos,Meteorology,Season & calendar,0.001920771392560797
+nbr_count_50km,month_sin,Regional PM signal,Season & calendar,0.001897911981550166
+hms_smoke,month_sin,Wildfire smoke,Season & calendar,0.001888155778670597
+temperature,month_sin,Meteorology,Season & calendar,0.0018828423489594278
+nbr_count_25km,month_sin,Regional PM signal,Season & calendar,0.001879391722868451
+dist_to_nearest_sensor,doy_cos,Geography,Season & calendar,0.0018763612008947895
+precipitation,dist_to_nearest_sensor,Meteorology,Geography,0.0018446807812567013
+dist_to_coast,month_sin,Geography,Season & calendar,0.0018189523252165139
+longitude,month,Geography,Season & calendar,0.0017909081370240893
+wind_speed,temp_x_humidity,Meteorology,Meteorology,0.0017738847718746667
+nbr_count_50km,doy_cos,Regional PM signal,Season & calendar,0.0017736900121453757
+pressure,month_sin,Meteorology,Season & calendar,0.001762332971301605
+temperature,wind_x_temp,Meteorology,Meteorology,0.0017512144700545743
+latitude,month,Geography,Season & calendar,0.0017468157002650663
+wind_speed,nbr_count_50km,Meteorology,Regional PM signal,0.0017450415666044655
+wind_speed,day_of_year,Meteorology,Season & calendar,0.0017240168792680964
+pressure,doy_sin,Meteorology,Season & calendar,0.001721108747960182
+dist_to_nearest_sensor,wind_x_temp,Geography,Meteorology,0.0017043559689828727
+wind_speed,dist_to_nearest_sensor,Meteorology,Geography,0.0017034134989734877
+aod,month_sin,Regional PM signal,Season & calendar,0.0016959065913887087
+doy_sin,doy_cos,Season & calendar,Season & calendar,0.0016787463727444569
+day_of_year,month_sin,Season & calendar,Season & calendar,0.001662324714223468
+precipitation,month_sin,Meteorology,Season & calendar,0.0016540255779327604
+nbr_count_100km,month_sin,Regional PM signal,Season & calendar,0.0016348786918719321
+pressure,precipitation,Meteorology,Meteorology,0.001613783970641626
+precipitation,doy_sin,Meteorology,Season & calendar,0.001598360489105901
+nbr_count_50km,month,Regional PM signal,Season & calendar,0.0015966279684087648
+nbr_count_100km,wind_x_temp,Regional PM signal,Meteorology,0.0015943249182397673
+humidity,wind_speed,Meteorology,Meteorology,0.0015862671650987824
+aod,month,Regional PM signal,Season & calendar,0.0015794620508969097
+doy_sin,wind_x_temp,Season & calendar,Meteorology,0.0015709543728127512
+wind_speed,nbr_count_100km,Meteorology,Regional PM signal,0.00157089830434062
+pressure,doy_cos,Meteorology,Season & calendar,0.0015664524876411734
+precipitation,day_of_year,Meteorology,Season & calendar,0.0015560409654787524
+pressure,wind_x_temp,Meteorology,Meteorology,0.0015435641794493246
+nbr_count_25km,doy_cos,Regional PM signal,Season & calendar,0.001505810042241225
+nbr_count_25km,wind_x_temp,Regional PM signal,Meteorology,0.0014847049631152346
+pressure,wind_speed,Meteorology,Meteorology,0.0014804808906145684
+precipitation,doy_cos,Meteorology,Season & calendar,0.001459404101350635
+nbr_count_25km,month,Regional PM signal,Season & calendar,0.0014184162793199253
+dist_to_nearest_sensor,month,Geography,Season & calendar,0.0014114897661434088
+month_cos,temp_x_humidity,Season & calendar,Meteorology,0.0014082660234990738
+nbr_pm25_100km,dow_sin,Regional PM signal,Season & calendar,0.001382393367014459
+wind_speed,nbr_count_25km,Meteorology,Regional PM signal,0.0013797821981437438
+dist_to_coast,month_cos,Geography,Season & calendar,0.0013771292202037699
+nbr_count_100km,month,Regional PM signal,Season & calendar,0.0013642443265826632
+doy_cos,wind_x_temp,Season & calendar,Meteorology,0.0013365094872444616
+longitude,month_cos,Geography,Season & calendar,0.001317888560453733
+day_of_year,month_cos,Season & calendar,Season & calendar,0.0012990812573523067
+dist_to_coast,month,Geography,Season & calendar,0.0012983128690051398
+nbr_pm25_50km,dow_sin,Regional PM signal,Season & calendar,0.0012893153496488288
+hms_smoke,month,Wildfire smoke,Season & calendar,0.0012657664873880286
+nbr_pm25_100km,dow,Regional PM signal,Season & calendar,0.0012445798399290694
+wind_speed,doy_sin,Meteorology,Season & calendar,0.0012351521643488342
+nbr_pm25_25km,dow_sin,Regional PM signal,Season & calendar,0.0012276494397350022
+hms_smoke,wind_x_temp,Wildfire smoke,Meteorology,0.0012227594718525376
+wind_speed,precipitation,Meteorology,Meteorology,0.0012191729565240418
+month_sin,doy_cos,Season & calendar,Season & calendar,0.0012181251307324717
+wind_speed,hms_smoke,Meteorology,Wildfire smoke,0.0012028336779336638
+dist_to_nearest_sensor,month_sin,Geography,Season & calendar,0.0011737795887363208
+latitude,month_cos,Geography,Season & calendar,0.001166762639885434
+nbr_std_50km,dow_cos,Regional PM signal,Season & calendar,0.0011462721373681596
+nbr_std_50km,dow_sin,Regional PM signal,Season & calendar,0.0011316687509587533
+month_sin,wind_x_temp,Season & calendar,Meteorology,0.0011150072805233284
+nbr_pm25_25km,dow,Regional PM signal,Season & calendar,0.0011149380490557213
+month,day_of_year,Season & calendar,Season & calendar,0.001110768523664813
+month_sin,doy_sin,Season & calendar,Season & calendar,0.0011063302491770915
+month,wind_x_temp,Season & calendar,Meteorology,0.0010913314903262415
+nbr_pm25_50km,dow_cos,Regional PM signal,Season & calendar,0.0010804016341665014
+nbr_pm25_50km,dow,Regional PM signal,Season & calendar,0.0010726945216940828
+temperature,month_cos,Meteorology,Season & calendar,0.0010239337687308766
+nbr_pm25_100km,dow_cos,Regional PM signal,Season & calendar,0.0010212370903119712
+pressure,month,Meteorology,Season & calendar,0.0010188820166125356
+temperature,wind_speed,Meteorology,Meteorology,0.0010184135036956797
+nbr_std_50km,dow,Regional PM signal,Season & calendar,0.0010179821813895067
+month,doy_sin,Season & calendar,Season & calendar,0.0010143054541776595
+wind_speed,doy_cos,Meteorology,Season & calendar,0.0009816189912143457
+dow_sin,temp_x_humidity,Season & calendar,Meteorology,0.0009763087349579631
+cams_pm25,dow,Regional PM signal,Season & calendar,0.0009648813823189824
+nbr_count_50km,month_cos,Regional PM signal,Season & calendar,0.0009549061956043484
+nbr_count_100km,month_cos,Regional PM signal,Season & calendar,0.0009468618779771001
+dist_to_nearest_sensor,month_cos,Geography,Season & calendar,0.0009404602516459307
+month,doy_cos,Season & calendar,Season & calendar,0.0009129406537808802
+nbr_count_25km,month_cos,Regional PM signal,Season & calendar,0.0009108898107007257
+hms_smoke,month_cos,Wildfire smoke,Season & calendar,0.0009039703342982184
+precipitation,wind_x_temp,Meteorology,Meteorology,0.0008753009567107901
+nbr_pm25_25km,dow_cos,Regional PM signal,Season & calendar,0.0008451825399019956
+pressure,month_cos,Meteorology,Season & calendar,0.0008416072442765961
+cams_pm25,dow_sin,Regional PM signal,Season & calendar,0.0008410778958880513
+wind_speed,wind_x_temp,Meteorology,Meteorology,0.0008321391424503097
+month_cos,doy_cos,Season & calendar,Season & calendar,0.0008119115878759652
+temperature,dow_sin,Meteorology,Season & calendar,0.0007685571223476955
+aod,dow_sin,Regional PM signal,Season & calendar,0.0007469576149450523
+month_cos,doy_sin,Season & calendar,Season & calendar,0.0007338210347339032
+humidity,dow_sin,Meteorology,Season & calendar,0.0007163701051542224
+dow,temp_x_humidity,Season & calendar,Meteorology,0.0006926152971260971
+cams_pm25,dow_cos,Regional PM signal,Season & calendar,0.0006797522978805655
+precipitation,month,Meteorology,Season & calendar,0.0006724729170945491
+aod,dow,Regional PM signal,Season & calendar,0.0006667100077777835
+humidity,dow,Meteorology,Season & calendar,0.000649829858423792
+wind_speed,month_sin,Meteorology,Season & calendar,0.0006352434745494084
+precipitation,month_cos,Meteorology,Season & calendar,0.0006272012545497915
+month_cos,wind_x_temp,Season & calendar,Meteorology,0.0006041240958923861
+dow_cos,temp_x_humidity,Season & calendar,Meteorology,0.000593831339316887
+dist_to_coast,dow_sin,Geography,Season & calendar,0.0005930130884206456
+longitude,dow_sin,Geography,Season & calendar,0.000576642667700196
+aod,dow_cos,Regional PM signal,Season & calendar,0.0005742770728758731
+month,month_sin,Season & calendar,Season & calendar,0.0005652102249951033
+wind_speed,month,Meteorology,Season & calendar,0.0005635191187460458
+humidity,dow_cos,Meteorology,Season & calendar,0.0005546928076885315
+month_sin,month_cos,Season & calendar,Season & calendar,0.0005382770157402735
+latitude,dow,Geography,Season & calendar,0.0005334080752216496
+latitude,dow_sin,Geography,Season & calendar,0.0005330799747618186
+dist_to_coast,dow,Geography,Season & calendar,0.00051850419240133
+longitude,dow,Geography,Season & calendar,0.00048112054137280214
+wind_speed,month_cos,Meteorology,Season & calendar,0.0004753542690611208
+dist_to_coast,dow_cos,Geography,Season & calendar,0.0004687598462026394
+longitude,dow_cos,Geography,Season & calendar,0.00044864839746979455
+precipitation,dow_sin,Meteorology,Season & calendar,0.0004400398893496888
+dow_sin,doy_cos,Season & calendar,Season & calendar,0.00043529508363905145
+hms_smoke,dow,Wildfire smoke,Season & calendar,0.00042766508717321757
+dow,doy_sin,Season & calendar,Season & calendar,0.0004265658535987437
+dist_to_nearest_sensor,dow_sin,Geography,Season & calendar,0.0004241491345072738
+nbr_count_50km,dow_sin,Regional PM signal,Season & calendar,0.00042337918883526496
+nbr_count_25km,dow_sin,Regional PM signal,Season & calendar,0.0004222311052092893
+nbr_count_100km,dow,Regional PM signal,Season & calendar,0.00041927824533845396
+nbr_count_100km,dow_sin,Regional PM signal,Season & calendar,0.0004156812186902691
+latitude,dow_cos,Geography,Season & calendar,0.0004133547250514732
+day_of_year,dow_sin,Season & calendar,Season & calendar,0.0004094961993695184
+temperature,dow,Meteorology,Season & calendar,0.0004059274622509383
+pressure,dow,Meteorology,Season & calendar,0.00040052031656076867
+dist_to_nearest_sensor,dow,Geography,Season & calendar,0.0003974000856765242
+hms_smoke,dow_sin,Wildfire smoke,Season & calendar,0.0003967805107457868
+dow,day_of_year,Season & calendar,Season & calendar,0.00038577652495462496
+hms_smoke,dow_cos,Wildfire smoke,Season & calendar,0.0003824284410215119
+pressure,dow_sin,Meteorology,Season & calendar,0.0003772748794077862
+nbr_count_50km,dow,Regional PM signal,Season & calendar,0.0003733697392446637
+pressure,dow_cos,Meteorology,Season & calendar,0.0003704836969892913
+dow_sin,doy_sin,Season & calendar,Season & calendar,0.0003687043509300213
+dist_to_nearest_sensor,dow_cos,Geography,Season & calendar,0.00036085423121456103
+dow_sin,wind_x_temp,Season & calendar,Meteorology,0.00035982677238227375
+dow_cos,doy_sin,Season & calendar,Season & calendar,0.00035207978253576556
+precipitation,dow,Meteorology,Season & calendar,0.0003501276197664407
+nbr_count_25km,dow,Regional PM signal,Season & calendar,0.00034963473133687694
+nbr_count_100km,dow_cos,Regional PM signal,Season & calendar,0.00033346505232387935
+temperature,dow_cos,Meteorology,Season & calendar,0.00033161823414682546
+dow,doy_cos,Season & calendar,Season & calendar,0.0003293902030202996
+day_of_year,dow_cos,Season & calendar,Season & calendar,0.00032801992338088145
+nbr_count_50km,dow_cos,Regional PM signal,Season & calendar,0.00031042674600986216
+dow_cos,wind_x_temp,Season & calendar,Meteorology,0.00030993251785924796
+dow,wind_x_temp,Season & calendar,Meteorology,0.0003071678632357044
+dow,month_sin,Season & calendar,Season & calendar,0.0003017775636871674
+dow_cos,doy_cos,Season & calendar,Season & calendar,0.00030042343801952567
+month,month_cos,Season & calendar,Season & calendar,0.0002993293069150262
+month,dow,Season & calendar,Season & calendar,0.00027295375216421995
+nbr_count_25km,dow_cos,Regional PM signal,Season & calendar,0.00027089021669576325
+wind_speed,dow_sin,Meteorology,Season & calendar,0.0002659473398570649
+precipitation,dow_cos,Meteorology,Season & calendar,0.00026064306631097333
+month_sin,dow_cos,Season & calendar,Season & calendar,0.0002484303619239874
+month_sin,dow_sin,Season & calendar,Season & calendar,0.00023882207868420734
+month,dow_sin,Season & calendar,Season & calendar,0.0002364672501576294
+wind_speed,dow,Meteorology,Season & calendar,0.00023114474275125928
+dow,month_cos,Season & calendar,Season & calendar,0.00023084458423971294
+wind_speed,dow_cos,Meteorology,Season & calendar,0.0002128938146248683
+month_cos,dow_sin,Season & calendar,Season & calendar,0.0002091235129147793
+month,dow_cos,Season & calendar,Season & calendar,0.00016535436226905884
+month_cos,dow_cos,Season & calendar,Season & calendar,0.00014960389503223672
+dow,dow_cos,Season & calendar,Season & calendar,7.840807748554409e-05
+dow,dow_sin,Season & calendar,Season & calendar,6.979487632504567e-05
+dow_sin,dow_cos,Season & calendar,Season & calendar,6.680879661612559e-05

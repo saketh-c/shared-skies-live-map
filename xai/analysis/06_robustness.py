@@ -129,7 +129,7 @@ def main():
         f.write(
             "Method agreement between SHAP group importance and grouped "
             f"permutation importance (joint shuffle, R=8):\n"
-            f"  Spearman rank correlation over the 7 concept groups: {rho:.3f}\n"
+            f"  Spearman rank correlation over the {len(grouping.GROUPS)} concept groups: {rho:.3f}\n"
             f"  Bootstrap full-ranking stability (B=1000, sensor-clustered): "
             f"{100*rank_stability:.1f}%\n"
             f"  Baseline in-sample R^2: {base_r2:.4f}\n")

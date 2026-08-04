@@ -126,9 +126,9 @@ for i, s in enumerate(srcs):
     box(0.1 + i * 2.0, 8.3, 1.75, 1.5, s, fs=6.0)
     arrow(0.975 + i * 2.0, 8.15, 4.0 + (i - 2) * 0.55, 7.05)
 
-box(2.0, 5.6, 6.0, 1.35, "38-feature pipeline\n(BallTree neighbor PM2.5 at 25/50/100 km)", fs=6.6)
+box(2.0, 5.6, 6.0, 1.35, "30-feature pipeline\n(BallTree neighbor PM2.5 at 25/50/100 km)", fs=6.6)
 arrow(5.0, 5.45, 5.0, 4.75)
-box(2.0, 3.3, 6.0, 1.35, "RF + LightGBM + CatBoost simplex ensemble\n(LOSO $R^2$ = 0.714, 310 sensors)", fs=6.6, bold=True)
+box(2.0, 3.3, 6.0, 1.35, "RF + LightGBM + CatBoost simplex ensemble\n(LOSO $R^2$ = 0.713, 310 sensors)", fs=6.6, bold=True)
 arrow(3.4, 3.15, 2.6, 2.35)
 arrow(6.6, 3.15, 7.4, 2.35)
 box(0.35, 0.85, 4.35, 1.45, "live tract map\n6,896 TX census tracts", fc="#e8efe9", fs=6.6)
@@ -157,7 +157,7 @@ for i, v in enumerate(f8[fvcol]):
     ax.text(v + 0.025, i, f"{v:.2f}", va="center", fontsize=6.5, color=INK)
 ax.set_xlim(0, 2.15)
 ax.set_xlabel(f"mean |contribution| ({UGM3})", labelpad=1.5)
-ax.set_title("(b) top 8 of 38 features", loc="left", fontsize=8)
+ax.set_title("(b) top 8 of 30 features", loc="left", fontsize=8)
 despine(ax)
 ax.tick_params(axis="y", length=0)
 save(fig, "fig2_global")
@@ -218,13 +218,11 @@ ax.set_xlabel("HMS smoke tier", labelpad=1.5)
 ax.set_title("(b) smoke tier", loc="left")
 despine(ax)
 
-dep_panel(axes[2], "traffic_proximity", "traffic proximity (EJScreen pctile)",
-          vline_q=0.85, vline_label=" p85")
-axes[2].set_title("(c) traffic proximity", loc="left")
+dep_panel(axes[2], "humidity", "relative humidity (%)")
+axes[2].set_title("(c) humidity", loc="left")
 
-dep_panel(axes[3], "pct_ling_isolated", "linguistically isolated (%)",
-          vline_q=0.70, vline_label=" p70")
-axes[3].set_title("(d) linguistic isolation", loc="left")
+dep_panel(axes[3], "dist_to_coast", "distance to coast (deg lon)")
+axes[3].set_title("(d) distance to coast", loc="left")
 save(fig, "fig3_dependence")
 
 # ================================================================ FIG 4
@@ -315,8 +313,7 @@ for k, ((title, sid, date), row) in enumerate(zip(cases, rows)):
     ax.set_yticks(np.arange(len(gv)))
     if k == 0:
         short = {"Regional PM signal": "regional signal", "Wildfire smoke": "smoke tier",
-                 "Meteorology": "meteorology", "Local sources": "local sources",
-                 "Community & EJ context": "community/EJ", "Geography": "geography",
+                 "Meteorology": "meteorology", "Geography": "geography",
                  "Season & calendar": "season"}
         ax.set_yticklabels([short[gname] for gname in order], fontsize=7)
     else:

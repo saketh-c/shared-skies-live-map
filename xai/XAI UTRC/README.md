@@ -9,7 +9,11 @@ explanation layer. The manuscript is `paper/main.pdf`.
   October 9-11, 2026, MIT Stata Center.
 - Technical papers due **August 9, 2026**; acceptances August 23.
 - Submission portal: Microsoft CMT (https://cmt3.research.microsoft.com/URTC2026).
-- Limit: 5 pages, no exceptions. The compiled manuscript is exactly 5 pages.
+- Limit: 5 pages, no exceptions. The manuscript renders to 5 pages under
+  pdflatex (the toolchain used for the committed PDF). Note that tectonic
+  (XeTeX) renders the same source to 6 pages because of font-metric
+  differences -- render the submission copy with pdflatex. The body text is
+  currently 55 characters shorter than the last verified 5-page revision.
 - Template: IEEE conference (US letter). The paper uses IEEEtran conference
   mode, the LaTeX equivalent of the official conference-template-letter.docx.
 - Suggested track: Technology OF Computation (data science / machine

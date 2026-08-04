@@ -20,7 +20,7 @@ const TRANSLATIONS = {
       why_title: "Why PM2.5 Matters",
       why_body: "Particles this small bypass the nose and throat and lodge deep in lung tissue. Short-term exposure causes coughing and irritation. Long-term exposure is linked to heart disease, stroke, lung cancer, and reduced life expectancy.",
       about_title: "About These Predictions",
-      about_body: "Values combine real-time weather data with EPA environmental justice indicators. Predictions refresh every 30 minutes and reflect estimated ground-level concentrations at the census tract level.",
+      about_body: "Values combine live PurpleAir sensor readings, real-time weather, and NOAA satellite smoke analysis. No demographic or environmental-justice variable is used as a model input. Predictions refresh every 30 minutes and reflect estimated ground-level concentrations at the census tract level.",
       levels: {
         good: {
           name: "Good",
@@ -143,7 +143,7 @@ const TRANSLATIONS = {
       why_title: "Por qué importa PM2.5",
       why_body: "Partículas tan pequeñas evitan la nariz y la garganta y se alojan en el tejido pulmonar. La exposición a corto plazo causa tos e irritación. La exposición a largo plazo se relaciona con enfermedades cardíacas, accidente cerebrovascular, cáncer de pulmón y menor esperanza de vida.",
       about_title: "Sobre estas predicciones",
-      about_body: "Los valores combinan datos meteorológicos en tiempo real con indicadores de justicia ambiental de la EPA. Las predicciones se actualizan cada 30 minutos y reflejan concentraciones estimadas a nivel de tracto censal.",
+      about_body: "Los valores combinan lecturas en vivo de sensores PurpleAir, datos meteorológicos en tiempo real y análisis satelital de humo de la NOAA. Ninguna variable demográfica o de justicia ambiental se usa como entrada del modelo. Las predicciones se actualizan cada 30 minutos y reflejan concentraciones estimadas a nivel de tracto censal.",
       levels: {
         good: {
           name: "Bueno",

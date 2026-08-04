@@ -11,7 +11,9 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-ROOT = Path(r"C:/Users/chebr/OneDrive/Documents/Shared Skies Initiative/real-time-map")
+# Derived from this file's location (xai/XAI UTRC/) so the script runs on any
+# checkout; it previously hardcoded one machine's Windows path.
+ROOT = Path(__file__).resolve().parents[2]
 XAI = ROOT / "xai"
 CACHE = XAI / "outputs" / "cache"
 sys.path.insert(0, str(XAI))
@@ -19,7 +21,8 @@ sys.path.insert(0, str(XAI))
 from engine import loader  # noqa: E402
 from engine.explain_shap import explain_rows  # noqa: E402
 
-OUTFILE = Path(__file__).with_name("tier_clustered_ci_result.json")
+# Name matches what make_figures.py reads for the tier error bars.
+OUTFILE = Path(__file__).with_name("verified_numbers_tiers_dayclustered.json")
 OUT = {}
 
 

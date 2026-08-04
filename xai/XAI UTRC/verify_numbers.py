@@ -69,32 +69,16 @@ note("group_importance_recomputed", {k: round(float(v), 4) for k, v in gimp.item
 fimp = shap_ens.abs().mean().sort_values(ascending=False)
 note("feature_importance_top10", {k: round(float(v), 4) for k, v in fimp.head(10).items()})
 
-print("[5] EJ + traffic dependence stats (sample=6000, seed 42 cache)")
+print("[5] dependence stats (sample=6000, seed 42 cache)")
 from scipy.stats import spearmanr  # noqa: E402
 S = shap_ens.reset_index(drop=True)
 F = feats_sample.reset_index(drop=True)
-for f in ("pct_ling_isolated", "pct_people_of_color", "traffic_proximity", "nbr_pm25_50km"):
-    rho, p = spearmanr(F[f], S[f])
-    note(f"spearman_{f}", {"rho": round(float(rho), 3), "p": float(p)})
-
-q70 = F["pct_ling_isolated"].quantile(0.70)
-note("pct_ling_isolated_mean_shap_above_p70",
-     round(float(S.loc[F["pct_ling_isolated"] > q70, "pct_ling_isolated"].mean()), 3))
-
-q85 = F["traffic_proximity"].quantile(0.85)
-hi = F["traffic_proximity"] > q85
-note("traffic_mean_shap_above_p85", round(float(S.loc[hi, "traffic_proximity"].mean()), 3))
-note("traffic_min_binned_median", None)  # filled below
-try:
-    bins = pd.qcut(F["traffic_proximity"], 12, duplicates="drop")
-    med = S.groupby(bins, observed=True)["traffic_proximity"].median()
-    OUT["traffic_min_binned_median"] = round(float(med.min()), 3)
-    print("  traffic_min_binned_median:", OUT["traffic_min_binned_median"])
-    OUT["traffic_binned_medians_last3"] = [round(float(v), 3) for v in med.tail(3)]
-except Exception as e:  # pragma: no cover
-    print("  traffic binning failed:", e)
-lo_tail = F["traffic_proximity"] >= F["traffic_proximity"].quantile(0.98)
-note("traffic_mean_shap_top2pct", round(float(S.loc[lo_tail, "traffic_proximity"].mean()), 3))
+# EJScreen features were removed from the model; the paper's dependence
+# claims now rest on the strongest remaining non-regional signals.
+for f in ("nbr_pm25_50km", "nbr_pm25_100km", "cams_pm25", "humidity",
+          "dist_to_coast"):
+    rho, p_val = spearmanr(F[f], S[f])
+    note(f"spearman_{f}", {"rho": round(float(rho), 3), "p": float(p_val)})
 
 print("[6] hms_smoke per-tier mean SHAP (sample)")
 tier_means = S.groupby(F["hms_smoke"])["hms_smoke"].mean()

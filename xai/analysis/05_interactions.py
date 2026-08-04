@@ -2,14 +2,14 @@
 
 Interaction values cost far more than plain SHAP, so each eligible model is
 probed on a few rows first and skipped if the extrapolated runtime exceeds
-the budget. RF (w=0.68) uses shap's tree algorithm; CatBoost (w=0.31) uses
+the budget. RF (w=0.79) uses shap's tree algorithm; CatBoost (w=0.14) uses
 its native ShapInteractionValues; LightGBM (w=0.008) is skipped by default
-as its weight is negligible. Completed models are combined with renormalized
+as its weight is small. Completed models are combined with renormalized
 ensemble weights - the caption of every output states which models made it.
 
 Outputs:
-  figures/interaction_heatmap.png   38x38 mean |interaction|, group-ordered
-  figures/interaction_groups.png    7x7 concept-group block sums
+  figures/interaction_heatmap.png   FxF mean |interaction|, group-ordered
+  figures/interaction_groups.png    GxG concept-group block sums
   outputs/top_interactions.csv      ranked feature pairs
   cache/interactions.npz            raw per-model matrices
 
@@ -89,7 +89,7 @@ def main():
     print(f"[interactions] {len(X)} rows, budget {args.budget_min:.0f} min/model")
 
     runners = {"rf": rf_interactions, "cat": cat_interactions}
-    mats, weights = {}, {}
+    raw, weights = {}, {}
     for name, model, w in loader.active_models(bundle):
         if name not in runners:
             print(f"  [{name}] no interaction runner (weight {w:.3f}) - skipped")
@@ -97,14 +97,23 @@ def main():
         print(f"[model] {name} (weight {w:.3f})")
         vals = runners[name](model, X, budget_s)
         if vals is not None:
-            mats[name] = np.abs(vals).mean(axis=0)  # mean |interaction|, [38,38]
+            raw[name] = vals                       # SIGNED, per-row [n, F, F]
             weights[name] = w
 
-    if not mats:
+    if not raw:
         raise SystemExit("no model fit the budget - raise --budget-min")
 
     wsum = sum(weights.values())
-    combined = sum(mats[n] * (weights[n] / wsum) for n in mats)
+    # Blend the SIGNED per-row interaction tensors with the deployment weights
+    # FIRST, then take the magnitude. Taking |.| per model and averaging after
+    # would report sum(|a|,|b|) >= |a+b| — inflating every pair wherever the
+    # models disagree in sign. The ensemble's interaction is the interaction of
+    # the blend, not the blend of the magnitudes.
+    blended_signed = sum(raw[n] * (weights[n] / wsum) for n in raw)
+    combined = np.abs(blended_signed).mean(axis=0)   # [F, F]
+    # Per-model magnitudes retained for diagnostics / the npz only.
+    mats = {n: np.abs(raw[n]).mean(axis=0) for n in raw}
+    del blended_signed, raw
     models_used = ", ".join(f"{n} (w={weights[n]:.2f})" for n in mats)
     print(f"[combine] renormalized over: {models_used} "
           f"(covers {wsum:.0%} of the deployed blend)")
@@ -131,7 +140,7 @@ def main():
     for _, r in pairs.head(15).iterrows():
         print(f"  {r.mean_abs_interaction:7.4f}  {r.feature_a} x {r.feature_b}")
 
-    # ── 38x38 heatmap, ordered by concept group ────────────────────────────
+    # ── FxF heatmap, ordered by concept group ────────────────────────────
     ordered = [f for g in grouping.GROUPS for f in grouping.GROUPS[g]]
     idx = [feats.index(f) for f in ordered]
     M = combined[np.ix_(idx, idx)].copy()
@@ -153,7 +162,7 @@ def main():
     plt.close(fig)
     print("[fig] interaction_heatmap.png")
 
-    # ── 7x7 concept-group block sums ───────────────────────────────────────
+    # ── GxG concept-group block sums ───────────────────────────────────────
     gnames = list(grouping.GROUPS)
     B = np.zeros((len(gnames), len(gnames)))
     for a, ga in enumerate(gnames):

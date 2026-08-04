@@ -1,39 +1,31 @@
 feature,group,spearman_value_vs_shap,rho_ci95_low,rho_ci95_high,ci_excludes_zero,mean_abs_shap
-nbr_pm25_100km,Regional PM signal,0.994,0.993,0.995,True,1.857
-nbr_pm25_50km,Regional PM signal,0.994,0.993,0.995,True,1.3709
-nbr_pm25_25km,Regional PM signal,0.989,0.986,0.991,True,1.3579
-nbr_std_50km,Regional PM signal,0.874,0.847,0.9,True,0.303
-cams_pm25,Regional PM signal,0.971,0.966,0.975,True,0.2113
-pct_ling_isolated,Community & EJ context,0.622,0.515,0.715,True,0.1536
-rmp_proximity,Local sources,0.733,0.644,0.799,True,0.1322
-longitude,Geography,0.552,0.439,0.646,True,0.1315
-pct_people_of_color,Community & EJ context,0.628,0.532,0.715,True,0.12
-aod,Regional PM signal,0.952,0.946,0.957,True,0.1166
-dist_to_coast,Geography,-0.425,-0.564,-0.271,True,0.1165
-humidity,Meteorology,0.878,0.86,0.893,True,0.1141
-pct_low_income,Community & EJ context,0.841,0.806,0.869,True,0.1116
-traffic_proximity,Local sources,-0.292,-0.429,-0.141,True,0.1109
-diesel_pm_proximity,Local sources,-0.537,-0.64,-0.427,True,0.1006
-temp_x_humidity,Meteorology,0.839,0.821,0.857,True,0.0925
-latitude,Geography,0.435,0.311,0.549,True,0.0872
-ejf_score,Community & EJ context,0.679,0.591,0.746,True,0.0859
-dist_to_nearest_sensor,Geography,-0.414,-0.547,-0.274,True,0.0779
-nbr_count_25km,Regional PM signal,-0.838,-0.861,-0.809,True,0.0715
-nbr_count_50km,Regional PM signal,-0.84,-0.88,-0.791,True,0.0621
-hms_smoke,Wildfire smoke,0.855,0.849,0.861,True,0.0525
-superfund_proximity,Local sources,0.163,-0.023,0.335,False,0.0488
-pressure,Meteorology,-0.674,-0.778,-0.556,True,0.0464
-nbr_count_100km,Regional PM signal,-0.538,-0.615,-0.446,True,0.0461
-temperature,Meteorology,0.797,0.786,0.807,True,0.0306
-day_of_year,Season & calendar,-0.68,-0.692,-0.667,True,0.026
-precipitation,Meteorology,0.7,0.681,0.718,True,0.0242
-doy_sin,Season & calendar,0.727,0.71,0.742,True,0.0207
-month_sin,Season & calendar,0.781,0.767,0.792,True,0.012
-wind_x_temp,Meteorology,-0.189,-0.252,-0.125,True,0.0081
-doy_cos,Season & calendar,0.301,0.252,0.345,True,0.0081
-month,Season & calendar,-0.66,-0.684,-0.639,True,0.0068
-wind_speed,Meteorology,-0.45,-0.491,-0.407,True,0.0062
-month_cos,Season & calendar,0.653,0.615,0.688,True,0.0039
-dow_sin,Season & calendar,0.161,0.122,0.198,True,0.0011
-dow,Season & calendar,-0.066,-0.096,-0.032,True,0.001
-dow_cos,Season & calendar,-0.052,-0.093,-0.014,True,0.0008
+nbr_pm25_100km,Regional PM signal,0.992,0.991,0.993,True,1.7547
+nbr_pm25_25km,Regional PM signal,0.988,0.984,0.991,True,1.4289
+nbr_pm25_50km,Regional PM signal,0.993,0.992,0.994,True,1.2951
+nbr_std_50km,Regional PM signal,0.88,0.853,0.906,True,0.4001
+cams_pm25,Regional PM signal,0.97,0.966,0.973,True,0.2237
+longitude,Geography,0.445,0.325,0.545,True,0.1878
+dist_to_coast,Geography,-0.496,-0.627,-0.353,True,0.1664
+humidity,Meteorology,0.878,0.862,0.892,True,0.1359
+latitude,Geography,0.188,0.055,0.315,True,0.129
+aod,Regional PM signal,0.958,0.952,0.963,True,0.1258
+temp_x_humidity,Meteorology,0.891,0.877,0.905,True,0.1205
+dist_to_nearest_sensor,Geography,-0.32,-0.439,-0.186,True,0.1194
+hms_smoke,Wildfire smoke,0.857,0.851,0.863,True,0.0898
+nbr_count_50km,Regional PM signal,-0.894,-0.919,-0.862,True,0.0872
+nbr_count_25km,Regional PM signal,-0.693,-0.74,-0.643,True,0.0709
+pressure,Meteorology,-0.644,-0.743,-0.527,True,0.0546
+nbr_count_100km,Regional PM signal,-0.562,-0.635,-0.487,True,0.0433
+temperature,Meteorology,0.767,0.752,0.78,True,0.0384
+day_of_year,Season & calendar,-0.635,-0.653,-0.618,True,0.0322
+precipitation,Meteorology,0.624,0.595,0.649,True,0.0283
+doy_sin,Season & calendar,0.678,0.651,0.702,True,0.0259
+doy_cos,Season & calendar,0.613,0.582,0.643,True,0.0156
+month_sin,Season & calendar,0.792,0.782,0.802,True,0.0146
+month,Season & calendar,-0.585,-0.603,-0.568,True,0.0131
+wind_speed,Meteorology,-0.465,-0.511,-0.421,True,0.0116
+wind_x_temp,Meteorology,-0.173,-0.227,-0.117,True,0.0105
+month_cos,Season & calendar,0.258,0.211,0.3,True,0.0041
+dow,Season & calendar,0.253,0.221,0.284,True,0.0018
+dow_sin,Season & calendar,0.236,0.198,0.27,True,0.0017
+dow_cos,Season & calendar,0.065,0.027,0.099,True,0.0013

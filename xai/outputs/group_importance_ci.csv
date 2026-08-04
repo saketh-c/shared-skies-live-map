@@ -1,8 +1,6 @@
 group,mean_abs_group_shap,ci95_low,ci95_high,boot_se
-Regional PM signal,4.8425,4.7312,4.9593,0.0589
-Community & EJ context,0.3939,0.3499,0.4429,0.0244
-Geography,0.3241,0.2862,0.3638,0.0205
-Local sources,0.2883,0.2444,0.3446,0.0266
-Meteorology,0.2046,0.1888,0.2231,0.0092
-Season & calendar,0.066,0.0627,0.0699,0.0019
-Wildfire smoke,0.0525,0.0506,0.0545,0.001
+Regional PM signal,4.8161,4.7075,4.9309,0.0584
+Geography,0.4718,0.4133,0.5295,0.0303
+Meteorology,0.2484,0.2305,0.2697,0.0103
+Season & calendar,0.0907,0.0861,0.0962,0.0026
+Wildfire smoke,0.0898,0.0872,0.0925,0.0013

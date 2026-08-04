@@ -1,4 +1,4 @@
-"""Concept groups: map the 38 model features onto 7 policy-legible categories.
+"""Concept groups: map the 30 model features onto 5 policy-legible categories.
 
 SHAP values are additive, so summing per-row contributions within a group is an
 exact decomposition of the prediction: base + sum(group sums) = raw prediction.
@@ -24,13 +24,6 @@ GROUPS = {
         "humidity", "temperature", "pressure", "wind_speed", "precipitation",
         "temp_x_humidity", "wind_x_temp",
     ],
-    "Local sources": [
-        "traffic_proximity", "superfund_proximity", "rmp_proximity",
-        "diesel_pm_proximity",
-    ],
-    "Community & EJ context": [
-        "ejf_score", "pct_people_of_color", "pct_low_income", "pct_ling_isolated",
-    ],
     "Geography": [
         "latitude", "longitude", "dist_to_nearest_sensor", "dist_to_coast",
     ],
@@ -46,8 +39,6 @@ GROUP_COLORS = {
     "Wildfire smoke": "#DD8452",
     "Regional PM signal": "#4C72B0",
     "Meteorology": "#55A868",
-    "Local sources": "#C44E52",
-    "Community & EJ context": "#8172B3",
     "Geography": "#937860",
     "Season & calendar": "#64B5CD",
 }
@@ -58,8 +49,6 @@ GROUP_BLURBS = {
     "Wildfire smoke": "Satellite-detected smoke plumes overhead (NOAA HMS).",
     "Regional PM signal": "What nearby sensors and satellites say the regional air already looks like today.",
     "Meteorology": "Weather that traps, disperses, or washes out particles.",
-    "Local sources": "Proximity to traffic, industrial, and hazardous-site emissions (EPA EJSCREEN).",
-    "Community & EJ context": "Demographic context the model associates with exposure - a learned correlation, NOT a causal driver.",
     "Geography": "Where this location sits in the state and relative to the sensor network.",
     "Season & calendar": "Time-of-year and day-of-week patterns.",
 }
