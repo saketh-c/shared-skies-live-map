@@ -1178,6 +1178,10 @@ async def health():
         "status": "ok",
         "model_loaded": state.get("bundle") is not None,
         "model_version": (state.get("bundle") or {}).get("version"),
+        # The version string is unchanged across retrains, so it cannot tell you
+        # WHICH bundle is live. The feature count can: the EJScreen removal took
+        # the model from 38 to 30, so this is the field to check after a deploy.
+        "model_features": len((state.get("bundle") or {}).get("feature_names", [])),
         "lookup_loaded": state.get("tract_lookup") is not None,
         "available_cities": list(CITIES.keys()),
         "live_purpleair_sensors": len(pa.get("sensors", [])) if pa.get("usable") else 0,

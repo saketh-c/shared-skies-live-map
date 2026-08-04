@@ -2,7 +2,7 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://adjustments-drainage-shares-greatly.trycloudflare.com/api/:path*"
+      "destination": "https://shared-skies-backend.onrender.com/api/:path*"
     }
   ]
 }
