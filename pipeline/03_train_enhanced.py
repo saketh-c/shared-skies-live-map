@@ -75,10 +75,18 @@ LOG_TRANSFORM_TARGET = False
 FEATURES = [
     # Weather (now includes wind_speed + precipitation)
     "humidity", "temperature", "pressure", "wind_speed", "precipitation",
-    # EJ / spatial
-    "ejf_score", "pct_people_of_color", "pct_low_income",
-    "traffic_proximity", "superfund_proximity", "rmp_proximity",
-    "diesel_pm_proximity", "pct_ling_isolated",
+    # NO EJSCREEN-DERIVED FEATURES. All eight were removed for the XAI study:
+    # four demographic (ejf_score, pct_people_of_color, pct_low_income,
+    # pct_ling_isolated) and four physical source-proximity (traffic_proximity,
+    # superfund_proximity, rmp_proximity, diesel_pm_proximity).
+    # Rationale: the study's central claim is that marginalized communities
+    # experience worse PM2.5. If any EJScreen variable is a model INPUT, that
+    # finding is partly an artifact of the inputs rather than a property of the
+    # atmosphere, and every SHAP attribution is contaminated. The demographic
+    # four were measured at dR2 = +0.0037, 95% CI [-0.0072, +0.0164] — the CI
+    # includes zero. The physical four cost more; see models/ablation_ejscreen.json.
+    # EJScreen data REMAINS in tract_lookup.parquet for the post-hoc EJ analysis
+    # and in the sensor-placement QUBO, neither of which is a model input.
     # Spatial
     "latitude", "longitude",
     # Spatial context (computed at load time from lat/lon + sensor network).

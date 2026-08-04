@@ -1,0 +1,109 @@
+[features] AOD+met data found — 30 features (full v4).
+targets: 285,798 rows / 310 sensors; neighbour pool: 400,710 rows / 427 sensors
+  fold 1/10 A_38_production        r2=0.6314  (244s)
+  fold 1/10 B_34_no_demographic    r2=0.6222  (503s)
+  fold 1/10 C_30_no_ejscreen       r2=0.6369  (669s)
+fold 1/10 done | 31 sensors held out | 669s elapsed
+
+  fold 2/10 A_38_production        r2=0.7119  (895s)
+  fold 2/10 B_34_no_demographic    r2=0.7036  (1026s)
+  fold 2/10 C_30_no_ejscreen       r2=0.7126  (1157s)
+fold 2/10 done | 31 sensors held out | 1157s elapsed
+
+  fold 3/10 A_38_production        r2=0.7889  (1425s)
+  fold 3/10 B_34_no_demographic    r2=0.7957  (1608s)
+  fold 3/10 C_30_no_ejscreen       r2=0.7957  (1753s)
+fold 3/10 done | 31 sensors held out | 1753s elapsed
+
+  fold 4/10 A_38_production        r2=0.6856  (2148s)
+  fold 4/10 B_34_no_demographic    r2=0.6959  (2302s)
+  fold 4/10 C_30_no_ejscreen       r2=0.6961  (2480s)
+fold 4/10 done | 31 sensors held out | 2480s elapsed
+
+  fold 5/10 A_38_production        r2=0.7829  (2723s)
+  fold 5/10 B_34_no_demographic    r2=0.7776  (2881s)
+  fold 5/10 C_30_no_ejscreen       r2=0.7813  (3018s)
+fold 5/10 done | 31 sensors held out | 3018s elapsed
+
+  fold 6/10 A_38_production        r2=0.6385  (3229s)
+  fold 6/10 B_34_no_demographic    r2=0.6226  (3367s)
+  fold 6/10 C_30_no_ejscreen       r2=0.6182  (3506s)
+fold 6/10 done | 31 sensors held out | 3506s elapsed
+
+  fold 7/10 A_38_production        r2=0.7430  (3736s)
+  fold 7/10 B_34_no_demographic    r2=0.7485  (3895s)
+  fold 7/10 C_30_no_ejscreen       r2=0.7432  (4042s)
+fold 7/10 done | 31 sensors held out | 4042s elapsed
+
+  fold 8/10 A_38_production        r2=0.6924  (4271s)
+  fold 8/10 B_34_no_demographic    r2=0.6951  (4448s)
+  fold 8/10 C_30_no_ejscreen       r2=0.6856  (4607s)
+fold 8/10 done | 31 sensors held out | 4607s elapsed
+
+  fold 9/10 A_38_production        r2=0.7760  (4844s)
+  fold 9/10 B_34_no_demographic    r2=0.7743  (4999s)
+  fold 9/10 C_30_no_ejscreen       r2=0.7777  (5131s)
+fold 9/10 done | 31 sensors held out | 5131s elapsed
+
+  fold 10/10 A_38_production        r2=0.6637  (5356s)
+  fold 10/10 B_34_no_demographic    r2=0.6570  (5524s)
+  fold 10/10 C_30_no_ejscreen       r2=0.6732  (5657s)
+fold 10/10 done | 31 sensors held out | 5657s elapsed
+
+
+scored rows: 285,798/285,798
+{
+  "design": {
+    "folds": "10-fold GroupKFold over sensors (deterministic)",
+    "seed": 42,
+    "bootstrap_reps": 2000,
+    "bootstrap": "per-sensor cluster bootstrap on the paired delta",
+    "blend_weights": {
+      "rf": 0.6827,
+      "lgbm": 0.0079,
+      "xgb": 0.0,
+      "cat": 0.3094
+    },
+    "target": "raw PurpleAir ATM",
+    "cap": 75.0,
+    "n_rows": 285798,
+    "n_sensors": 310,
+    "neighbour_pool_rows": 400710
+  },
+  "arms": {
+    "A_38_production": {
+      "n_features": 38,
+      "r2": 0.713590660058974,
+      "rmse": 4.2146402371871945,
+      "mae": 2.6203630124743467
+    },
+    "B_34_no_demographic": {
+      "n_features": 34,
+      "r2": 0.7114074872243981,
+      "rmse": 4.230672920060925,
+      "mae": 2.6295104087335823
+    },
+    "C_30_no_ejscreen": {
+      "n_features": 30,
+      "r2": 0.7140738244591119,
+      "rmse": 4.211083747601944,
+      "mae": 2.6148677286780435
+    }
+  },
+  "deltas_vs_A": {
+    "B_34_no_demographic": {
+      "delta_r2_A_minus_arm": 0.0021831728345759194,
+      "ci95_low": -0.003145118580055284,
+      "ci95_high": 0.008325805825180756,
+      "ci_includes_zero": true,
+      "interpretation": "indistinguishable from noise"
+    },
+    "C_30_no_ejscreen": {
+      "delta_r2_A_minus_arm": -0.0004831644001379587,
+      "ci95_low": -0.007041321360824476,
+      "ci95_high": 0.0066217623674200265,
+      "ci_includes_zero": true,
+      "interpretation": "indistinguishable from noise"
+    }
+  }
+}

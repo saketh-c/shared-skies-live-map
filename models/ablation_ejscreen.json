@@ -1,0 +1,55 @@
+{
+  "design": {
+    "folds": "10-fold GroupKFold over sensors (deterministic)",
+    "seed": 42,
+    "bootstrap_reps": 2000,
+    "bootstrap": "per-sensor cluster bootstrap on the paired delta",
+    "blend_weights": {
+      "rf": 0.6827,
+      "lgbm": 0.0079,
+      "xgb": 0.0,
+      "cat": 0.3094
+    },
+    "target": "raw PurpleAir ATM",
+    "cap": 75.0,
+    "n_rows": 285798,
+    "n_sensors": 310,
+    "neighbour_pool_rows": 400710
+  },
+  "arms": {
+    "A_38_production": {
+      "n_features": 38,
+      "r2": 0.713590660058974,
+      "rmse": 4.2146402371871945,
+      "mae": 2.6203630124743467
+    },
+    "B_34_no_demographic": {
+      "n_features": 34,
+      "r2": 0.7114074872243981,
+      "rmse": 4.230672920060925,
+      "mae": 2.6295104087335823
+    },
+    "C_30_no_ejscreen": {
+      "n_features": 30,
+      "r2": 0.7140738244591119,
+      "rmse": 4.211083747601944,
+      "mae": 2.6148677286780435
+    }
+  },
+  "deltas_vs_A": {
+    "B_34_no_demographic": {
+      "delta_r2_A_minus_arm": 0.0021831728345759194,
+      "ci95_low": -0.003145118580055284,
+      "ci95_high": 0.008325805825180756,
+      "ci_includes_zero": true,
+      "interpretation": "indistinguishable from noise"
+    },
+    "C_30_no_ejscreen": {
+      "delta_r2_A_minus_arm": -0.0004831644001379587,
+      "ci95_low": -0.007041321360824476,
+      "ci95_high": 0.0066217623674200265,
+      "ci_includes_zero": true,
+      "interpretation": "indistinguishable from noise"
+    }
+  }
+}

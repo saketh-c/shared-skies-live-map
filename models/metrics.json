@@ -3,46 +3,46 @@
     "test_size": 57160,
     "train_size": 228638,
     "rf": {
-      "rmse": 3.7141,
-      "r2": 0.7786,
-      "mae": 2.229
+      "rmse": 3.9718,
+      "r2": 0.749,
+      "mae": 2.4432
     },
     "lgbm": {
-      "rmse": 3.048,
-      "r2": 0.8509,
-      "mae": 1.612
+      "rmse": 3.8559,
+      "r2": 0.7634,
+      "mae": 2.1193
     },
     "xgb": {
-      "rmse": 3.0947,
-      "r2": 0.8463,
-      "mae": 1.669
+      "rmse": 3.3945,
+      "r2": 0.8166,
+      "mae": 1.7453
     },
     "cat": {
-      "rmse": 3.2325,
-      "r2": 0.8323,
-      "mae": 1.7908
+      "rmse": 3.3663,
+      "r2": 0.8197,
+      "mae": 1.9129
     },
     "ensemble": {
-      "rmse": 3.1646,
-      "r2": 0.8392,
-      "mae": 1.7211
+      "rmse": 3.5161,
+      "r2": 0.8033,
+      "mae": 1.939
     }
   },
   "loso_cv": {
-    "rmse": 4.2218,
-    "mae": 2.6176,
-    "r2": 0.7126,
+    "rmse": 4.2486,
+    "mae": 2.6112,
+    "r2": 0.709,
     "n_sites": 310,
     "note": "SUPERSEDED inverse-MSE baseline (NOT the deployed blend). The deployed model uses the simplex-convex weights in loso_cv_optimized; read loso_cv_optimized.r2 for the headline LOSO number."
   },
   "loso_cv_optimized": {
-    "r2": 0.7136,
+    "r2": 0.7134,
     "config": "simplex_4model",
     "weights": {
-      "rf": 0.6827,
-      "lgbm": 0.0079,
+      "rf": 0.7935,
+      "lgbm": 0.0702,
       "xgb": 0.0,
-      "cat": 0.3094
+      "cat": 0.1363
     },
     "method": "simplex-constrained convex combiner, GroupKFold-over-sensors cross-fit"
   },
@@ -57,20 +57,20 @@
     ],
     "single_model_r2": {
       "rf": 0.7138,
-      "lgbm": 0.7031,
-      "xgb": 0.7022,
-      "cat": 0.7078
+      "lgbm": 0.7029,
+      "xgb": 0.6849,
+      "cat": 0.6985
     },
-    "equal_weight_r2": 0.7114,
-    "inverse_mse_r2": 0.7126,
-    "simplex_4model_grouped_cv_r2": 0.7136,
-    "simplex_4model_insample_r2": 0.7155,
-    "nnls_4model_grouped_cv_r2": 0.7133,
+    "equal_weight_r2": 0.7084,
+    "inverse_mse_r2": 0.709,
+    "simplex_4model_grouped_cv_r2": 0.7134,
+    "simplex_4model_insample_r2": 0.7145,
+    "nnls_4model_grouped_cv_r2": 0.7134,
     "simplex_4model_weights": {
-      "rf": 0.6827,
-      "lgbm": 0.0079,
+      "rf": 0.7935,
+      "lgbm": 0.0702,
       "xgb": 0.0,
-      "cat": 0.3094
+      "cat": 0.1363
     },
     "drop_rf": {
       "models": [
@@ -79,21 +79,21 @@
         "cat"
       ],
       "weights": {
-        "lgbm": 0.2396,
+        "lgbm": 0.6214,
         "xgb": 0.0,
-        "cat": 0.7604
+        "cat": 0.3786
       },
-      "grouped_cv_r2": 0.7083,
-      "insample_r2": 0.7083
+      "grouped_cv_r2": 0.7047,
+      "insample_r2": 0.7054
     },
     "chosen_config": "simplex_4model",
     "chosen_weights": {
-      "rf": 0.6827,
-      "lgbm": 0.0079,
+      "rf": 0.7935,
+      "lgbm": 0.0702,
       "xgb": 0.0,
-      "cat": 0.3094
+      "cat": 0.1363
     },
-    "chosen_grouped_cv_r2": 0.7136,
+    "chosen_grouped_cv_r2": 0.7134,
     "best_single_model": "rf",
     "best_single_model_r2": 0.7138
   },
@@ -103,14 +103,6 @@
     "pressure",
     "wind_speed",
     "precipitation",
-    "ejf_score",
-    "pct_people_of_color",
-    "pct_low_income",
-    "traffic_proximity",
-    "superfund_proximity",
-    "rmp_proximity",
-    "diesel_pm_proximity",
-    "pct_ling_isolated",
     "latitude",
     "longitude",
     "dist_to_nearest_sensor",
@@ -137,7 +129,7 @@
     "temp_x_humidity",
     "wind_x_temp"
   ],
-  "n_features": 38,
+  "n_features": 30,
   "target_transform": null,
   "pm25_train_cap": 75.0
 }

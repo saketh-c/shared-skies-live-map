@@ -1,0 +1,247 @@
+{
+  "field": {
+    "n_tracts": 6896,
+    "n_days_averaged": 365,
+    "date_start": "2025-05-02",
+    "date_end": "2026-05-01",
+    "mean_pm25": 8.9146075555175,
+    "model_features": 30,
+    "ejscreen_inputs": 0
+  },
+  "correlations": {
+    "pct_people_of_color": {
+      "label": "% people of colour (EJScreen percentile)",
+      "n": 6896,
+      "pearson_r": 0.029168317326575148,
+      "pearson_p": 0.015423619984358535,
+      "pearson_ci95": [
+        0.004582912395371181,
+        0.056264628746130085
+      ],
+      "spearman_rho": 0.12396404371575724,
+      "spearman_p": 5.036532995194545e-25
+    },
+    "pct_low_income": {
+      "label": "% low income (EJScreen percentile)",
+      "n": 6896,
+      "pearson_r": 0.12666564780298847,
+      "pearson_p": 4.603938646020952e-26,
+      "pearson_ci95": [
+        0.10421008878931132,
+        0.14959239712189848
+      ],
+      "spearman_rho": 0.16240533457673217,
+      "spearman_p": 5.692255015247948e-42
+    },
+    "ejf_score": {
+      "label": "EJ index (EJScreen percentile)",
+      "n": 6896,
+      "pearson_r": 0.08752874741926839,
+      "pearson_p": 3.307759679179641e-13,
+      "pearson_ci95": [
+        0.06477507774206032,
+        0.11081340260615616
+      ],
+      "spearman_rho": 0.14973125960106898,
+      "spearman_p": 7.253032216856572e-36
+    },
+    "pct_ling_isolated": {
+      "label": "% linguistically isolated (EJScreen percentile)",
+      "n": 6896,
+      "pearson_r": 0.003049152926992001,
+      "pearson_p": 0.8001423142549051,
+      "pearson_ci95": [
+        -0.02190455107494335,
+        0.0273056925347814
+      ],
+      "spearman_rho": 0.07868047585966917,
+      "spearman_p": 6.039514326877515e-11
+    }
+  },
+  "quintiles": {
+    "pct_people_of_color": {
+      "label": "% people of colour (EJScreen percentile)",
+      "bins": [
+        {
+          "quintile": "Q1 (least)",
+          "n_tracts": 1432,
+          "mean_pm25": 9.008880269447701,
+          "ci95_low": 8.916128335456765,
+          "ci95_high": 9.097339424781515
+        },
+        {
+          "quintile": "Q2",
+          "n_tracts": 1348,
+          "mean_pm25": 8.754423146798366,
+          "ci95_low": 8.667226530016338,
+          "ci95_high": 8.83780288757125
+        },
+        {
+          "quintile": "Q3",
+          "n_tracts": 1368,
+          "mean_pm25": 8.671183652157726,
+          "ci95_low": 8.593341648576375,
+          "ci95_high": 8.749304143687198
+        },
+        {
+          "quintile": "Q4",
+          "n_tracts": 1374,
+          "mean_pm25": 8.751289686464903,
+          "ci95_low": 8.654143542934932,
+          "ci95_high": 8.847011931636581
+        },
+        {
+          "quintile": "Q5 (most)",
+          "n_tracts": 1374,
+          "mean_pm25": 9.379187401572661,
+          "ci95_low": 9.250378462290971,
+          "ci95_high": 9.504769198049793
+        }
+      ],
+      "q5_minus_q1": 0.37030713212496025,
+      "q5_minus_q1_ci95": [
+        0.2159434902822864,
+        0.5263898884378251
+      ],
+      "q5_minus_q1_pct": 4.110467905548736
+    },
+    "pct_low_income": {
+      "label": "% low income (EJScreen percentile)",
+      "bins": [
+        {
+          "quintile": "Q1 (least)",
+          "n_tracts": 1412,
+          "mean_pm25": 8.575571295852608,
+          "ci95_low": 8.514188082372097,
+          "ci95_high": 8.639270683724613
+        },
+        {
+          "quintile": "Q2",
+          "n_tracts": 1379,
+          "mean_pm25": 8.759714265301445,
+          "ci95_low": 8.677240579313123,
+          "ci95_high": 8.83979189732419
+        },
+        {
+          "quintile": "Q3",
+          "n_tracts": 1380,
+          "mean_pm25": 8.950273042692867,
+          "ci95_low": 8.848925950123776,
+          "ci95_high": 9.053065123040884
+        },
+        {
+          "quintile": "Q4",
+          "n_tracts": 1422,
+          "mean_pm25": 9.018845817962168,
+          "ci95_low": 8.911249819511076,
+          "ci95_high": 9.125372290941181
+        },
+        {
+          "quintile": "Q5 (most)",
+          "n_tracts": 1303,
+          "mean_pm25": 9.2944017722147,
+          "ci95_low": 9.171784768624066,
+          "ci95_high": 9.416274388798943
+        }
+      ],
+      "q5_minus_q1": 0.7188304763620916,
+      "q5_minus_q1_ci95": [
+        0.5758453189300491,
+        0.849048721717433
+      ],
+      "q5_minus_q1_pct": 8.382304240298703
+    },
+    "ejf_score": {
+      "label": "EJ index (EJScreen percentile)",
+      "bins": [
+        {
+          "quintile": "Q1 (least)",
+          "n_tracts": 1424,
+          "mean_pm25": 8.709968422719028,
+          "ci95_low": 8.63378312296511,
+          "ci95_high": 8.785261600502327
+        },
+        {
+          "quintile": "Q2",
+          "n_tracts": 1418,
+          "mean_pm25": 8.86844680196702,
+          "ci95_low": 8.790675694778406,
+          "ci95_high": 8.949885555326778
+        },
+        {
+          "quintile": "Q3",
+          "n_tracts": 1377,
+          "mean_pm25": 8.81194525426258,
+          "ci95_low": 8.720204034231235,
+          "ci95_high": 8.899356023533887
+        },
+        {
+          "quintile": "Q4",
+          "n_tracts": 1357,
+          "mean_pm25": 8.934721304546835,
+          "ci95_low": 8.829251702253472,
+          "ci95_high": 9.046555232651174
+        },
+        {
+          "quintile": "Q5 (most)",
+          "n_tracts": 1320,
+          "mean_pm25": 9.271375513877219,
+          "ci95_low": 9.14757302535667,
+          "ci95_high": 9.401375815487642
+        }
+      ],
+      "q5_minus_q1": 0.5614070911581912,
+      "q5_minus_q1_ci95": [
+        0.41600276646939754,
+        0.7099806768816446
+      ],
+      "q5_minus_q1_pct": 6.445569764567923
+    },
+    "pct_ling_isolated": {
+      "label": "% linguistically isolated (EJScreen percentile)",
+      "bins": [
+        {
+          "quintile": "Q1 (least)",
+          "n_tracts": 1412,
+          "mean_pm25": 9.00582163464455,
+          "ci95_low": 8.920471121955211,
+          "ci95_high": 9.09322973098466
+        },
+        {
+          "quintile": "Q2",
+          "n_tracts": 1390,
+          "mean_pm25": 8.811793863248074,
+          "ci95_low": 8.729765706279263,
+          "ci95_high": 8.893457463703363
+        },
+        {
+          "quintile": "Q3",
+          "n_tracts": 1389,
+          "mean_pm25": 8.804328256437241,
+          "ci95_low": 8.723111624502312,
+          "ci95_high": 8.886028238160646
+        },
+        {
+          "quintile": "Q4",
+          "n_tracts": 1437,
+          "mean_pm25": 8.84250660979236,
+          "ci95_low": 8.744356736771987,
+          "ci95_high": 8.936884417772465
+        },
+        {
+          "quintile": "Q5 (most)",
+          "n_tracts": 1268,
+          "mean_pm25": 9.128254052328712,
+          "ci95_low": 8.991239473878986,
+          "ci95_high": 9.259817197114256
+        }
+      ],
+      "q5_minus_q1": 0.12243241768416269,
+      "q5_minus_q1_ci95": [
+        -0.04333741985940938,
+        0.2821911218300642
+      ],
+      "q5_minus_q1_pct": 1.3594808186426508
+    }
+  }
+}
