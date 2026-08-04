@@ -6,6 +6,7 @@
 \usepackage{xcolor}
 \usepackage[hidelinks]{hyperref}
 \usepackage{balance}
+\usepackage{stfloats}
 
 \graphicspath{{../figures/}}
 
@@ -376,8 +377,6 @@ detected smoke event is carried by the regional signal; the smoke tier
 adds $+0.3$~\ugm{}. (b) The worst miss in the corpus: neighbors saw
 nothing, and the regional signal suppresses the prediction below the
 baseline.}
-\label{fig:cases}
-\end{figure}
 
 \subsection{Explaining a success and a failure}
 Fig.~\ref{fig:cases} decomposes two individual predictions. On the smoke
@@ -397,6 +396,9 @@ excluded (241 pre-cap), so these figures lower-bound the blind spot. The
 features that make the model accurate on regional events actively vote
 against hyper-local ones; no reweighting of the same features can fix what
 the network cannot see.
+
+\label{fig:cases}
+\end{figure}
 
 
 \section{Discussion}
