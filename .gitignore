@@ -26,9 +26,12 @@ pipeline/data_pull_cache/
 website/node_modules/
 website/dist/
 
-# Papers — kept locally only, not tracked in the repo
-paper/
-paper_hs/
+# The old repo-root LaTeX paper folders — kept locally only, not tracked.
+# Root-anchored on purpose: a bare "paper/" matches a directory of that name at
+# ANY depth, which silently swallowed xai/XAI UTRC/paper/ and meant new files
+# added there were never committed.
+/paper/
+/paper_hs/
 
 logs/
 
