@@ -134,17 +134,14 @@ from the Copernicus Atmosphere Monitoring Service (CAMS) \cite{peuch2022};
 location and distance covariates; and calendar encodings.
 
 No EPA EJScreen variable is a model input. An earlier deployment carried
-eight --- four demographic and four physical source-proximity ---
-for 11.1\% of blended attribution \cite{ejscreen}; all eight were removed before this
-study. A model used to characterize exposure disparities across
-demographic groups must not receive those groups as predictors, or any
-disparity it reproduces is partly an artifact of its own inputs. The
-proximity features are not circular in that sense but were dropped too, so
-that no EJScreen product enters the prediction path. Cost was measured: on
-frozen sensor-grouped folds with the blend held fixed, the cost of dropping
-the four demographic features is $\Delta R^2 = 0.0022$ (95\% CI
-$[-0.0031,+0.0083]$) and of dropping all eight is $-0.0005$
-($[-0.0070,+0.0066]$) --- negative, i.e. the smaller model scored
+eight --- four demographic and four source-proximity --- for 12.1\% of
+blended attribution \cite{ejscreen}; all eight were removed before this study,
+because a model used to characterize exposure disparities must not receive
+those groups as predictors or any disparity it reproduces is partly an
+artifact of its own inputs. Cost was measured on frozen sensor-grouped folds
+with the blend held fixed: dropping the four demographic features costs
+$\Delta R^2 = 0.0022$ (95\% CI $[-0.0031,+0.0083]$), dropping all eight
+$-0.0005$ ($[-0.0070,+0.0066]$) --- negative, i.e. the smaller model scored
 marginally higher. Both intervals contain zero.
 
 \subsection{Ensemble and validation}
@@ -331,6 +328,13 @@ observed PM2.5 is lower than on medium-tier rows (11.6 versus
 guarantee surface-level smoke. The model nearly ignores a feature whose
 evidential value its training data did not support.
 
+\subsubsection{The disparity survives the exclusion} Correlating tract
+predictions (6,896 tracts, 365 days) afterwards against EJScreen percentiles
+the model never sees, low income rises monotonically across quintiles from
+8.58 to 9.29~\ugm{} ($\rho=0.16$); percent people of colour is non-monotone,
+dipping to 8.67 mid-range before reaching 9.38. Real but uneven --- and, with
+no demographic input, inferred from atmospheric evidence alone.
+
 \subsubsection{Interactions stay inside the regional group} SHAP
 interaction values (a 400-row subsample, seed 42; random forest and
 CatBoost blended with renormalized weights covering 93\% of the deployed
@@ -402,11 +406,10 @@ baseline.}
 \section{Discussion}
 \label{sec:discussion}
 
-\subsection{For model builders} The smoke tier could be replaced, not
-retuned: candidate representations include plume density, smoke age, or
-lagged fire radiative power. The saturating neighbor
-response ties directly to the 75~\ugm{} training cap, so raising the cap
-(or modeling exceedances separately) is a measurable next experiment.
+\subsection{For model builders} The smoke tier could be replaced rather than
+retuned --- plume density, smoke age, or lagged fire radiative power. The
+saturating neighbor response ties directly to the 75~\ugm{} training cap, so
+raising it is a measurable next experiment.
 
 \subsection{For network operators} The miss case turns an error metric
 into a map, with one caution: sign alone cannot separate clean
