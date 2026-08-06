@@ -44,8 +44,8 @@ Atlanta, GA, USA\\
 \begin{abstract}
 Low-cost sensor networks feed operational air quality maps, but the models
 behind them are rarely explained to the communities relying on them. This
-paper presents an exact explanation layer for Shared Skies, a deployed platform
-mapping PM2.5 across 6,896 Texas census tracts, validated at 0.71 by
+paper presents an exact explanation layer for a deployed platform that maps
+PM2.5 across 6,896 Texas census tracts, validated at 0.71 by
 leave-one-sensor-out testing. Blending per-model TreeExplainer attributions
 with deployment weights reconstructs every prediction exactly; sums over
 five concept groups make predictions readable in physical units. The
@@ -81,9 +81,9 @@ Yet the
 explanations almost always describe research models; deployed systems,
 the ones people actually consult, remain largely unexplained.
 
-This paper explains one such system exactly. Shared Skies is a live web
-platform that predicts PM2.5 for every census tract in Texas from PurpleAir
-sensors and public data streams, refreshing continuously. We contribute:
+This paper explains one such system exactly. It is a live web platform that
+predicts PM2.5 for every census tract in Texas from PurpleAir sensors and
+public data streams, refreshing continuously. We contribute:
 (1) an exact explanation layer for the deployed convex tree ensemble, which
 blends per-model TreeExplainer attributions with the deployment weights to
 reconstruct every pre-clipping output to machine precision, then
@@ -99,11 +99,9 @@ placement rather than model tuning.
 \section{The Deployed System}
 \label{sec:system}
 \subsection{Platform}
-Shared Skies serves a public, bilingual web map of model-estimated 24-hour
-PM2.5 for all 6,896 Texas census tracts
-(\url{https://sharedskiesinitiative.org/real-time-map}), publicly served
-since April 2026. The backend pulls live PurpleAir
-readings, cached for 15 minutes, recomputes the full feature set, runs the
+The platform serves a public, bilingual web map of model-estimated 24-hour
+PM2.5 for all 6,896 Texas census tracts, publicly served since April 2026.
+The backend pulls live PurpleAir readings, cached for 15 minutes, recomputes the full feature set, runs the
 ensemble for every tract, and caches predictions for 30 minutes. A served
 value estimates a tract's daily-mean-equivalent PM2.5 given current
 conditions; the training feature pipeline is reproduced at serving time, so
@@ -137,16 +135,17 @@ location and distance covariates; and calendar encodings.
 
 No EPA EJScreen variable is a model input. An earlier deployment carried
 eight --- four demographic and four physical source-proximity ---
-for 11.1\% of blended attribution; all eight were removed before this
+for 11.1\% of blended attribution \cite{ejscreen}; all eight were removed before this
 study. A model used to characterize exposure disparities across
 demographic groups must not receive those groups as predictors, or any
 disparity it reproduces is partly an artifact of its own inputs. The
 proximity features are not circular in that sense but were dropped too, so
 that no EJScreen product enters the prediction path. Cost was measured: on
-frozen sensor-grouped folds with the blend held fixed, dropping the four
-demographic features moved $R^2$ by $+0.0022$ (95\% CI
-$[-0.0032,+0.0083]$) and dropping all eight by $-0.0005$
-($[-0.0070,+0.0066]$) --- both intervals contain zero.
+frozen sensor-grouped folds with the blend held fixed, the cost of dropping
+the four demographic features is $\Delta R^2 = 0.0022$ (95\% CI
+$[-0.0031,+0.0083]$) and of dropping all eight is $-0.0005$
+($[-0.0070,+0.0066]$) --- negative, i.e. the smaller model scored
+marginally higher. Both intervals contain zero.
 
 \subsection{Ensemble and validation}
 Four regressors are trained: a random forest \cite{breiman2001}, LightGBM
@@ -166,8 +165,8 @@ Blend weights are a simplex-constrained convex combination fit on the LOSO
 out-of-fold predictions and selected by a grouped cross-fit over sensors.
 The deployed weights are 0.7935 (random forest), 0.1363 (CatBoost), 0.0702
 (LightGBM), and exactly zero for XGBoost, giving LOSO $R^2=0.7134$ against
-0.7084 for an equal-weight blend and an inverse-MSE baseline at 0.7090
-(RMSE 4.25~\ugm{}, MAE 2.61~\ugm{}). The random forest alone reaches
+0.7084 for an equal-weight blend and an inverse-MSE baseline at 0.7090.
+The deployed configuration scores RMSE 4.21~\ugm{} and MAE 2.61~\ugm{}. The random forest alone reaches
 0.7138: at this resolution the top candidates are tied, and the deployment
 is a nearly single-model instance of the convex blends the method covers.
 We explain the blend because the blend is what ships. Live inference
@@ -220,9 +219,9 @@ distribution through tree cover counts, and its credit assignment among
 correlated features differs from interventional variants. The audit of
 Eq.~\eqref{eq:blend} runs wherever rows are explained; over the 6,000-row
 global sample the maximum absolute reconstruction error is below
-$6\times10^{-6}$~\ugm{} (mean below $5\times10^{-7}$); the residual
+$7\times10^{-6}$~\ugm{} (mean below $5\times10^{-7}$); the residual
 reflects float32 caching, and direct float64 explanation of individual
-rows reconstructs to $5\times10^{-13}$~\ugm{}. The serving layer applies only a
+rows reconstructs to $5\times10^{-14}$~\ugm{}. The serving layer applies only a
 final clip at zero, which never binds on the sampled predictions (minimum
 raw output $+0.4$~\ugm{}).
 
@@ -288,7 +287,7 @@ confined to the bottom pair --- season (0.091) and smoke (0.090) differ by
 0.001~\ugm{} with near-coincident intervals, so their order flips at
 random.
 
-\begin{figure*}[t]
+\begin{figure*}[b]
 \centering
 \includegraphics[width=\textwidth]{fig3_dependence}
 \caption{Feature dependence on the 6,000-row sample (gray points; blue line
@@ -297,7 +296,7 @@ mean is near-linear then flattens above 40~\ugm{}. (b) HMS smoke tier:
 red markers are exact means over all 431 heavy-tier rows and 2,500
 medium-tier rows with day-clustered bootstrap 95\% intervals; the heavy
 tier shows no increase over medium.
-(c) Humidity contributes weakly and non-monotonically. (d) Distance to
+(c) Humidity contributes weakly but monotonically, with a threshold near 60\% RH. (d) Distance to
 coast trends negative inland, encoding the Gulf moisture gradient and
 sensor-network density rather than a causal effect of position.}
 \label{fig:dependence}
@@ -308,12 +307,12 @@ Dependence analysis (Fig.~\ref{fig:dependence}) sharpens this picture in
 three ways.
 
 \subsubsection{Near-linear regional response} The 50~km neighbor mean maps
-onto its attribution almost monotonically (Spearman $\rho=0.994$), with
-slope 0.26~\ugm{} per 1~\ugm{} of neighbor mean below 30~\ugm{}, then
+onto its attribution almost monotonically (Spearman $\rho=0.993$), with
+slope 0.25~\ugm{} per 1~\ugm{} of neighbor mean below 30~\ugm{}, then
 flattens: over corpus rows, the median contribution is
-$+6.3$~\ugm{} for neighbor means between 30 and 40~\ugm{} (2,000 of 4,060
-rows sampled) and $+7.95$~\ugm{}
-(CI $[7.93, 7.97]$, all 860 qualifying rows) above 40~\ugm{}. The
+$+5.78$~\ugm{} for neighbor means between 30 and 40~\ugm{} (2,000 of 4,060
+rows sampled) and $+7.39$~\ugm{}
+(CI $[7.37, 7.43]$, all 860 qualifying rows) above 40~\ugm{}. The
 flattening is consistent with the exclusion of training days above
 75~\ugm{}: the model has little headroom to extrapolate events it never
 saw.
@@ -352,8 +351,8 @@ model disagreement cannot inflate a pair.
 (top, 156 sensors, 98.7\% under a plume) and the cleanest day (bottom, 154
 sensors): regional-signal contribution (left) and predicted PM2.5 (right).
 The event is carried almost entirely by the regional signal
-($+24.8$~\ugm{} statewide mean) while the smoke tier never exceeds
-$+0.31$~\ugm{} anywhere in the state.}
+($+24.3$~\ugm{} statewide mean) while the smoke tier peaks at
+$+0.64$~\ugm{} anywhere in the state.}
 \label{fig:maps}
 \end{figure}
 
@@ -368,15 +367,6 @@ regional group pulled predictions down by 7.6~\ugm{} on average from the
 9.65~\ugm{} baseline. Smoke information reaches the model through the
 neighbor network, not the smoke feature: both days are settings of one
 nowcasting mechanism.
-
-\begin{figure}[!b]
-\centering
-\includegraphics[width=\columnwidth]{fig5_cases}
-\caption{Exact concept-group decomposition of two predictions. (a) A
-detected smoke event is carried by the regional signal; the smoke tier
-adds $+0.3$~\ugm{}. (b) The worst miss in the corpus: neighbors saw
-nothing, and the regional signal suppresses the prediction below the
-baseline.}
 
 \subsection{Explaining a success and a failure}
 Fig.~\ref{fig:cases} decomposes two individual predictions. On the smoke
@@ -397,6 +387,14 @@ features that make the model accurate on regional events actively vote
 against hyper-local ones; no reweighting of the same features can fix what
 the network cannot see.
 
+\begin{figure}[!b]
+\centering
+\includegraphics[width=\columnwidth]{fig5_cases}
+\caption{Exact concept-group decomposition of two predictions. (a) A
+detected smoke event is carried by the regional signal; the smoke tier
+adds $+0.6$~\ugm{}. (b) The worst miss in the corpus: neighbors saw
+nothing, and the regional signal suppresses the prediction below the
+baseline.}
 \label{fig:cases}
 \end{figure}
 
@@ -416,8 +414,8 @@ surroundings from unsensed ones (the clean day's statewide mean regional
 contribution, $-7.6$~\ugm{}, is as negative as El Paso's annual
 $-6.8$~\ugm{}). Sparsity
 separates them: the El Paso sensor averages 0.8 same-day neighbors within
-50~km against a statewide 27, while densely sensed East Texas averages
-$+1.34$~\ugm{}, with individual sensors up to $+9.4$~\ugm{}. Persistently
+50~km against a statewide 27, and its regional contribution averages
+$-6.8$~\ugm{} against East Texas's $+1.34$~\ugm{} (up to $+9.4$). Persistently
 negative regional means in sparse
 neighborhoods mark where predictions rest on remote evidence (distance to
 the nearest sensor reaches 164~km), and those are the places where the
@@ -463,7 +461,7 @@ places. The model is a spatial nowcaster that nearly ignores its smoke
 tier, leans on geography as a proxy for network density, and structurally
 cannot see events its sensor network does not cover. None of this is
 visible in $R^2$, and all of it matters for how the tool should be used,
-improved, and communicated. Explaining 6,000 predictions takes 20 minutes
+improved, and communicated. Explaining 6,000 predictions takes under six minutes
 on a desktop CPU and one prediction a fraction of a second, so attaching
 exact, plainly narrated explanations to the live platform is the immediate
 next step.
