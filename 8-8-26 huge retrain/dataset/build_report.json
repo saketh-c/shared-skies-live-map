@@ -1,0 +1,27 @@
+{
+  "pa_v4_files": 200,
+  "pa_v4_raw_rows": 173026,
+  "tier_a_bins_per_day_mean": 3.9668025806451612,
+  "qc": {
+    "raw": 173026,
+    "after_range": 163042,
+    "after_mad": 162926,
+    "after_min_days": 162335
+  },
+  "weather_sensors": {
+    "open_meteo": 505,
+    "nasa_power": 0
+  },
+  "weather_coverage_pct": 99.99,
+  "overlap": {
+    "pairs": 139856,
+    "corr": 0.9831,
+    "mae": 0.479,
+    "bias_new_minus_old": 0.44
+  },
+  "old_only_sensors": 325,
+  "final_rows": 434986,
+  "final_sensors": 499,
+  "date_min": "2021-01-01",
+  "date_max": "2026-08-07"
+}

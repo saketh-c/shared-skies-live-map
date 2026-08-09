@@ -1,0 +1,135 @@
+{
+  "random_split": {
+    "test_size": 59979,
+    "train_size": 239915,
+    "rf": {
+      "rmse": 3.9326,
+      "r2": 0.7474,
+      "mae": 2.4844
+    },
+    "lgbm": {
+      "rmse": 3.795,
+      "r2": 0.7648,
+      "mae": 2.1504
+    },
+    "xgb": {
+      "rmse": 3.3163,
+      "r2": 0.8204,
+      "mae": 1.7391
+    },
+    "cat": {
+      "rmse": 3.2975,
+      "r2": 0.8224,
+      "mae": 1.9302
+    },
+    "ensemble": {
+      "rmse": 3.4484,
+      "r2": 0.8058,
+      "mae": 1.9571
+    }
+  },
+  "loso_cv": {
+    "rmse": 4.2828,
+    "mae": 2.6953,
+    "r2": 0.702,
+    "n_sites": 319,
+    "note": "SUPERSEDED inverse-MSE baseline (NOT the deployed blend). The deployed model uses the simplex-convex weights in loso_cv_optimized; read loso_cv_optimized.r2 for the headline LOSO number."
+  },
+  "loso_cv_optimized": {
+    "r2": 0.7076,
+    "config": "simplex_4model",
+    "weights": {
+      "rf": 0.8182,
+      "lgbm": 0.1818,
+      "xgb": 0.0,
+      "cat": 0.0
+    },
+    "method": "simplex-constrained convex combiner, GroupKFold-over-sensors cross-fit"
+  },
+  "ensemble_weight_optimization": {
+    "n_oof_rows": 299894,
+    "n_sensors": 319,
+    "models": [
+      "rf",
+      "lgbm",
+      "xgb",
+      "cat"
+    ],
+    "single_model_r2": {
+      "rf": 0.7069,
+      "lgbm": 0.6937,
+      "xgb": 0.6816,
+      "cat": 0.6941
+    },
+    "equal_weight_r2": 0.7011,
+    "inverse_mse_r2": 0.702,
+    "simplex_4model_grouped_cv_r2": 0.7076,
+    "simplex_4model_insample_r2": 0.7076,
+    "nnls_4model_grouped_cv_r2": 0.7076,
+    "simplex_4model_weights": {
+      "rf": 0.8182,
+      "lgbm": 0.1818,
+      "xgb": 0.0,
+      "cat": 0.0
+    },
+    "drop_rf": {
+      "models": [
+        "lgbm",
+        "xgb",
+        "cat"
+      ],
+      "weights": {
+        "lgbm": 0.465,
+        "xgb": 0.0876,
+        "cat": 0.4474
+      },
+      "grouped_cv_r2": 0.6974,
+      "insample_r2": 0.6978
+    },
+    "chosen_config": "simplex_4model",
+    "chosen_weights": {
+      "rf": 0.8182,
+      "lgbm": 0.1818,
+      "xgb": 0.0,
+      "cat": 0.0
+    },
+    "chosen_grouped_cv_r2": 0.7076,
+    "best_single_model": "rf",
+    "best_single_model_r2": 0.7069
+  },
+  "features": [
+    "humidity",
+    "temperature",
+    "pressure",
+    "wind_speed",
+    "precipitation",
+    "latitude",
+    "longitude",
+    "dist_to_nearest_sensor",
+    "dist_to_coast",
+    "nbr_pm25_25km",
+    "nbr_count_25km",
+    "nbr_pm25_50km",
+    "nbr_count_50km",
+    "nbr_std_50km",
+    "nbr_pm25_100km",
+    "nbr_count_100km",
+    "hms_smoke",
+    "aod",
+    "cams_pm25",
+    "month",
+    "dow",
+    "day_of_year",
+    "month_sin",
+    "month_cos",
+    "dow_sin",
+    "dow_cos",
+    "doy_sin",
+    "doy_cos",
+    "temp_x_humidity",
+    "wind_x_temp"
+  ],
+  "n_features": 30,
+  "target_transform": null,
+  "pm25_train_cap": 75.0
+}
