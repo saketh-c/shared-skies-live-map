@@ -1,0 +1,92 @@
+---------------------------------------
+Begin Slurm Prolog: Aug-09-2026 11:24:59
+Job ID:    11759866
+User ID:   ntan68
+Account:   gts-ar70
+Job name:  lm-merge
+Partition: cpu-small
+QOS:       embers
+---------------------------------------
+[features] AOD+met data found — 30 features (full v4).
+======================================================================
+LOADING AND ENGINEERING FEATURES
+======================================================================
+
+Loading p2_processed_v2.xls...
+  Raw rows: 434986, columns: 41
+Using v2 wind_speed (m/s) + precipitation already in dataset; skipping historical_weather.csv merge.
+  Wind speed: mean=5.60 m/s, non-zero=434847/434986
+  Precipitation: mean=2.57
+Engineering temporal features...
+Engineering feature interactions...
+Engineering spatial context features...
+  dist_to_nearest_sensor: median=3.6 km, max=164.3 km
+  dist_to_coast:          median=313.5 km
+  dist_to_urban:          median=39.0 km
+Sensor QC...
+  dropped 58 sensors / 13,860 rows (499 → 441 sensors, 434,986 → 421,126 rows)
+Engineering same-day MULTI-RADIUS neighbor PM features (this takes a minute)...
+  25km neighbor coverage: 83.0%   corr with pm25 = 0.753
+  50km neighbor coverage: 91.6%   corr with pm25 = 0.771
+  100km neighbor coverage: 96.5%   corr with pm25 = 0.780
+  HMS smoke merged: 151,231/421,126 rows with smoke (35.9%); tiers={0: np.int64(269895), 1: np.int64(136559), 2: np.int64(13876), 3: np.int64(796)}
+  aod merged: 86.3% coverage (rest median-filled)
+  cams_pm25 merged: 86.3% coverage (rest median-filled)
+  dust merged: 86.3% coverage (rest median-filled)
+  shortwave merged: 100.0% coverage
+  et0 merged: 100.0% coverage
+  cloud_cover merged: 100.0% coverage
+
+  Final rows: 421126
+  Features: 30
+  PM2.5 range: 0.00 – 183.20 µg/m³
+  Sensors: 441
+  TX membership: 319 in-Texas sensors (training targets), 122 out-of-Texas sensors kept as neighbors only (120,963 rows excluded from targets)
+[merge] 24 shards, 319 site metrics
+[merge] pooled LOSO: RMSE=4.2828 MAE=2.6953 R2=0.7020 (319 sites)
+[merge] saved loso_residuals.json (278 GEOIDs)
+
+======================================================================
+ENSEMBLE WEIGHT OPTIMIZATION (on LOSO out-of-fold predictions)
+======================================================================
+  Usable OOF rows: 299,894  |  sensors: 319  |  models: ['rf', 'lgbm', 'xgb', 'cat']
+
+  Single-model LOSO R²:
+    RF     R²=0.7069
+    LGBM   R²=0.6937
+    XGB    R²=0.6816
+    CAT    R²=0.6941
+
+  Equal-weight blend        R²=0.7011
+  Inverse-MSE blend (v4)    R²=0.7020  (current production)
+
+  4-model simplex (in-sample)  R²=0.7076
+  4-model simplex (grouped-CV) R²=0.7076  ← honest, no optimism
+  4-model NNLS    (grouped-CV) R²=0.7076
+  4-model simplex weights: RF:0.818  LGBM:0.182  XGB:0.000  CAT:0.000
+
+  3-model (drop RF) simplex (grouped-CV) R²=0.6974
+  3-model simplex weights: LGBM:0.465  XGB:0.088  CAT:0.447
+
+  ✓ CHOSEN: simplex_4model  grouped-CV LOSO R²=0.7076
+    weights → RF:0.818  LGBM:0.182  XGB:0.000  CAT:0.000
+[merge] re-saved bundle with LOSO-optimized weights (30.2 MB)
+============================================================
+HUGE RETRAIN COMPLETE
+  Random split R2:        0.8058
+  LOSO R2 (inv-MSE):      0.7020
+  LOSO R2 (OPTIMIZED):    0.7076  <- headline
+  LOSO RMSE:              4.2828
+  Weights:                {'rf': 0.8182, 'lgbm': 0.1818, 'xgb': 0.0, 'cat': 0.0}
+---------------------------------------
+Begin Slurm Epilog: Aug-09-2026 11:27:16
+Job ID:        11759866
+User ID:       ntan68
+Account:       gts-ar70
+Job name:      lm-merge
+Resources:     cpu=8,mem=48G,node=1
+Rsrc Used:     cput=00:18:24,vmem=0,walltime=00:02:18,mem=1157244K,energy_used=0
+Partition:     cpu-small
+QOS:           embers
+Nodes:         atl1-1-02-010-15-2
+---------------------------------------

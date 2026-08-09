@@ -1,0 +1,82 @@
+---------------------------------------
+Begin Slurm Prolog: Aug-09-2026 10:59:56
+Job ID:    11759864
+User ID:   ntan68
+Account:   gts-ar70
+Job name:  lm-train
+Partition: cpu-small
+QOS:       embers
+---------------------------------------
+[features] AOD+met data found — 30 features (full v4).
+======================================================================
+LOADING AND ENGINEERING FEATURES
+======================================================================
+
+Loading p2_processed_v2.xls...
+  Raw rows: 434986, columns: 41
+Using v2 wind_speed (m/s) + precipitation already in dataset; skipping historical_weather.csv merge.
+  Wind speed: mean=5.60 m/s, non-zero=434847/434986
+  Precipitation: mean=2.57
+Engineering temporal features...
+Engineering feature interactions...
+Engineering spatial context features...
+  dist_to_nearest_sensor: median=3.6 km, max=164.3 km
+  dist_to_coast:          median=313.5 km
+  dist_to_urban:          median=39.0 km
+Sensor QC...
+  dropped 58 sensors / 13,860 rows (499 → 441 sensors, 434,986 → 421,126 rows)
+Engineering same-day MULTI-RADIUS neighbor PM features (this takes a minute)...
+  25km neighbor coverage: 83.0%   corr with pm25 = 0.753
+  50km neighbor coverage: 91.6%   corr with pm25 = 0.771
+  100km neighbor coverage: 96.5%   corr with pm25 = 0.780
+  HMS smoke merged: 151,231/421,126 rows with smoke (35.9%); tiers={0: np.int64(269895), 1: np.int64(136559), 2: np.int64(13876), 3: np.int64(796)}
+  aod merged: 86.3% coverage (rest median-filled)
+  cams_pm25 merged: 86.3% coverage (rest median-filled)
+  dust merged: 86.3% coverage (rest median-filled)
+  shortwave merged: 100.0% coverage
+  et0 merged: 100.0% coverage
+  cloud_cover merged: 100.0% coverage
+
+  Final rows: 421126
+  Features: 30
+  PM2.5 range: 0.00 – 183.20 µg/m³
+  Sensors: 441
+  TX membership: 319 in-Texas sensors (training targets), 122 out-of-Texas sensors kept as neighbors only (120,963 rows excluded from targets)
+[cap] dropped 319 rows > 75
+Exporting sensor climatological-PM JSON for backend fallback...
+  saved 441 sensors
+[targets] 319 in-TX sensors, 299894 rows
+  Train: 239915,  Test: 59979
+
+Training Random Forest (300 trees, depth=12, leaf=12 for memory)...
+Training LightGBM (up to 2000 rounds, early stopping)...
+Training XGBoost (up to 2000 rounds, hist tree method, early stopping)...
+Training CatBoost (oblivious trees + ordered boosting)...
+
+── Test-set performance (individual models, µg/m³) ──
+  RF      RMSE=3.9326  R²=0.7474  MAE=2.4844
+  LGBM    RMSE=3.7950  R²=0.7648  MAE=2.1504
+  XGB     RMSE=3.3163  R²=0.8204  MAE=1.7391
+  CAT     RMSE=3.2975  R²=0.8224  MAE=1.9302
+  ENSEMBLE  RMSE=3.4484  R²=0.8058  MAE=1.9571
+  Weights → RF:0.204  LGBM:0.219  XGB:0.287  CAT:0.290
+Retraining on FULL dataset...
+
+Training Random Forest (300 trees, depth=12, leaf=12 for memory)...
+Training LightGBM (up to 2000 rounds, early stopping)...
+Training XGBoost (up to 2000 rounds, hist tree method, early stopping)...
+Training CatBoost (oblivious trees + ordered boosting)...
+Saved /storage/home/hcoda1/8/ntan68/scratch/livemap_retrain/repo/models/ensemble.joblib (28.1 MB)
+TRAIN-FULL COMPLETE. Random-split ensemble R2 = 0.8058
+---------------------------------------
+Begin Slurm Epilog: Aug-09-2026 11:03:29
+Job ID:        11759864
+User ID:       ntan68
+Account:       gts-ar70
+Job name:      lm-train
+Resources:     cpu=24,mem=64G,node=1
+Rsrc Used:     cput=01:25:12,vmem=0,walltime=00:03:33,mem=2038820K,energy_used=0
+Partition:     cpu-small
+QOS:           embers
+Nodes:         atl1-1-02-011-26-1
+---------------------------------------

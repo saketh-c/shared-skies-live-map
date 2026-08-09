@@ -1,0 +1,38 @@
+---------------------------------------
+Begin Slurm Prolog: Aug-09-2026 10:56:35
+Job ID:    11759862
+User ID:   ntan68
+Account:   gts-ar70
+Job name:  lm-build
+Partition: cpu-small
+QOS:       embers
+---------------------------------------
+[build] TX sensors in selection: 505
+/storage/scratch1/8/ntan68/livemap_retrain/retrain/build_dataset.py:103: RuntimeWarning: Mean of empty slice
+  d["pm25"] = np.nanmean(np.column_stack([a, b]), axis=1)
+/storage/scratch1/8/ntan68/livemap_retrain/retrain/build_dataset.py:103: RuntimeWarning: Mean of empty slice
+  d["pm25"] = np.nanmean(np.column_stack([a, b]), axis=1)
+/storage/scratch1/8/ntan68/livemap_retrain/retrain/build_dataset.py:103: RuntimeWarning: Mean of empty slice
+  d["pm25"] = np.nanmean(np.column_stack([a, b]), axis=1)
+[build] read 200 sensor files
+[build] QC: 173026 -> 163042 (range) -> 162926 (MAD z<20) -> 162335 (>=60 days)
+[build] new part: 162335 rows, 174 sensors
+[build] weather caches: 505 open_meteo, 0 nasa_power
+[build] weather coverage on new part: 100.0%
+[build] old dataset: 412507 rows, 467 sensors
+[build] overlap: 139856 pairs, corr=0.9831, mae=0.479, bias=0.440
+[build] union dedupe: 574842 -> 434986 rows
+[build] FINAL: 434986 rows, 499 sensors, 2021-01-01 .. 2026-08-07
+[build] wrote /storage/home/hcoda1/8/ntan68/scratch/livemap_retrain/repo/p2_processed_v2.xls and /storage/home/hcoda1/8/ntan68/scratch/livemap_retrain/repo/pipeline/purpleair_full_dataset.parquet
+---------------------------------------
+Begin Slurm Epilog: Aug-09-2026 10:58:02
+Job ID:        11759862
+User ID:       ntan68
+Account:       gts-ar70
+Job name:      lm-build
+Resources:     cpu=8,mem=32G,node=1
+Rsrc Used:     cput=00:11:44,vmem=0,walltime=00:01:28,mem=1358956K,energy_used=0
+Partition:     cpu-small
+QOS:           embers
+Nodes:         atl1-1-02-018-20-2
+---------------------------------------
