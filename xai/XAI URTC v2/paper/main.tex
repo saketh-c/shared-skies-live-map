@@ -1,0 +1,475 @@
+\documentclass[conference]{IEEEtran}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage[hidelinks]{hyperref}
+\usepackage{balance}
+\usepackage{stfloats}
+
+\graphicspath{{../figures/}}
+
+\newcommand{\ugm}{$\mu$g/m$^3$}
+\hyphenation{LightGBM}
+
+\setlength{\textfloatsep}{7pt plus 2pt minus 3pt}
+\setlength{\dbltextfloatsep}{7pt plus 2pt minus 3pt}
+
+\begin{document}
+
+\title{Exact Concept-Grouped SHAP Explanations of a Deployed Real-Time
+PM2.5 Ensemble for Texas Census Tracts}
+
+\author{
+\IEEEauthorblockN{Saketh Chebrolu}
+\IEEEauthorblockA{St. Mark's School of Texas\\
+Dallas, TX, USA\\
+chebrolusaketh@gmail.com}
+\and
+\IEEEauthorblockN{Nathan Tan}
+\IEEEauthorblockA{St. Mark's School of Texas\\
+Dallas, TX, USA\\
+nathantan2027@gmail.com}
+\and
+\IEEEauthorblockN{Yifeng Wang}
+\IEEEauthorblockA{School of Civil and Environmental Engineering\\
+Georgia Institute of Technology\\
+Atlanta, GA, USA\\
+ywang3627@gatech.edu}
+}
+
+\maketitle
+
+\begin{abstract}
+Low-cost sensor networks feed operational air quality maps, but the models
+behind them are rarely explained to the communities relying on them. This
+paper presents an exact explanation layer for a deployed platform that maps
+PM2.5 across 6,896 Texas census tracts, validated at 0.71 by
+leave-one-sensor-out testing. Blending per-model TreeExplainer attributions
+with deployment weights reconstructs every prediction exactly; sums over
+five concept groups make predictions readable in physical units. The
+explanations reveal a spatial nowcaster: neighbor features dominate, carry
+a smoke event nearly alone, and suppress hyper-local events no neighbor
+observes, motivating targeted sensor placement and policy guardrails.
+\end{abstract}
+
+\begin{IEEEkeywords}
+explainable artificial intelligence, SHAP, air quality, PM2.5, low-cost
+sensors, ensemble learning, environmental monitoring
+\end{IEEEkeywords}
+
+\section{Introduction}
+Low-cost optical sensors have changed who gets to see air pollution.
+Networks such as PurpleAir now report fine particulate matter (PM2.5) at
+neighborhood scale and minute cadence, and corrected versions of their data
+feed public tools such as the AirNow Fire and Smoke Map
+\cite{barkjohn2021}. The
+placement of these sensors is itself uneven across income groups
+\cite{desouza2021}, so the models that interpolate between them are, for
+many communities, the only air quality information available.
+
+Such tools are judged almost entirely on accuracy. A fused ensemble over
+sensor, satellite, meteorological, and demographic inputs can validate
+well yet behave in ways its operators would not expect, and when its
+outputs color a public map or steer monitor placement, unexamined behavior
+is a liability. Shapley additive explanation
+(SHAP) methods \cite{lundberg2017, lundberg2020} have made attribution
+practical for tree models, and environmental applications such as
+flood-susceptibility mapping have begun to adopt them \cite{choubin2025}.
+Yet the
+explanations almost always describe research models; deployed systems,
+the ones people actually consult, remain largely unexplained.
+
+This paper explains one such system exactly. It is a live web platform that
+predicts PM2.5 for every census tract in Texas from PurpleAir sensors and
+public data streams, refreshing continuously. We contribute:
+(1) an exact explanation layer for the deployed convex tree ensemble, which
+blends per-model TreeExplainer attributions with the deployment weights to
+reconstruct every pre-clipping output to machine precision, then
+partitions the 30 features into five concept groups so that each
+prediction becomes a short physical story; (2) a characterization of what the deployed model actually
+learned, which is dominated to a degree accuracy metrics never reveal by
+same-day readings from neighboring sensors; and (3) an explanation-driven
+failure analysis showing that the same neighbor features that produce the
+model's accuracy actively suppress its predictions during hyper-local
+pollution events, a structural blind spot that argues for targeted sensor
+placement rather than model tuning.
+
+\section{The Deployed System}
+\label{sec:system}
+\subsection{Platform}
+The platform serves a public, bilingual web map of model-estimated 24-hour
+PM2.5 for all 6,896 Texas census tracts, publicly served since April 2026.
+The backend pulls live PurpleAir readings, cached for 15 minutes, recomputes the full feature set, runs the
+ensemble for every tract, and caches predictions for 30 minutes. A served
+value estimates a tract's daily-mean-equivalent PM2.5 given current
+conditions; the training feature pipeline is reproduced at serving time, so
+sub-daily dynamics enter only through the inputs. The tract color scale
+breaks at 9~\ugm{}, adopting the level of the 2024 annual PM2.5 standard
+\cite{epa2024naaqs} as a fixed reference for the 24-hour map. A second view
+proposes future sensor placements, which Section~\ref{sec:discussion}
+connects back to the explanations.
+
+\subsection{Training data and features}
+The training target is the daily mean of the raw PurpleAir ATM-channel
+PM2.5 concentration. Readings are restricted to 0 to 200~\ugm{} and
+cleaned per sensor with a robust z-score rule on median absolute
+deviation; sensors with fewer than 60 valid days, near-constant output, or
+medians indicating indoor placement are dropped. The result is 285,798 daily
+readings from 310 outdoor sensors inside Texas between January 2021 and May
+2026. Sensors in border states contribute same-day neighbor context but are
+never training targets. The raw ATM channel is kept, rather than corrected
+\cite{barkjohn2021}, so that training targets and live inference share
+semantics; Section~\ref{sec:discussion} revisits this choice. Days with
+means above 75~\ugm{} are excluded
+from training, a choice whose consequences the explanations make visible.
+
+Each row carries 30 features (Table~\ref{tab:groups}): daily weather from
+Open-Meteo \cite{zippenfenig}; same-day neighbor statistics (mean and
+count of other sensors within 25, 50, and 100~km, plus dispersion at
+50~km, computed with a haversine BallTree); an ordinal smoke tier from
+NOAA Hazard Mapping System (HMS) analyst polygons \cite{brey2018}; aerosol optical depth and surface PM2.5
+from the Copernicus Atmosphere Monitoring Service (CAMS) \cite{peuch2022};
+location and distance covariates; and calendar encodings.
+
+No EPA EJScreen variable is a model input. An earlier deployment carried
+eight (four demographic and four source-proximity) for 12.1\% of
+blended attribution \cite{ejscreen}; all eight were removed before this study,
+because a model used to characterize exposure disparities must not receive
+those groups as predictors or any disparity it reproduces is partly an
+artifact of its own inputs. Cost was measured on frozen sensor-grouped folds
+with the blend held fixed: dropping the four demographic features costs
+$\Delta R^2 = 0.0022$ (95\% CI $[-0.0031,+0.0083]$), dropping all eight
+$-0.0005$ ($[-0.0070,+0.0066]$): negative, i.e. the smaller model scored
+marginally higher. Both intervals contain zero.
+
+\subsection{Ensemble and validation}
+Four regressors are trained: a random forest \cite{breiman2001}, LightGBM
+\cite{ke2017}, XGBoost \cite{chen2016}, and CatBoost
+\cite{prokhorenkova2018}. Validation is leave-one-sensor-out (LOSO): each of
+the 310 sensors is held out in turn, models are refit on the rest, and,
+critically, the neighbor features of every training row are recomputed with
+the held-out sensor removed from the pool, closing a same-day leakage path
+that random splits cannot detect. Spatially naive cross-validation is known
+to overstate the skill of models like this one \cite{meyer2022}; under
+random 80/20 splitting this ensemble scores $R^2=0.80$, which LOSO deflates
+to 0.71. LightGBM and XGBoost use Huber and pseudo-Huber objectives
+respectively: PM2.5 is heavy-tailed, and a squared-error objective lets a
+handful of smoke and dust days dominate the fit.
+
+Blend weights are a simplex-constrained convex combination fit on the LOSO
+out-of-fold predictions and selected by a grouped cross-fit over sensors.
+The deployed weights are 0.7935 (random forest), 0.1363 (CatBoost), 0.0702
+(LightGBM), and exactly zero for XGBoost, giving LOSO $R^2=0.7134$ against
+0.7084 for an equal-weight blend and an inverse-MSE baseline at 0.7090.
+The deployed configuration scores RMSE 4.21~\ugm{} and MAE 2.61~\ugm{}. The random forest alone reaches
+0.7138: at this resolution the top candidates are tied, and the deployment
+is a nearly single-model instance of the convex blends the method covers.
+We explain the blend because the blend is what ships. Live inference
+fills unavailable features with training medians.
+
+\begin{table}[!t]
+\caption{The five concept groups partitioning the 30 model features
+(group sizes in parentheses).}
+\label{tab:groups}
+\centering
+\footnotesize
+\begin{tabular}{>{\raggedright\arraybackslash}p{0.30\columnwidth}>{\raggedright\arraybackslash}p{0.58\columnwidth}}
+\toprule
+Group & Features \\
+\midrule
+Regional PM signal (9) & neighbor PM2.5 mean and count at 25, 50, 100 km;
+dispersion at 50 km; CAMS AOD; CAMS PM2.5 \\
+Wildfire smoke (1) & HMS smoke tier (none/light/medium/heavy) \\
+Meteorology (7) & temperature, humidity, pressure, wind speed,
+precipitation, two interaction terms \\
+Geography (4) & latitude, longitude, distance to coast, distance to
+nearest sensor \\
+Season and calendar (9) & month, weekday, day of year, and their
+sine/cosine encodings \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Exact Ensemble Explanations}
+\subsection{Blending per-model attributions}
+The deployed prediction for features $x$ is
+$f(x)=\max\bigl(0,\sum_m w_m f_m(x)\bigr)$ over the three models with
+$w_m>0$. TreeExplainer \cite{lundberg2020} decomposes each tree model
+exactly as $f_m(x)=b_m+\sum_j \phi^m_j(x)$. Attributions are additive, so
+\begin{equation}
+\sum_m w_m f_m(x) = b + \sum_j \phi_j(x),
+\label{eq:blend}
+\end{equation}
+where $b=\sum_m w_m b_m$ and $\phi_j(x)=\sum_m w_m \phi^m_j(x)$. The
+result is an additive decomposition of the pre-clipping ensemble output,
+computed without sampling or surrogate models. The algebra is elementary, a direct
+consequence of the additivity of SHAP attributions \cite{lundberg2017}; the
+point is applying it to the blend a public platform actually serves rather
+than to a surrogate or a single member model. Exact here means local
+accuracy,
+faithful reconstruction of this model's output, not axiomatic Shapley
+values under an interventional distribution: TreeExplainer (SHAP 0.50.0)
+runs in tree-path-dependent mode, which conditions on the training
+distribution through tree cover counts, and its credit assignment among
+correlated features differs from interventional variants. The audit of
+Eq.~\eqref{eq:blend} runs wherever rows are explained; over the 6,000-row
+global sample the maximum absolute reconstruction error is below
+$7\times10^{-6}$~\ugm{} (mean below $5\times10^{-7}$); the residual
+reflects float32 caching, and direct float64 explanation of individual
+rows reconstructs to $5\times10^{-14}$~\ugm{}. The serving layer applies only a
+final clip at zero, which never binds on the sampled predictions (minimum
+raw output $+0.4$~\ugm{}).
+
+\subsection{Concept groups}
+Individual attributions for 30 features are exact but not legible to a
+public audience. We therefore partition the features into the five concept
+groups of Table~\ref{tab:groups} and report group sums
+$\Phi_G(x)=\sum_{j\in G}\phi_j(x)$, the summation form of grouped Shapley
+explanation \cite{jullum2021}; the contribution here is the domain
+ontology, not the operation. Because the partition is exhaustive and
+disjoint, $b+\sum_G \Phi_G(x)$ still reconstructs the prediction exactly;
+runtime validation asserts the partition against the deployed feature list.
+Note that a group's global importance, the mean absolute summed
+contribution, falls below the sum of member importances when members
+cancel.
+
+\subsection{Analysis protocol}
+Global structure is computed over a uniform 6,000-row sample of the training
+frame (seed 42). Feature response is analyzed with dependence scatters,
+12-quantile binned medians, and Spearman rank correlations between feature
+value and attribution, with bootstrap intervals clustered by sensor. Because the sample contains only five heavy-smoke
+rows, tier-level smoke statistics are recomputed exactly over all 431
+heavy-tier rows in the corpus and a 2,500-row sample of the medium tier,
+with 2,000-resample percentile-bootstrap 95\% confidence intervals
+clustered by day, since statewide plumes correlate all same-day rows. Two
+full days are explained
+sensor-by-sensor: the strongest smoke day (May 27, 2024) and the cleanest
+day (April 3, 2024) among days with at least 150 reporting sensors. Local
+cases follow fixed rules: the highest-reading smoke-day row predicted
+within 35\% of its observation, and the worst underprediction above
+40~\ugm{}. All pipeline outputs reproduce byte-identically, and every
+analysis number in this paper is regenerated by verification scripts
+released with the code.
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=\columnwidth]{fig2_global}
+\caption{Global importance over the 6,000-row sample. (a) Mean absolute
+concept-group contribution; the regional PM signal exceeds every other
+group by an order of magnitude. (b) The top individual features are the
+three neighbor means, neighbor dispersion, and CAMS surface PM2.5.}
+\label{fig:global}
+\end{figure}
+
+\section{Results}
+\subsection{The model is a spatial nowcaster}
+Fig.~\ref{fig:global} shows global importance. The regional PM signal group
+averages 4.82~\ugm{} of absolute contribution per prediction (95\% CI
+$[4.71,4.93]$); the next group, geography, averages 0.47~\ugm{}
+$[0.41,0.53]$, an order of magnitude smaller, followed by meteorology
+at 0.25~\ugm{}, season and calendar at 0.091~\ugm{}, and the dedicated
+smoke tier last at 0.090~\ugm{}. The three neighbor-mean features are
+individually the three most important inputs (1.75, 1.43, and 1.30~\ugm{}
+at 100, 25, and 50~km). Whatever else the ensemble encodes, its predictions
+are first and foremost a spatial average of what nearby sensors already
+report.
+
+The top of that ordering is not in doubt: the regional group's interval is
+disjoint from every other, and grouped permutation importance reproduces
+the ranking exactly (rank correlation 1.0). The full five-way ranking
+survives 65.8\% of 1,000 sensor-clustered resamples, the instability
+confined to the bottom pair: season (0.091) and smoke (0.090) differ by
+0.001~\ugm{} with near-coincident intervals, so their order flips at
+random.
+
+\begin{figure*}[b]
+\centering
+\includegraphics[width=\textwidth]{fig3_dependence}
+\caption{Feature dependence on the 6,000-row sample (gray points; blue line
+is the 12-quantile binned median). (a) Contribution of the 50 km neighbor
+mean is near-linear then flattens above 40~\ugm{}. (b) HMS smoke tier:
+red markers are exact means over all 431 heavy-tier rows and 2,500
+medium-tier rows with day-clustered bootstrap 95\% intervals; the heavy
+tier shows no increase over medium.
+(c) Humidity contributes weakly but monotonically, with a threshold near 60\% RH. (d) Distance to
+coast trends negative inland, encoding the Gulf moisture gradient and
+sensor-network density rather than a causal effect of position.}
+\label{fig:dependence}
+\end{figure*}
+
+\subsection{Feature response and semantics}
+Dependence analysis (Fig.~\ref{fig:dependence}) sharpens this picture in
+three ways.
+
+\subsubsection{Near-linear regional response} The 50~km neighbor mean maps
+onto its attribution almost monotonically (Spearman $\rho=0.993$), with
+slope 0.25~\ugm{} per 1~\ugm{} of neighbor mean below 30~\ugm{}, then
+flattens: over corpus rows, the median contribution is
+$+5.78$~\ugm{} for neighbor means between 30 and 40~\ugm{} (2,000 of 4,060
+rows sampled) and $+7.39$~\ugm{}
+(CI $[7.37, 7.43]$, all 860 qualifying rows) above 40~\ugm{}. The
+flattening is consistent with the exclusion of training days above
+75~\ugm{}: the model has little headroom to extrapolate events it never
+saw.
+
+\subsubsection{The smoke tier is nearly redundant} Mean
+attribution of the HMS tier, in \ugm{}, is $-0.074$ (none) and $+0.101$
+(light) on the sample, $+0.227$ over 2,500 recomputed medium-tier rows
+(day-clustered CI $[0.218, 0.238]$), and $+0.209$ over all 431 heavy-tier
+rows (CI $[0.191, 0.243]$; the heavy rows fall on only 31 days). Heavy-tier
+attribution shows no increase over medium (difference CI
+$[-0.018, 0.041]$~\ugm{}), and the whole tier range is negligible against
+a LOSO RMSE near 4.2~\ugm{}. Only 431 of
+285,798 training rows (0.15\%) carry the heavy tier, and on those rows mean
+observed PM2.5 is lower than on medium-tier rows (11.6 versus
+16.6~\ugm{}), a reminder that an analyst-drawn plume overhead does not
+guarantee surface-level smoke. The model nearly ignores a feature whose
+evidential value its training data did not support.
+
+\subsubsection{The disparity survives the exclusion} Correlating tract
+predictions (6,896 tracts, 365 days) afterwards against EJScreen percentiles
+the model never sees, low income rises monotonically across quintiles from
+8.58 to 9.29~\ugm{} ($\rho=0.16$); percent people of color is non-monotone,
+dipping to 8.67 mid-range before reaching 9.38. The disparity is real but
+uneven, and, with no demographic input, inferred from atmospheric evidence
+alone.
+
+\subsubsection{Interactions stay inside the regional group} SHAP
+interaction values (a 400-row subsample, seed 42; random forest and
+CatBoost blended with renormalized weights covering 93\% of the deployed
+ensemble, LightGBM omitted as its interaction runtime exceeded budget)
+rank the six leading pairs entirely within the regional signal group: the
+three neighbor means interact at 0.48, 0.41, and 0.30~\ugm{} mean absolute
+strength, followed by three neighbor-dispersion pairs. The strongest
+cross-group pair, humidity with the 100~km neighbor mean, is weaker at
+0.06~\ugm{}. Regional dominance is not an artifact of additive
+attribution. Magnitudes are taken \emph{after} the signed blend, so
+model disagreement cannot inflate a pair.
+
+
+\begin{figure}[!b]
+\centering
+\includegraphics[width=\columnwidth]{fig4_event_maps}
+\caption{Every reporting sensor explained on the strongest smoke day
+(top, 156 sensors, 98.7\% under a plume) and the cleanest day (bottom, 154
+sensors): regional-signal contribution (left) and predicted PM2.5 (right).
+The event is carried almost entirely by the regional signal
+($+24.3$~\ugm{} statewide mean) while the smoke tier peaks at
+$+0.64$~\ugm{} anywhere in the state.}
+\label{fig:maps}
+\end{figure}
+
+\subsection{Two days, one mechanism}
+On May 27, 2024
+(Fig.~\ref{fig:maps}), with 98.7\% of sensors under an analyst-drawn plume
+and a statewide mean reading of 37.0~\ugm{}, the model predicted a mean of
+36.0~\ugm{}, and the regional signal group contributed $+24.3$~\ugm{} of
+that on average. The smoke tier's mean contribution that day was
+$+0.4$~\ugm{}. On April 3, 2024 (statewide mean 1.03~\ugm{}), the
+regional group pulled predictions down by 7.6~\ugm{} on average from the
+9.65~\ugm{} baseline. Smoke information reaches the model through the
+neighbor network, not the smoke feature: both days are settings of one
+nowcasting mechanism.
+
+\subsection{Explaining a success and a failure}
+Fig.~\ref{fig:cases} decomposes two individual predictions. On the smoke
+day, sensor 217461 read 71.1~\ugm{} and the model predicted 49.8~\ugm{},
+with $+34.6$~\ugm{} from the regional signal and $+0.64$~\ugm{} from the
+smoke tier; even this detection underpredicts, consistent with the
+capped training range and the saturating neighbor response. On November 19,
+2024, sensor 242357 read 75.0~\ugm{}, at the retention boundary itself,
+while every neighbor mean sat below 1.8~\ugm{}; the model predicted
+5.1~\ugm{}. The explanation shows why: the regional group contributed
+$-5.9$~\ugm{}, with the 100~km neighbor mean alone at $-2.2$~\ugm{}. Nor
+is the case unique: 46 corpus rows read at least 40~\ugm{} with every
+neighbor mean below 5~\ugm{}; the regional group is negative on all 46
+(mean $-4.9$~\ugm{}), and the highest prediction among them is 8.5~\ugm{}
+against a mean observation of 54.1~\ugm{}. Rows above 75~\ugm{} were
+excluded (241 pre-cap), so these figures lower-bound the blind spot. The
+features that make the model accurate on regional events actively vote
+against hyper-local ones; no reweighting of the same features can fix what
+the network cannot see.
+
+\begin{figure}[!b]
+\centering
+\includegraphics[width=\columnwidth]{fig5_cases}
+\caption{Exact concept-group decomposition of two predictions. (a) A
+detected smoke event is carried by the regional signal; the smoke tier
+adds $+0.6$~\ugm{}. (b) The worst miss in the corpus: neighbors saw
+nothing, and the regional signal suppresses the prediction below the
+baseline.}
+\label{fig:cases}
+\end{figure}
+
+
+\section{Discussion}
+\label{sec:discussion}
+
+\subsection{For model builders} The smoke tier could be replaced rather than
+retuned: plume density, smoke age, or lagged fire radiative power. The
+saturating neighbor response ties directly to the 75~\ugm{} training cap, so
+raising it is a measurable next experiment.
+
+\subsection{For network operators} The miss case turns an error metric
+into a map, with one caution: sign alone cannot separate clean
+surroundings from unsensed ones (the clean day's statewide mean regional
+contribution, $-7.6$~\ugm{}, is as negative as El Paso's annual
+$-6.8$~\ugm{}). Sparsity
+separates them: the El Paso sensor averages 0.8 same-day neighbors within
+50~km against a statewide 27, and its regional contribution averages
+$-6.8$~\ugm{} against East Texas's $+1.34$~\ugm{} (up to $+9.4$). Persistently
+negative regional means in sparse
+neighborhoods mark where predictions rest on remote evidence (distance to
+the nearest sensor reaches 164~km), and those are the places where the
+platform's placement optimizer should spend new sensors; the explanation
+layer supplies that prioritization for free.
+
+\subsection{For communicating attributions} SHAP explains the model, not
+the atmosphere. Distance to coast and longitude are the clearest example:
+both carry real signal, but they encode where the sensor network and the
+Gulf moisture gradient sit, not a causal effect of coordinates on
+particulate matter. Public-facing deployment of these explanations needs
+the concept-group framing and an explicit correlational disclaimer as
+defaults, not footnotes. Carrying no demographic input
+(Section~\ref{sec:system}) removes the sharpest misreading risk, but does
+not make the remaining attributions causal.
+
+\subsection{Limitations} The target is the uncorrected ATM channel, so
+absolute levels are not comparable to regulatory monitors without a
+correction such as that of Barkjohn et al. \cite{barkjohn2021}; the
+explanations inherit whatever bias that channel carries. Days above
+75~\ugm{} are absent from training, so extreme-event behavior describes a
+model that never saw the worst days, and the failure analysis lower-bounds
+the blind spot. LOSO $R^2$ characterizes held-out sensor locations;
+accuracy at unsensed tracts is unquantified, and the miss case suggests it
+degrades exactly there. Every attribution is conditioned on a network whose
+placement is itself demographically uneven \cite{desouza2021}: the
+regional-signal group is powerful precisely where sensors are dense, so
+these explanations describe an unevenly observed state, not Texas
+uniformly.
+Tree-path-dependent attribution spreads credit among correlated
+features, so within-group rankings are less certain than group totals. Explanation statistics describe the training frame, not the
+serving distribution. The findings describe one model over one state and
+five years; the method applies unchanged to any convex blend of tree
+models.
+
+\balance
+\section{Conclusion}
+We converted a deployed, accuracy-validated PM2.5 mapping system into one
+whose every prediction can be read: an exact blend of per-model
+TreeExplainer attributions, folded into five concept groups, reconstructs
+each output to machine precision. The reading is unflattering in
+places. The model is a spatial nowcaster that nearly ignores its smoke
+tier, leans on geography as a proxy for network density, and structurally
+cannot see events its sensor network does not cover. None of this is
+visible in $R^2$, and all of it matters for how the tool should be used,
+improved, and communicated. Explaining 6,000 predictions takes under six minutes
+on a desktop CPU and one prediction a fraction of a second, so attaching
+exact, plainly narrated explanations to the live platform is the immediate
+next step.
+
+\bibliographystyle{IEEEtran}
+\bibliography{../references}
+
+\end{document}
