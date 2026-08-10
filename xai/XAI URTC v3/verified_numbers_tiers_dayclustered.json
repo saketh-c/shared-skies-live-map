@@ -1,0 +1,52 @@
+{
+  "n_t3": 431,
+  "n_t2": 2500,
+  "t3_days": 31,
+  "t2_days": 227,
+  "t3_sensors": 123,
+  "t2_mean": 0.2273,
+  "t3_mean": 0.2085,
+  "diff_point": 0.0187,
+  "iid_diff_ci95_repro": [
+    0.0112,
+    0.0258
+  ],
+  "t2_iid_mean_ci95": [
+    0.2243,
+    0.2302
+  ],
+  "t3_iid_mean_ci95": [
+    0.2021,
+    0.2158
+  ],
+  "diff_ci95_day_clustered": [
+    -0.0177,
+    0.0406
+  ],
+  "t2_mean_ci95_day_clustered": [
+    0.2182,
+    0.2382
+  ],
+  "t3_mean_ci95_day_clustered": [
+    0.1905,
+    0.2432
+  ],
+  "diff_excludes_zero_day": false,
+  "diff_ci95_sensor_clustered": [
+    0.0074,
+    0.0303
+  ],
+  "t2_mean_ci95_sensor_clustered": [
+    0.2202,
+    0.2356
+  ],
+  "t3_mean_ci95_sensor_clustered": [
+    0.201,
+    0.2169
+  ],
+  "diff_excludes_zero_sensor": true,
+  "t3_day_mean_min": 0.1199,
+  "t3_day_mean_max": 0.4726,
+  "t3_day_mean_std": 0.0767,
+  "t3_within_day_std": 0.0312
+}

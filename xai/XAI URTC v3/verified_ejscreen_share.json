@@ -1,0 +1,8 @@
+{
+ "source": "xai/outputs/archive/feature_importance_38feature_preremoval.csv",
+ "n_features": 38,
+ "total_mean_abs_shap": 7.128,
+ "demographic_share_pct": 6.61,
+ "proximity_share_pct": 5.51,
+ "all_ejscreen_share_pct": 12.12
+}
