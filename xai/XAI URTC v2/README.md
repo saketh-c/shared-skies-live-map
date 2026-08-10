@@ -42,6 +42,10 @@ supersedes `xai/XAI UTRC` (v1, kept for history) and is the copy to submit.
 ## Contents
 
 - `paper/main.tex`, `paper/main.pdf`: the manuscript (IEEEtran conference).
+- `paper/main.docx`: a Word conversion of the compiled PDF (made with
+  Microsoft Word's PDF import) for co-author review and commenting. It is
+  a convenience copy: the LaTeX-built `main.pdf` is the submission
+  document, and line-break hyphenation may be imperfect in the docx.
 - `references.bib`: 16 entries, all cited in the manuscript; every field
   web-verified against publisher pages, Crossref, DBLP, or arXiv (see
   `citation_verification_notes.md`, including the 2026-08-09 full
