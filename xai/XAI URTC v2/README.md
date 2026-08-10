@@ -42,10 +42,18 @@ supersedes `xai/XAI UTRC` (v1, kept for history) and is the copy to submit.
 ## Contents
 
 - `paper/main.tex`, `paper/main.pdf`: the manuscript (IEEEtran conference).
-- `paper/main.docx`: a Word conversion of the compiled PDF (made with
-  Microsoft Word's PDF import) for co-author review and commenting. It is
-  a convenience copy: the LaTeX-built `main.pdf` is the submission
-  document, and line-break hyphenation may be imperfect in the docx.
+- `paper/main2.docx` (and `paper/make_main2_docx.py`, its generator): the
+  manuscript rebuilt natively in the IEEE conference Word template's
+  structure and typography (Times New Roman throughout, 24pt title, 11pt
+  author names, 9pt bold abstract, 10pt two-column body, 8pt captions and
+  references, small-caps headings). Because it is plain flowed content
+  with real column sections and no text frames, it imports cleanly into
+  Google Docs. Use this copy for co-author review and commenting.
+- `paper/main.docx`: an earlier Word conversion of the compiled PDF via
+  Microsoft Word's PDF import. It is faithful in Word but relies on
+  layout frames that break in Google Docs; prefer `main2.docx`.
+- Either docx is a convenience copy: the LaTeX-built `main.pdf` is the
+  submission document.
 - `references.bib`: 16 entries, all cited in the manuscript; every field
   web-verified against publisher pages, Crossref, DBLP, or arXiv (see
   `citation_verification_notes.md`, including the 2026-08-09 full
