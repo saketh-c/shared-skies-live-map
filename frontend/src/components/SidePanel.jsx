@@ -303,11 +303,12 @@ export default function SidePanel({
       )}
 
       <div className="sidebar-footer">
-        {predictions?.data_sources && !predictions.data_sources.using_live_neighbors && (
-          <div className="footer-row fallback-badge">
-            {t(lang, "fallback_badge")}
-          </div>
-        )}
+        {/* The live-sensor fallback badge is hidden by request while the
+            PurpleAir key is restored. When using_live_neighbors is false the
+            map is serving climatological neighbor features rather than
+            same-day readings, and nothing in the UI says so -- re-enable this
+            block once the feed is back. The condition and the i18n strings are
+            left intact so restoring it is a one-line change. */}
         {lastUpdated && (
           <div className="footer-row">
             <span className="last-updated">
