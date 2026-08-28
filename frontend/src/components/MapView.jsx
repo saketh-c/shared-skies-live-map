@@ -5,19 +5,19 @@ import { BREAKPOINTS, pm25ToEpaAqi } from "../utils/aqi.js";
 import { LanguageContext } from '../App';
 import { t, translateCategory } from '../i18n';
 
-// CARTO now watermarks its basemap CDN ("API KEY REQUIRED") for keyless use.
-// A free CARTO account gives an API key; set it as VITE_CARTO_API_KEY in the
-// Vercel project (a basemap key is domain-restricted and safe to ship in the
-// bundle). With the key the tiles are clean; without it they render watermarked
-// but the map still works. Basemap key only -- never put a secret token here.
-const CARTO_KEY = import.meta.env.VITE_CARTO_API_KEY || "";
-const _cartoKeyParam = CARTO_KEY ? `?api_key=${CARTO_KEY}` : "";
-const CARTO_LIGHT_NOLABELS =
-  `https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png${_cartoKeyParam}`;
-const CARTO_LIGHT_LABELS =
-  `https://{s}.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}{r}.png${_cartoKeyParam}`;
+// Basemap: Esri Dark Gray Canvas. CARTO's dark basemaps moved to a 14-day
+// trial and watermark keyless requests ("API KEY REQUIRED"), so this replaces
+// them with Esri's dark canvas, which serves keyless and free with no trial.
+// Two layers, matching the previous base+labels split: a label-free dark base
+// and a transparent reference (labels) overlay. Note the tile path is
+// {z}/{y}/{x} -- y before x -- which differs from CARTO's {z}/{x}/{y}; there is
+// no {s} subdomain and no {r} retina variant.
+const BASEMAP_NOLABELS =
+  "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}";
+const BASEMAP_LABELS =
+  "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}";
 const ATTRIBUTION =
-  '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>';
+  'Tiles &copy; <a href="https://www.esri.com/">Esri</a> &mdash; Esri, HERE, Garmin, &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, and the GIS user community';
 
 const TEXAS_CENTER = [31.5, -99.0];
 const TEXAS_ZOOM = 6;
@@ -486,7 +486,7 @@ const MapViewContent = forwardRef(
           maxBoundsViscosity={0.6}
         >
           <TileLayer
-            url={CARTO_LIGHT_NOLABELS}
+            url={BASEMAP_NOLABELS}
             attribution={ATTRIBUTION}
             zIndex={1}
             keepBuffer={8}
@@ -495,7 +495,7 @@ const MapViewContent = forwardRef(
             updateInterval={150}
             crossOrigin="anonymous"
             noWrap={true}
-            maxNativeZoom={19}
+            maxNativeZoom={16}
             eventHandlers={{ tileloadstart: onTileLoadStart, tileload: onTileLoadEnd, tileerror: onTileLoadEnd }}
           />
 
@@ -608,7 +608,7 @@ const MapViewContent = forwardRef(
           </Pane>
 
           <TileLayer
-            url={CARTO_LIGHT_LABELS}
+            url={BASEMAP_LABELS}
             zIndex={650}
             pane="shadowPane"
             keepBuffer={8}
@@ -617,7 +617,7 @@ const MapViewContent = forwardRef(
             updateInterval={150}
             crossOrigin="anonymous"
             noWrap={true}
-            maxNativeZoom={19}
+            maxNativeZoom={16}
           />
 
           <button
