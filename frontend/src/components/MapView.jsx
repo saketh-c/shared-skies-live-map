@@ -5,10 +5,17 @@ import { BREAKPOINTS, pm25ToEpaAqi } from "../utils/aqi.js";
 import { LanguageContext } from '../App';
 import { t, translateCategory } from '../i18n';
 
+// CARTO now watermarks its basemap CDN ("API KEY REQUIRED") for keyless use.
+// A free CARTO account gives an API key; set it as VITE_CARTO_API_KEY in the
+// Vercel project (a basemap key is domain-restricted and safe to ship in the
+// bundle). With the key the tiles are clean; without it they render watermarked
+// but the map still works. Basemap key only -- never put a secret token here.
+const CARTO_KEY = import.meta.env.VITE_CARTO_API_KEY || "";
+const _cartoKeyParam = CARTO_KEY ? `?api_key=${CARTO_KEY}` : "";
 const CARTO_LIGHT_NOLABELS =
-  "https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png";
+  `https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png${_cartoKeyParam}`;
 const CARTO_LIGHT_LABELS =
-  "https://{s}.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}{r}.png";
+  `https://{s}.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}{r}.png${_cartoKeyParam}`;
 const ATTRIBUTION =
   '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>';
 

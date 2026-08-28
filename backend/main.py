@@ -330,6 +330,24 @@ async def lifespan(app: FastAPI):
         except TypeError:
             # Older joblib versions may not accept mmap_mode; fall back to normal load
             state['bundle'] = await asyncio.to_thread(joblib.load, MODEL_PATH)
+        # Free the RAM of any model that carries zero blend weight. XGBoost sits
+        # at weight 0.0 in the deployed v6 simplex blend, so its deserialized
+        # booster is dead weight; _active_models already excludes it from every
+        # prediction, so dropping the object here changes no output. On the
+        # 512 MB free tier this reclaims the headroom that turns a visitor-time
+        # spike into an OOM restart. The xgboost library stays imported (it was
+        # needed to unpickle), which is fine -- the resident cost is the booster.
+        try:
+            b = state["bundle"]
+            weights = b.get("weights", {})
+            dropped = [n for n in list(b.get("models", {}))
+                       if abs(weights.get(n, 0.0)) <= 1e-9]
+            for n in dropped:
+                b["models"].pop(n, None)
+            if dropped:
+                print(f"Dropped zero-weight models from RAM: {dropped}")
+        except Exception as e:
+            print(f"Zero-weight model prune skipped: {e}")
         print(f"Model loaded. Features: {state['bundle']['feature_names']}")
     else:
         state["bundle"] = None
