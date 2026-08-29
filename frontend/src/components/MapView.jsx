@@ -5,22 +5,20 @@ import { BREAKPOINTS, pm25ToEpaAqi } from "../utils/aqi.js";
 import { LanguageContext } from '../App';
 import { t, translateCategory } from '../i18n';
 
-// Basemap: CARTO Dark Matter (the original near-black look) served from CARTO's
-// LEGACY fastly endpoint. The newer basemaps.cartocdn.com host began watermarking
-// this site's tiles ("API KEY REQUIRED") once traffic crossed the anonymous
-// free quota, and Esri's dark-gray canvas that briefly replaced it was a lighter
-// grey served from a single host with no subdomain sharding, which loaded slowly.
-// The fastly host is CARTO's pre-key infrastructure: same tiles, four subdomains
-// (a/b/c/d) so the browser fetches tiles four-wide instead of queueing them --
-// that parallelism is the fix for the lag. Two layers keep the base below the
-// choropleth and the place labels above it.
-const BASEMAP_SUBDOMAINS = ["a", "b", "c", "d"];
-const BASEMAP_NOLABELS =
-  "https://cartodb-basemaps-{s}.global.ssl.fastly.net/dark_nolabels/{z}/{x}/{y}{r}.png";
-const BASEMAP_LABELS =
-  "https://cartodb-basemaps-{s}.global.ssl.fastly.net/dark_only_labels/{z}/{x}/{y}{r}.png";
+// Basemap: Stadia Maps "Alidade Smooth Dark" -- the near-black successor to
+// CARTO Dark Matter. CARTO began watermarking this site's tiles once traffic
+// crossed its anonymous free quota, on every CARTO host, so no keyless CARTO
+// endpoint works for this domain any more. Stadia's free tier covers this
+// traffic with no watermark, and it authenticates by DOMAIN (the site's origins
+// are registered in the Stadia dashboard), so no key or token appears in this
+// bundle. Served over HTTP/2, so one host multiplexes tiles without the
+// head-of-line queueing that made the single-host Esri fallback lag.
+// This is a single combined layer (base + labels); Stadia does not split
+// alidade into label-free and labels-only raster variants the way CARTO did.
+const BASEMAP_URL =
+  "https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png";
 const ATTRIBUTION =
-  '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>';
+  '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a> &copy; <a href="https://openmaptiles.org/">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
 
 const TEXAS_CENTER = [31.5, -99.0];
 const TEXAS_ZOOM = 6;
@@ -489,8 +487,7 @@ const MapViewContent = forwardRef(
           maxBoundsViscosity={0.6}
         >
           <TileLayer
-            url={BASEMAP_NOLABELS}
-            subdomains={BASEMAP_SUBDOMAINS}
+            url={BASEMAP_URL}
             attribution={ATTRIBUTION}
             zIndex={1}
             keepBuffer={8}
@@ -611,19 +608,6 @@ const MapViewContent = forwardRef(
             })}
           </Pane>
 
-          <TileLayer
-            url={BASEMAP_LABELS}
-            subdomains={BASEMAP_SUBDOMAINS}
-            zIndex={650}
-            pane="shadowPane"
-            keepBuffer={8}
-            updateWhenZooming={true}
-            updateWhenIdle={false}
-            updateInterval={150}
-            crossOrigin="anonymous"
-            noWrap={true}
-            maxNativeZoom={20}
-          />
 
           <button
             type="button"
