@@ -230,7 +230,7 @@ const MapViewContent = forwardRef(
         try {
           layer.setStyle({
             fillColor: pred ? pred.color : "#2d3436",
-            fillOpacity: isSelected ? 0.95 : 0.80,
+            fillOpacity: isSelected ? 0.95 : 0.70,
             color: isSelected ? "#ffffff" : (pred ? pred.color : "rgba(0,0,0,0.08)"),
             weight: isSelected ? 2.5 : 1.0,
           });
@@ -273,7 +273,11 @@ const MapViewContent = forwardRef(
       const isSelected = geoid === selectedGeoid;
       return {
         fillColor: pred ? pred.color : "#2d3436",
-        fillOpacity: isSelected ? 0.95 : 0.80,
+        // 0.70 (was 0.80): Stadia alidade ships a single combined base+labels
+        // raster with no labels-only variant to draw on top, so the choropleth
+        // buries Texas city names. Easing the resting fill lets the base labels
+        // read through the light Good/Moderate tracts without muddying the color.
+        fillOpacity: isSelected ? 0.95 : 0.70,
         color: isSelected ? "#ffffff" : (pred ? pred.color : "rgba(0,0,0,0.08)"),
         weight: isSelected ? 2.5 : 1.0,
         lineCap: "round",
@@ -348,7 +352,7 @@ const MapViewContent = forwardRef(
           const isSelected = geoid === selectedGeoidRef.current;
           e.target.setStyle({
             fillColor: currentPred ? currentPred.color : "#2d3436",
-            fillOpacity: isSelected ? 0.95 : 0.80,
+            fillOpacity: isSelected ? 0.95 : 0.70,
             color: isSelected ? "#ffffff" : (currentPred ? currentPred.color : "rgba(0,0,0,0.08)"),
             weight: isSelected ? 2.5 : 1.0,
           });
