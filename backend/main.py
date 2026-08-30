@@ -45,17 +45,24 @@ CONDITIONS_SNAPSHOT_PATH = os.path.join(SNAPSHOTS_DIR, "conditions_latest.json")
 MODELS_DIR = os.path.join(ROOT, "models")
 
 # Live PurpleAir: the model's dominant feature (nbr_pm25_*) must be computed
-# from same-day live readings to match training. TTL 60 min: with the 24h-mean
-# field a 1-hour cadence tracks events closely while staying cheap (24 small
-# bbox pulls/day). Set PURPLEAIR_API_KEY in Render env to override the key.
-# PurpleAir bills 1 + (sensors x fields) points per call: ~430 TX sensors x 6
-# billed fields = ~2,580 points each. This TTL is deliberately set EQUAL to the
-# Texas prediction cache TTL (30 min) rather than below it. At 15 min the feed
-# refreshed twice per prediction cycle, so every other fetch was paid for and
-# then superseded before any prediction consumed it — ~124k points/day of pure
-# waste. Matching the cycle halves spend with no loss of freshness: predictions
-# still use air that is at most one cycle old.
-PURPLEAIR_CACHE_TTL_MIN = int(os.environ.get("PURPLEAIR_CACHE_TTL_MIN", "30"))
+# from same-day live readings to match training. Set PURPLEAIR_API_KEY in Render
+# env to supply the key.
+#
+# BUDGET REALITY: a PurpleAir read key grants ~1,000,000 points PER MONTH (it
+# replenishes monthly, it is NOT a one-time 100M pool). Each bbox pull bills
+# 1 + (sensors x fields) points: ~430 TX sensors x 6 billed fields = ~2,580
+# points. So the *monthly* cost of the live feed is:
+#     2,580 x (1440 / TTL_min) x 30.4 days
+#   TTL 30 min -> ~3.76M/month  (3.7x OVER the 1M/month grant — drains it in ~8 days)
+#   TTL 60 min -> ~1.88M/month  (still over budget)
+#   TTL  3 h   -> ~628k/month   (fits, ~370k/month headroom)   <-- default
+#   TTL  6 h   -> ~314k/month   (very comfortable)
+# The neighbor feature is a 24-HOUR mean, so a 3-hour refresh tracks it with no
+# meaningful accuracy loss, and the separate HMS smoke overlay still updates
+# hourly for fast-developing events. Override PURPLEAIR_CACHE_TTL_MIN in Render
+# (no redeploy needed): lower it if the map gets its own well-funded key, raise
+# it to 360 to stretch a shared budget further.
+PURPLEAIR_CACHE_TTL_MIN = int(os.environ.get("PURPLEAIR_CACHE_TTL_MIN", "180"))
 # Clip dist_to_nearest_sensor to the training-network max so rural tracts (which
 # can be 195km from any sensor vs the 164km training max) don't push the tree
 # models out of distribution.
