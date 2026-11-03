@@ -69,7 +69,7 @@ export default function Contact() {
             <p style={label}>Address</p>
             <p style={value}>5800 Furneaux Dr, Plano TX</p>
             <p style={{ ...label, marginTop: '32px' }}>Hours</p>
-            <p style={value}>8:00 AM — 8:00 PM</p>
+            <p style={value}>8:00 AM – 8:00 PM</p>
           </div>
         </div>
       </motion.div>

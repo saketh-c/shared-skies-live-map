@@ -39,7 +39,7 @@ const WORDS = 'We turn air quality data into community change.'.split(' ')
 const PILLARS = [
   {
     n: '01', title: 'Research',
-    body: 'We install and maintain accurate, low-cost air quality sensors in frontline neighborhoods — creating a real-time picture of local pollution accessible to every resident.',
+    body: 'We install and maintain accurate, low-cost air quality sensors in frontline neighborhoods, creating a real-time picture of local pollution accessible to every resident.',
     icon: '◎',
   },
   {
@@ -122,7 +122,7 @@ function HeroSection() {
           Dallas, Texas · Environmental Justice · Since 2024
         </motion.p>
 
-        {/* Headline — word by word */}
+        {/* Headline, word by word */}
         <h1 style={{
           fontFamily: 'Lora, Georgia, serif',
           fontSize: 'clamp(32px, 4.2vw, 62px)',
@@ -156,7 +156,7 @@ function HeroSection() {
             lineHeight: 1.7, maxWidth: '500px', marginBottom: '44px',
           }}
         >
-          Shared Skies deploys real-time air quality monitors in frontline neighborhoods across Texas — making pollution data accessible to the communities that need it most.
+          Shared Skies deploys real-time air quality monitors in frontline neighborhoods across Texas, making pollution data accessible to the communities that need it most.
         </motion.p>
 
         {/* CTAs */}

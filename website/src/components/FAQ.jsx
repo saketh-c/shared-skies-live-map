@@ -4,11 +4,11 @@ import { motion, AnimatePresence, useInView } from 'framer-motion'
 const FAQS = [
   {
     q: 'How is Shared Skies different from other environmental organizations?',
-    a: 'Unlike traditional environmental organizations, Shared Skies is youth-led and hyper-local. We deploy real-time air quality monitors directly in frontline neighborhoods, making data accessible to the very communities breathing that air. We combine scientific rigor with grassroots advocacy — empowering residents, not just researchers, to drive change.',
+    a: 'Unlike traditional environmental organizations, Shared Skies is youth-led and hyper-local. We deploy real-time air quality monitors directly in frontline neighborhoods, making data accessible to the very communities breathing that air. We combine scientific rigor with grassroots advocacy, empowering residents, not just researchers, to drive change.',
   },
   {
     q: 'What communities does Shared Skies help?',
-    a: 'We focus on frontline communities — neighborhoods disproportionately burdened by pollution due to proximity to highways, industrial facilities, and other pollution sources. We primarily work in the Dallas-Fort Worth metroplex, with plans to expand to other Texas cities and communities across the country.',
+    a: 'We focus on frontline communities: neighborhoods disproportionately burdened by pollution due to proximity to highways, industrial facilities, and other pollution sources. We primarily work in the Dallas-Fort Worth metroplex, with plans to expand to other Texas cities and communities across the country.',
   },
   {
     q: 'Is this problem real, and does Shared Skies really work?',

@@ -44,7 +44,7 @@ export default function Mission() {
         </FadeUp>
       </div>
 
-      {/* Equity quote — Lora, regular (not italic) */}
+      {/* Equity quote: Lora, regular (not italic) */}
       <div style={{ padding: '120px 80px 130px' }}>
         <FadeUp>
           <p style={{

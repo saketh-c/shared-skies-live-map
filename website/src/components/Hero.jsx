@@ -37,7 +37,7 @@ export default function Hero() {
       )`,
     }}>
 
-      {/* Subtle radial glow at center — adds depth */}
+      {/* Subtle radial glow at center adds depth */}
       <div style={{
         position: 'absolute',
         top: '15%',

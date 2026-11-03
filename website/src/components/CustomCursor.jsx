@@ -49,7 +49,7 @@ export default function CustomCursor() {
 
   return (
     <div id="custom-cursor" style={{ pointerEvents: 'none' }}>
-      {/* Small solid dot — instant follow */}
+      {/* Small solid dot: instant follow */}
       <motion.div
         style={{
           position: 'fixed',
@@ -69,7 +69,7 @@ export default function CustomCursor() {
         transition={{ duration: 0.1 }}
       />
 
-      {/* Outer ring — spring follow */}
+      {/* Outer ring: spring follow */}
       <motion.div
         style={{
           position: 'fixed',

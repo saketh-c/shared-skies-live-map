@@ -67,7 +67,7 @@ export default function Join() {
             color: 'rgba(255,255,255,0.72)', lineHeight: 1.72,
             maxWidth: '540px',
           }}>
-            Whether you're a student, scientist, educator, or advocate — there's a place for you in Shared Skies. Fill out the form below to get started.
+            Whether you're a student, scientist, educator, or advocate, there's a place for you in Shared Skies. Fill out the form below to get started.
           </p>
         </Reveal>
       </section>

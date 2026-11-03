@@ -44,7 +44,7 @@ export default function OriginStory() {
         pointerEvents: 'none',
       }} />
 
-      {/* Text — top-left, matching original */}
+      {/* Text: top-left, matching original */}
       <motion.div
         ref={textRef}
         initial={{ opacity: 0, y: 32 }}
