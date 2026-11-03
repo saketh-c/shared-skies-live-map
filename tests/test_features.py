@@ -165,7 +165,7 @@ def test_compute_path_passes_utc_calendar(client, monkeypatch, no_snapshots):
     class Stop(Exception):
         pass
 
-    def spy(lookup_reset, weather, temporal, header):
+    def spy(lookup_reset, weather, temporal, header, points=None):
         seen["temporal"] = temporal
         seen["columns"] = set(lookup_reset.columns)
         raise Stop

@@ -1,0 +1,40 @@
+name: Prediction log
+
+# Render's disk is ephemeral, so the backend keeps no history. Every 3 hours
+# this saves what the live map is serving (tracts, AirNow monitors, PurpleAir
+# sensors, calibration block, health) as one tarball on the monthly GitHub
+# Release prediction-log-YYYY-MM. scripts/fetch_prediction_log.py merges them.
+#
+# Deploy safety: the release tag is created with GITHUB_TOKEN, and events made
+# with GITHUB_TOKEN do not start other workflows, so ci.yml (on: push) does not
+# run for it. Render deploys only on branch commits, and a release creates no
+# commit. Vercel likewise builds branches, not tags.
+on:
+  schedule:
+    - cron: '17 */3 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: prediction-log
+  cancel-in-progress: false
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: scripts
+          persist-credentials: false
+      - name: Log a snapshot
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SSI_LOG_MAX_WAIT_S: "480"
+        # Python stdlib only; the upload uses the preinstalled gh CLI. Exits
+        # non-zero only when the backend never answered in the retry window
+        # (about 8 min, for a free instance waking up) or the upload failed.
+        run: python3 scripts/log_snapshot.py --out-dir "$RUNNER_TEMP/snap"

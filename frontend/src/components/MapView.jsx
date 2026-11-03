@@ -1,12 +1,12 @@
 import { memo, useMemo, useRef, useEffect, useState, forwardRef, useCallback, useContext } from "react";
 import { MapContainer, TileLayer, GeoJSON, useMap, Circle, CircleMarker, Tooltip, Pane } from "react-leaflet";
 import L from "leaflet";
-import { BREAKPOINTS, pm25ToEpaAqi } from "../utils/aqi.js";
+import { BREAKPOINTS, pm25Color, pm25ToEpaAqi } from "../utils/aqi.js";
 import { LanguageContext } from '../App';
 import { t, translateCategory } from '../i18n';
 import "./MapView.css";
 
-// Basemap: Stadia Maps "Alidade Smooth Dark" -- the near-black successor to
+// Basemap: Stadia Maps "Alidade Smooth Dark", the near-black successor to
 // CARTO Dark Matter. CARTO began watermarking this site's tiles once traffic
 // crossed its anonymous free quota, on every CARTO host, so no keyless CARTO
 // endpoint works for this domain any more. Stadia's free tier covers this
@@ -31,7 +31,7 @@ const BASEMAPS = {
   esri: {
     url: "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}",
     attribution:
-      'Powered by <a href="https://www.esri.com/">Esri</a> &mdash; Esri, HERE, Garmin, &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, and the GIS user community',
+      'Powered by <a href="https://www.esri.com/">Esri</a> | Esri, HERE, Garmin, &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, and the GIS user community',
     // Dark Gray Base has real imagery only to z16; Leaflet upscales beyond.
     maxNativeZoom: 16,
   },
@@ -41,7 +41,7 @@ const TILE_ERROR_STREAK_FALLBACK = 6;
 const TEXAS_CENTER = [31.5, -99.0];
 const TEXAS_ZOOM = 6;
 
-// API base — matches App.jsx convention.
+// API base: matches App.jsx convention.
 const API_BASE = import.meta.env.VITE_API_URL || "";
 
 // NOAA HMS smoke polygon styling by density tier.
@@ -146,14 +146,14 @@ function BackgroundClickHandler({ onBackgroundClick, justClickedRef }) {
 // Input-adaptive wheel zoom (replaces BOTH the old flyTo-based handler and
 // Leaflet's native one):
 //  - Leaflet's native handler divides wheel deltas by 2x devicePixelRatio on
-//    Windows and squashes them through a sigmoid — on scaled-display laptops
+//    Windows and squashes them through a sigmoid; on scaled-display laptops
 //    a trackpad's small deltas collapse to ~0 zoom ("barely zooms"), until a
 //    momentum burst punches through ("randomly starts zooming"). This handler
 //    uses RAW pixel deltas: linear, device-independent.
 //  - Mouse notches (large discrete deltas) -> one ANIMATED step per notch,
 //    cursor-anchored (same feel as a desktop mouse today).
 //  - Trackpad streams / ctrl+pinch (small rapid deltas) -> immediate zoom,
-//    batched to one update per animation frame — smooth continuous zooming.
+//    batched to one update per animation frame, for smooth continuous zooming.
 //  - No Math.round (no snap-back no-ops), no flyTo (no zoom-out arc flash).
 function AdaptiveWheelZoom() {
   const map = useMap();
@@ -226,7 +226,7 @@ function MapLifecycle() {
     const onZoomStart = () => document.body.classList.add("disable-transitions");
     const onZoomEnd = () => {
       // Strip the no-transitions guard immediately so labels/polys snap to the new
-      // zoom in the same frame the tiles arrive — no lingering "stale text" pause.
+      // zoom in the same frame the tiles arrive, with no lingering "stale text" pause.
       document.body.classList.remove("disable-transitions");
     };
     map.on("zoomstart", onZoomStart);
@@ -314,6 +314,103 @@ const QuantumSensorMarker = memo(function QuantumSensorMarker({ sensor, renderer
   );
 });
 
+// Live PurpleAir sensors and EPA AirNow monitors (GET /api/live/sensors).
+// Drawn by their own SVG renderer in a pane above the tracts, for the same
+// reason as the quantum markers: a canvas in a higher pane would cover the
+// choropleth canvas and swallow its hover and clicks everywhere. The pane has
+// pointer-events:none, so only the dots themselves take the mouse. Built
+// imperatively (one layer group, tooltips created on open) because a React
+// component per dot is needless overhead for ~500 dots.
+const LIVE_PANE = "liveSensorsPane";
+const LAYERS_KEY = "ssi_map_layers";
+const DEFAULT_LAYERS = { monitors: true, sensors: false };
+const LIVE_SENSOR_STYLE = {
+  radius: 4, color: "rgba(5, 8, 16, 0.85)", weight: 1, fillOpacity: 0.95,
+  // Clicks stay on the dot, so they neither select nor deselect a tract.
+  bubblingMouseEvents: false,
+};
+const LIVE_MONITOR_STYLE = {
+  radius: 6.5, color: "#ffffff", weight: 2.5, fillOpacity: 1, bubblingMouseEvents: false,
+};
+const LIVE_TOOLTIP_OPTS = { direction: "top", offset: [0, -6], opacity: 0.95, className: "sensor-tooltip live-tooltip" };
+
+function readLayerPrefs() {
+  try {
+    const v = JSON.parse(localStorage.getItem(LAYERS_KEY) || "null");
+    if (v && typeof v === "object") {
+      return { monitors: v.monitors !== false, sensors: v.sensors === true };
+    }
+  } catch (_) {}
+  return DEFAULT_LAYERS;
+}
+
+const isNum = (v) => typeof v === "number" && Number.isFinite(v);
+const fmt1 = (v) => Number(v).toFixed(1);
+
+// Tooltip body as DOM nodes (textContent), so monitor names from the feed are
+// never parsed as HTML.
+function tipNode(title, lines) {
+  const el = document.createElement("div");
+  const head = document.createElement("div");
+  head.className = "live-tip-title";
+  head.textContent = title;
+  el.appendChild(head);
+  lines.forEach((text) => {
+    const row = document.createElement("div");
+    row.className = "live-tip-line";
+    row.textContent = text;
+    el.appendChild(row);
+  });
+  return el;
+}
+
+function LiveSensorLayer({ data, showSensors, showMonitors, lang }) {
+  const map = useMap();
+  const renderer = useMemo(() => L.svg({ pane: LIVE_PANE }), []);
+  // Leaflet adds a renderer to the map with its first path and never removes
+  // it, so take it off on unmount; otherwise every remount (tab switch, new
+  // fetch status) would leave another empty SVG listening to map moves.
+  useEffect(() => () => { map.removeLayer(renderer); }, [map, renderer]);
+  useEffect(() => {
+    if (!data || (!showSensors && !showMonitors)) return;
+    const group = L.layerGroup();
+    const calibrated = data.calibration_applied === true;
+
+    if (showSensors) {
+      const sensors = (data.purpleair?.sensors || [])
+        .filter((s) => isNum(s?.lat) && isNum(s?.lon) && isNum(s?.pm25))
+        // Highest readings drawn last, so they sit on top where dots overlap.
+        .sort((a, b) => a.pm25 - b.pm25);
+      sensors.forEach((s) => {
+        const m = L.circleMarker([s.lat, s.lon], { ...LIVE_SENSOR_STYLE, renderer, fillColor: pm25Color(s.pm25) });
+        const showRaw = calibrated && isNum(s.pm25_raw) && Math.abs(s.pm25_raw - s.pm25) >= 0.05;
+        m.bindTooltip(() => tipNode(t(lang, "sensor_tip_title"), [
+          t(lang, "sensor_tip_value", fmt1(s.pm25), showRaw ? fmt1(s.pm25_raw) : null),
+        ]), LIVE_TOOLTIP_OPTS);
+        group.addLayer(m);
+      });
+    }
+
+    if (showMonitors) {
+      const monitors = (data.monitors?.monitors || [])
+        .filter((mo) => isNum(mo?.lat) && isNum(mo?.lon) && isNum(mo?.pm25));
+      monitors.forEach((mo) => {
+        const m = L.circleMarker([mo.lat, mo.lon], { ...LIVE_MONITOR_STYLE, renderer, fillColor: pm25Color(mo.pm25) });
+        m.bindTooltip(() => {
+          const lines = [t(lang, "monitor_tip_value", fmt1(mo.pm25), isNum(mo.hours) ? mo.hours : null)];
+          if (isNum(mo.map_pm25)) lines.push(t(lang, "monitor_tip_map", fmt1(mo.map_pm25)));
+          return tipNode(t(lang, "monitor_tip_title", mo.name || mo.id || ""), lines);
+        }, LIVE_TOOLTIP_OPTS);
+        group.addLayer(m);
+      });
+    }
+
+    group.addTo(map);
+    return () => { group.remove(); };
+  }, [map, renderer, data, showSensors, showMonitors, lang]);
+  return null;
+}
+
 const GEOJSON_STATUS_KEYS = {
   loading: "map_loading_tracts",
   retrying: "map_waking_server",
@@ -324,7 +421,7 @@ const GEOJSON_STATUS_KEYS = {
 const PREDICTIONS_SLOW_MS = 6000;
 
 const MapViewContent = forwardRef(
-  ({ geojson, geojsonStatus, predictions, onTractSelect, onBackgroundClick, selectedGeoid, searchMarker, sensorMarkers, existingSensors, activeTab = "map" }, _ref) => {
+  ({ geojson, geojsonStatus, predictions, onTractSelect, onBackgroundClick, selectedGeoid, searchMarker, sensorMarkers, existingSensors, activeTab = "map", generatedAt = null, liveLayersSupported = false }, _ref) => {
     const { lang } = useContext(LanguageContext);
     const langRef = useRef(lang);
     useEffect(() => { langRef.current = lang; }, [lang]);
@@ -367,7 +464,7 @@ const MapViewContent = forwardRef(
           const data = await res.json();
           if (alive) setHmsData(data);
         } catch (e) {
-          // Network failures are non-fatal — the layer just won't render.
+          // Network failures are non-fatal: the layer just won't render.
           console.warn("HMS fetch failed:", e?.message);
         }
       };
@@ -375,6 +472,57 @@ const MapViewContent = forwardRef(
       const id = setInterval(fetchHms, HMS_REFRESH_MS);
       return () => { alive = false; clearInterval(id); };
     }, [showHmsSmoke]);
+
+    // Live sensor / monitor layers. Toggle state persists per browser.
+    const [layers, setLayers] = useState(readLayerPrefs);
+    useEffect(() => {
+      try { localStorage.setItem(LAYERS_KEY, JSON.stringify(layers)); } catch (_) {}
+    }, [layers]);
+    const toggleLayer = useCallback((name) => {
+      setLayers((prev) => ({ ...prev, [name]: !prev[name] }));
+    }, []);
+    const [liveData, setLiveData] = useState(null);
+    // "idle" until the first fetch, then "ok" or "error". On error both
+    // toggles hide; the next prediction batch tries again.
+    const [liveStatus, setLiveStatus] = useState("idle");
+    const liveFetchedForRef = useRef(null);
+    const anyLayerOn = layers.monitors || layers.sensors;
+
+    // Fetched only while a layer is on, and again whenever a new prediction
+    // batch lands (the dots belong to that batch). liveLayersSupported is
+    // false for a backend without the endpoint, so it is never probed there.
+    useEffect(() => {
+      if (!liveLayersSupported || !generatedAt || !anyLayerOn) return;
+      if (liveFetchedForRef.current === generatedAt) return;
+      liveFetchedForRef.current = generatedAt;
+      const ctrl = new AbortController();
+      let settled = false;
+      (async () => {
+        try {
+          const res = await fetch(`${API_BASE}/api/live/sensors`, { signal: ctrl.signal });
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          const data = await res.json();
+          if (!data || typeof data !== "object") throw new Error("bad payload");
+          setLiveData(data);
+          setLiveStatus("ok");
+        } catch (e) {
+          if (e?.name !== "AbortError") setLiveStatus("error");
+        } finally {
+          settled = true;
+        }
+      })();
+      return () => {
+        // Cancelled before it finished (layers switched off, new batch):
+        // forget it so the next run fetches again.
+        if (!settled && liveFetchedForRef.current === generatedAt) liveFetchedForRef.current = null;
+        ctrl.abort();
+      };
+    }, [liveLayersSupported, generatedAt, anyLayerOn]);
+
+    // The Sensors tab has its own sensor dots; keep that view uncluttered, and
+    // hide the toggles there too, since they would have no visible effect.
+    const liveTogglesVisible = liveLayersSupported && liveStatus !== "error" && activeTab !== "quantum";
+    const liveLayersVisible = liveTogglesVisible && liveStatus === "ok";
 
     useEffect(() => { onTractSelectRef.current = onTractSelect; }, [onTractSelect]);
     useEffect(() => { activeTabRef.current = activeTab; }, [activeTab]);
@@ -403,7 +551,7 @@ const MapViewContent = forwardRef(
 
     // When the user leaves the Map tab, kill any in-flight hover state so it
     // doesn't visually persist (mouseout won't fire because the cursor isn't
-    // moving off the polygon — the tab is just being switched).
+    // moving off the polygon; the tab is just being switched).
     useEffect(() => {
       if (activeTab === "map") return;
       setTooltipData(null);
@@ -421,7 +569,7 @@ const MapViewContent = forwardRef(
 
     // Dedicated SVG renderer for the quantum-sensor markers so they live in
     // their own high-z-index pane and never get hidden by polygon
-    // bringToFront(). SVG (not canvas) is critical here — a canvas in a
+    // bringToFront(). SVG (not canvas) is critical here: a canvas in a
     // top-of-stack pane would swallow clicks across the whole map area.
     const sensorSvgRenderer = useMemo(
       () => L.svg({ pane: "quantumSensorsPane" }),
@@ -454,7 +602,7 @@ const MapViewContent = forwardRef(
       return tractStyle(predMap[geoid], geoid === selectedGeoidRef.current);
     }, [predMap]);
 
-    // onEachFeature runs once per feature — uses refs to always access latest state.
+    // onEachFeature runs once per feature and uses refs to always access latest state.
     // Tooltip is a custom React overlay (not Leaflet bindTooltip) so it never glitches.
     const onEachFeature = useCallback((feature, layer) => {
       const geoid = normGeoid(feature.properties?.GEOID);
@@ -463,7 +611,7 @@ const MapViewContent = forwardRef(
       layer.on({
         click: () => {
           // Polygon clicks are only meaningful on the Map tab. On the Sensors
-          // tab the polygons are a passive backdrop — only blue dots are
+          // tab the polygons are a passive backdrop; only blue dots are
           // interactive. Skipping this also prevents handleDeselect from
           // running (justClickedRef stays false but we don't want any
           // selection-mutating side effects either).
@@ -497,7 +645,7 @@ const MapViewContent = forwardRef(
           setTooltipData({ name: displayName, pm25: pred.pm25, epaAqi: pred.epa_aqi ?? pm25ToEpaAqi(pred.pm25), color: pred.color, category: pred.category, county, x: pt.x, y: pt.y });
         },
 
-        // Update tooltip position directly on DOM — no React re-render on every mouse move
+        // Update tooltip position directly on DOM, with no React re-render on every mouse move
         mousemove: (e) => {
           if (activeTabRef.current !== "map") return;
           lastMouseLatLngRef.current = e.latlng;
@@ -515,7 +663,7 @@ const MapViewContent = forwardRef(
 
         mouseout: (e) => {
           // mouseout always runs to keep style state clean (it's a no-op if
-          // mouseover was suppressed — the polygon is already in default style).
+          // mouseover was suppressed, since the polygon is already in default style).
           hoveredLayerRef.current = null;
           hoveredGeoidRef.current = null;
           lastMouseLatLngRef.current = null;
@@ -526,7 +674,7 @@ const MapViewContent = forwardRef(
           setTooltipData(null);
         },
       });
-    }, [bringSelectedToFront]); // stable — all state accessed via refs
+    }, [bringSelectedToFront]); // stable: all state accessed via refs
 
     // Only render GeoJSON once BOTH geojson and predictions are ready,
     // so onEachFeature always has a populated predMapRef.
@@ -683,7 +831,7 @@ const MapViewContent = forwardRef(
             />
           )}
 
-          {/* NOAA HMS smoke polygons — own pane between choropleth (z=400) and
+          {/* NOAA HMS smoke polygons: own pane between choropleth (z=400) and
               sensor markers (z=600). Pointer-events:none so the smoke overlay
               never steals clicks from the choropleth underneath. */}
           {showHmsSmoke && hmsData?.features?.length > 0 && (
@@ -719,7 +867,18 @@ const MapViewContent = forwardRef(
             />
           ))}
 
-          {/* Quantum sensor placement markers — rendered as SVG (not canvas)
+          <Pane name={LIVE_PANE} style={{ zIndex: 590, pointerEvents: "none" }}>
+            {liveLayersVisible && (
+              <LiveSensorLayer
+                data={liveData}
+                showSensors={layers.sensors}
+                showMonitors={layers.monitors}
+                lang={lang}
+              />
+            )}
+          </Pane>
+
+          {/* Quantum sensor placement markers, rendered as SVG (not canvas)
               in their OWN pane with z-index above overlayPane so polygon
               bringToFront() calls can never push them behind. The pane DIV
               itself has pointer-events:none so empty space passes clicks
@@ -769,6 +928,29 @@ const MapViewContent = forwardRef(
                 <span className="legend-range">{b.label}</span>
               </div>
             ))}
+            {liveTogglesVisible && (
+              <>
+                <div className="legend-divider" />
+                <label className="legend-row legend-toggle">
+                  <input
+                    type="checkbox"
+                    checked={layers.monitors}
+                    onChange={() => toggleLayer("monitors")}
+                  />
+                  <span className="legend-category">{t(lang, "layer_monitors")}</span>
+                  <span className="legend-marker is-monitor" aria-hidden="true" />
+                </label>
+                <label className="legend-row legend-toggle">
+                  <input
+                    type="checkbox"
+                    checked={layers.sensors}
+                    onChange={() => toggleLayer("sensors")}
+                  />
+                  <span className="legend-category">{t(lang, "layer_sensors")}</span>
+                  <span className="legend-marker is-sensor" aria-hidden="true" />
+                </label>
+              </>
+            )}
             {/* Smoke is dated so an older analysis is never read as today's. */}
             {showHmsSmoke && hmsData?.data_date && (
               <div className="legend-hms-date">
@@ -789,7 +971,7 @@ const MapViewContent = forwardRef(
           )}
         </div>
 
-        {/* Custom tooltip — positioned absolutely over the map, never glitches */}
+        {/* Custom tooltip: positioned absolutely over the map, never glitches */}
         {tooltipData && (
           <div
             ref={tooltipDomRef}

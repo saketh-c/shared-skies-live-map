@@ -329,6 +329,10 @@ export default function App() {
     localWeather && localWeather.geoid === selectedGeoid ? localWeather.weather : null;
 
   const sensorMarkersForMap = activeTab === "quantum" ? quantumSensors : null;
+  // A backend that calibrates to EPA monitors also serves /api/live/sensors;
+  // an older one has neither, and the map then never requests the endpoint.
+  const liveLayersSupported = predictions != null &&
+    (predictions.calibration != null || predictions.data_sources?.airnow_monitors != null);
   const existingSensorsForMap = activeTab === "quantum" ? existingSensors : null;
 
   return (
@@ -395,7 +399,7 @@ export default function App() {
 
           {activeTab === "guide" && (
             <Suspense fallback={<TabFallback />}>
-              <AirQualityGuide />
+              <AirQualityGuide calibrated={predictions?.calibration != null} />
             </Suspense>
           )}
         </div>
@@ -436,6 +440,8 @@ export default function App() {
             sensorMarkers={sensorMarkersForMap}
             existingSensors={existingSensorsForMap}
             activeTab={activeTab}
+            generatedAt={predictions?.generated_at ?? null}
+            liveLayersSupported={liveLayersSupported}
           />
         </div>
       </div>

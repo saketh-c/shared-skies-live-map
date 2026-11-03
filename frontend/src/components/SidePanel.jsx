@@ -4,9 +4,33 @@ import { LanguageContext } from "../App";
 import { t, translateCategory, translateHealth, formatPercentile } from "../i18n";
 import SidebarHeader from "./SidebarHeader.jsx";
 
+const MISSING = "N/A";
+
 function fmt(val, decimals = 1) {
-  if (val == null || isNaN(val)) return "—";
+  if (val == null || isNaN(val)) return MISSING;
   return Number(val).toFixed(decimals);
+}
+
+// Local clock time of an ISO timestamp, e.g. "2:53 PM"; null if unparseable.
+function localTime(iso, lang) {
+  const ts = Date.parse(iso);
+  if (Number.isNaN(ts)) return null;
+  return new Date(ts).toLocaleTimeString(lang === "es" ? "es-US" : "en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+  });
+}
+
+// Date and time, for stamps that can be from yesterday.
+function localDateTime(iso, lang) {
+  const ts = Date.parse(iso);
+  if (Number.isNaN(ts)) return null;
+  return new Date(ts).toLocaleString(lang === "es" ? "es-US" : "en-US", {
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
 }
 
 const DEFAULT_REFRESH_MIN = 15;
@@ -26,8 +50,21 @@ function UpdatedAgo({ generatedAt, lang }) {
   return min < 1 ? t(lang, "updated_just_now") : t(lang, "updated_minutes_ago", min);
 }
 
-function Credits({ lang }) {
-  const credits = t(lang, "credits");
+// Credits that only hold while the backend actually uses the source: AirNow
+// when this batch is calibrated, NWS when it supplies current conditions. An
+// older backend sends neither field, so neither is credited.
+const CONDITIONAL_CREDITS = {
+  "https://www.airnow.gov/": (p) => p?.calibration?.applied === true,
+  "https://www.weather.gov/": (p) => {
+    const src = p?.data_sources?.conditions_source;
+    return src != null ? src === "nws" : p?.calibration != null;
+  },
+};
+
+function Credits({ lang, predictions }) {
+  const credits = t(lang, "credits").filter((segments) => segments.every(
+    (seg) => typeof seg === "string" || !CONDITIONAL_CREDITS[seg.href] || CONDITIONAL_CREDITS[seg.href](predictions),
+  ));
   return (
     <div className="footer-row footer-data">
       {t(lang, "credits_label")}:{" "}
@@ -43,7 +80,7 @@ function Credits({ lang }) {
   );
 }
 
-const PM25Hero = memo(function PM25Hero({ pm25, epaAqi, color, category, lang }) {
+const PM25Hero = memo(function PM25Hero({ pm25, pm25Model, epaAqi, color, category, lang }) {
   const gaugePct = pm25ToGaugePct(pm25);
   const aqi = epaAqi ?? pm25ToEpaAqi(pm25);
   return (
@@ -61,6 +98,12 @@ const PM25Hero = memo(function PM25Hero({ pm25, epaAqi, color, category, lang })
           <div className="pm25-unit">µg/m³</div>
         </div>
         <div className="pm25-aqi-equiv" data-num>{t(lang, "aqi_equiv", aqi)}</div>
+        {/* Raw model value, shown only when calibration actually moved it. */}
+        {pm25Model != null && pm25 != null && Math.abs(pm25Model - pm25) >= 0.1 && (
+          <div className="pm25-before-calib" data-num>
+            {t(lang, "before_calibration", fmt(pm25Model, 2))}
+          </div>
+        )}
         <div
           className="aqi-badge"
           style={{
@@ -103,35 +146,64 @@ const WeatherWidget = memo(function WeatherWidget({ weather, isLoading, lang }) 
         <div className="weather-item">
           <div className="weather-item-label">{t(lang, "temperature")}</div>
           <div className="weather-item-value" data-num>
-            {!weather ? "—" : `${fmt(weather.temperature, 0)}°`}
+            {!weather ? MISSING : `${fmt(weather.temperature, 0)}°`}
           </div>
           <div className="weather-item-sub">Fahrenheit</div>
         </div>
         <div className="weather-item">
           <div className="weather-item-label">{t(lang, "humidity")}</div>
           <div className="weather-item-value" data-num>
-            {!weather ? "—" : `${fmt(weather.humidity, 0)}%`}
+            {!weather ? MISSING : `${fmt(weather.humidity, 0)}%`}
           </div>
           <div className="weather-item-sub">{lang === "es" ? "Relativa" : "Relative"}</div>
         </div>
         <div className="weather-item">
           <div className="weather-item-label">{t(lang, "pressure")}</div>
           <div className="weather-item-value" data-num>
-            {!weather ? "—" : fmt(weather.pressure, 0)}
+            {!weather ? MISSING : fmt(weather.pressure, 0)}
           </div>
           <div className="weather-item-sub">hPa</div>
         </div>
         <div className="weather-item">
           <div className="weather-item-label">{t(lang, "wind")}</div>
           <div className="weather-item-value" data-num>
-            {!weather ? "—" : fmt(weather.wind_speed, 0)}
+            {!weather ? MISSING : fmt(weather.wind_speed, 0)}
           </div>
           <div className="weather-item-sub">mph</div>
         </div>
       </div>
+      {weather?.source === "nws" && weather.station && (
+        <div className="weather-station-note" title={t(lang, "weather_source_title")}>
+          {t(lang, "weather_source", weather.station, localTime(weather.observed_at, lang))}
+        </div>
+      )}
     </>
   );
 });
+
+// Footer line(s) about the EPA AirNow calibration. An older backend sends no
+// calibration object, and then nothing is shown.
+function CalibrationNote({ calibration, lang }) {
+  if (!calibration || typeof calibration !== "object") return null;
+  if (!calibration.applied) {
+    return <div className="footer-row calib-note is-off">{t(lang, "calib_unavailable")}</div>;
+  }
+  const n = calibration.monitors_used ?? calibration.loo?.n;
+  const mae = calibration.loo?.mae;
+  return (
+    <div className="footer-row calib-note is-on">
+      {n > 0 && <div className="calib-line">{t(lang, "calib_applied", n)}</div>}
+      {calibration.reused_from && (
+        <div className="calib-line">{t(lang, "calib_reused", localDateTime(calibration.reused_from, lang))}</div>
+      )}
+      {typeof mae === "number" && Number.isFinite(mae) && (
+        <div className="calib-accuracy" title={t(lang, "calib_accuracy_title")} data-num>
+          {t(lang, "calib_accuracy", mae.toFixed(1))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 const EJ_FIELD_KEYS = [
   "ejf_score",
@@ -273,6 +345,7 @@ export default function SidePanel({
         <>
           <PM25Hero
             pm25={selectedTract.pm25}
+            pm25Model={selectedTract.pm25_model}
             epaAqi={selectedTract.epa_aqi}
             color={selectedTract.color}
             category={selectedTract.category}
@@ -331,6 +404,7 @@ export default function SidePanel({
               : t(lang, "live_badge_fallback")}
           </div>
         )}
+        <CalibrationNote calibration={predictions?.calibration} lang={lang} />
         {predictions?.generated_at && (
           <div className="footer-row">
             <span className="last-updated">
@@ -342,7 +416,7 @@ export default function SidePanel({
             )}
           </div>
         )}
-        <Credits lang={lang} />
+        <Credits lang={lang} predictions={predictions} />
         <div className="footer-row footer-built">
           {lang === "es" ? "Creado por" : "Built by"}{" "}
           <a

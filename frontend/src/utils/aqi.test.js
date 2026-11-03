@@ -154,3 +154,21 @@ describe("healthIcon", () => {
     expect(healthIcon(undefined)).toBe("?");
   });
 });
+
+describe("getAQIInfo health messages", () => {
+  // Must match backend pm25_info and i18n HEALTH_MSG.en word for word.
+  it.each([
+    [5, "Air quality is good: within the U.S. EPA annual PM2.5 standard (9 µg/m³)."],
+    [11, "Moderate: above the EPA annual standard. Unusually sensitive people may want to limit prolonged outdoor exertion."],
+    [14, "Elevated: approaching or above the WHO 24-hour guideline (15 µg/m³). Sensitive groups should limit prolonged outdoor activity."],
+    [30, "⚠️ High: everyone may begin to feel effects; sensitive groups are at greater risk. Often driven by wildfire smoke or dust."],
+  ])("pm25 %f -> exact message", (pm25, msg) => {
+    expect(getAQIInfo(pm25).health_msg).toBe(msg);
+  });
+
+  it("never uses an em dash", () => {
+    for (const pm25 of [0, 9.5, 15, 40]) {
+      expect(getAQIInfo(pm25).health_msg).not.toContain("\u2014");
+    }
+  });
+});

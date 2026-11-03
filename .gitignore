@@ -14,7 +14,7 @@ backend/static/snapshots/
 .claude/
 .DS_Store
 
-# Large raw datasets (exceed GitHub 100MB limit) — kept locally only
+# Large raw datasets (exceed GitHub 100MB limit), kept locally only
 pipeline/purpleair_full_dataset.csv
 pipeline/purpleair_training_ready.csv
 p2_processed_v2.xls
@@ -26,7 +26,7 @@ pipeline/data_pull_cache/
 website/node_modules/
 website/dist/
 
-# The old repo-root LaTeX paper folders — kept locally only, not tracked.
+# The old repo-root LaTeX paper folders: kept locally only, not tracked.
 # Root-anchored on purpose: a bare "paper/" matches a directory of that name at
 # ANY depth, which silently swallowed xai/XAI UTRC/paper/ and meant new files
 # added there were never committed.
@@ -61,3 +61,6 @@ backend/.env
 catboost_info/
 .pytest_cache/
 .venv/
+
+# scripts/fetch_prediction_log.py output (about 1.7M tract rows a month)
+prediction_log/

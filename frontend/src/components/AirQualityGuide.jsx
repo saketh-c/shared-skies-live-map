@@ -13,7 +13,9 @@ const COLOR_MAP = {
   high:     pm25Color(35),   // mid-High red   (gradient #FF6B6B→#800000)
 };
 
-export default function AirQualityGuide() {
+// `calibrated`: the backend calibrates to EPA monitors (it sends a
+// calibration block), so the About text may say so.
+export default function AirQualityGuide({ calibrated = false }) {
   const { lang } = useContext(LanguageContext);
 
   const levels = ["good", "moderate", "elevated", "high"].map((k) => ({
@@ -53,6 +55,7 @@ export default function AirQualityGuide() {
       <div className="guide-explainer">
         <h4>{t(lang, "guide.about_title")}</h4>
         {t(lang, "guide.about_body")}
+        {calibrated && ` ${t(lang, "guide.about_calib")}`}
       </div>
     </div>
   );

@@ -83,7 +83,7 @@ export default function SearchBar({ onSearch, predictionsReady = true }) {
   const abortControllerRef = useRef(null);
 
   // Debounced typo-tolerant suggestions (backend proxies Photon w/ Texas bias;
-  // no need to append ", Texas" — the server scopes results to the TX bbox).
+  // no need to append ", Texas" because the server scopes results to the TX bbox).
   useEffect(() => {
     const query = searchInput.trim();
     if (skipNextQueryRef.current) {

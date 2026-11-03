@@ -59,6 +59,8 @@ const TRANSLATIONS = {
       ["Weather: ", { text: "Open-Meteo.com", href: "https://open-meteo.com/" }, " (", { text: "CC BY 4.0", href: "https://creativecommons.org/licenses/by/4.0/" }, ")"],
       ["Aerosols: contains modified ", { text: "Copernicus Atmosphere Monitoring Service", href: "https://atmosphere.copernicus.eu/" }, " information"],
       ["Smoke: ", { text: "NOAA HMS", href: "https://www.ospo.noaa.gov/products/land/hms.html" }],
+      ["Calibration: ", { text: "EPA AirNow", href: "https://www.airnow.gov/" }, " monitors (preliminary data)"],
+      ["Current conditions: ", { text: "National Weather Service", href: "https://www.weather.gov/" }],
       ["Tracts: ", { text: "U.S. Census TIGER", href: "https://www.census.gov/geographies/mapping-files/time-series/geo/tiger-line-file.html" }],
       [{ text: "EPA EJScreen", href: "https://www.epa.gov/ejscreen" }, " (context only)"],
     ],
@@ -71,12 +73,14 @@ const TRANSLATIONS = {
       why_title: "Why PM2.5 Matters",
       why_body: "Particles this small bypass the nose and throat and lodge deep in lung tissue. Short-term exposure causes coughing and irritation. Long-term exposure is linked to heart disease, stroke, lung cancer, and reduced life expectancy.",
       about_title: "About These Predictions",
-      about_body: "Values combine live PurpleAir sensor readings, weather data, and NOAA satellite smoke analysis. No demographic or environmental-justice variable is used as a model input. The PurpleAir feed is refreshed about every 15 minutes and predictions are recomputed after each refresh; weather and aerosol inputs update every 6 hours and smoke analysis every hour. Values are estimated 24-hour-average ground-level concentrations for each census tract.",
+      about_body: "Values combine live PurpleAir sensor readings, weather data, and NOAA satellite smoke analysis. No demographic or environmental-justice variable is used as a model input. The PurpleAir feed is refreshed about every 15 minutes and predictions are recomputed after each refresh; weather and aerosol inputs update every 6 hours and smoke analysis every hour. Values are estimated 24-hour-average ground-level concentrations for each census tract, so they can differ from apps that show the current hour's reading.",
+      // Appended to about_body only when the backend calibrates to EPA monitors.
+      about_calib: "Each update cycle, the map is also calibrated to EPA AirNow regulatory monitors in and around Texas so it lines up with official measurements. If monitor data is unavailable, the last calibration is reused for up to a day and the sidebar says so; after that the map is shown uncalibrated.",
       levels: {
         good: {
           name: "Good",
           range: "0 – 9 µg/m³",
-          description: "Within the U.S. EPA annual PM2.5 standard (9 µg/m³). No health concerns for anyone — ideal for outdoor activities.",
+          description: "Within the U.S. EPA annual PM2.5 standard (9 µg/m³). No health concerns for anyone; ideal for outdoor activities.",
           who: "Safe for everyone",
         },
         moderate: {
@@ -88,7 +92,7 @@ const TRANSLATIONS = {
         elevated: {
           name: "Elevated",
           range: "13 – 17 µg/m³",
-          description: "Above the WHO 24-hour guideline (15 µg/m³). Prolonged exposure carries cardiovascular and respiratory risk; common in dense urban/industrial areas and during smoke or dust events.",
+          description: "Approaching or above the WHO 24-hour guideline (15 µg/m³). Prolonged exposure carries cardiovascular and respiratory risk; common in dense urban/industrial areas and during smoke or dust events.",
           who: "Sensitive groups (asthma, heart disease, elderly, children): limit prolonged outdoor exertion.",
         },
         high: {
@@ -130,6 +134,23 @@ const TRANSLATIONS = {
     },
     aqi_equiv: (aqi) => `≈ US EPA AQI ${aqi}`,
     live_sensors_note: (n) => `${n} PurpleAir sensors`,
+    // Calibration to EPA AirNow monitors (sidebar footer + tract detail).
+    calib_applied: (n) => `Calibrated to ${n} EPA monitors`,
+    calib_accuracy: (mae) => `Checked against EPA monitors today: typical error ±${mae} µg/m³ (held out)`,
+    calib_accuracy_title: "Average gap between the map and each EPA monitor, with that monitor left out of the calibration it is checked against",
+    calib_unavailable: "Not calibrated: EPA monitor data unavailable",
+    calib_reused: (time) => `Using the last EPA calibration${time ? ` (from ${time})` : ""}; current monitor data unavailable`,
+    before_calibration: (v) => `Before calibration: ${v} µg/m³`,
+    weather_source: (station, time) => `NWS · ${station}${time ? ` · ${time}` : ""}`,
+    weather_source_title: "Latest observation from a National Weather Service station",
+    // Map layer toggles and marker tooltips.
+    layer_monitors: "EPA monitors",
+    layer_sensors: "PurpleAir sensors",
+    sensor_tip_title: "PurpleAir sensor",
+    sensor_tip_value: (v, raw) => `24-hr avg ${v} µg/m³${raw != null ? ` (raw ${raw})` : ""}`,
+    monitor_tip_title: (name) => `EPA monitor · ${name}`,
+    monitor_tip_value: (v, h) => `24-hr avg ${v} µg/m³${h != null ? ` (${h} h of data)` : ""}`,
+    monitor_tip_map: (v) => `Map here: ${v} µg/m³`,
     legend_title: "PM2.5 µg/m³",
     census_tract_prefix: "Census Tract",
     // Quantum Sensor Placement
@@ -244,6 +265,8 @@ const TRANSLATIONS = {
       ["Clima: ", { text: "Open-Meteo.com", href: "https://open-meteo.com/" }, " (", { text: "CC BY 4.0", href: "https://creativecommons.org/licenses/by/4.0/" }, ")"],
       ["Aerosoles: contiene información modificada del ", { text: "Servicio de Vigilancia Atmosférica de Copernicus", href: "https://atmosphere.copernicus.eu/" }],
       ["Humo: ", { text: "NOAA HMS", href: "https://www.ospo.noaa.gov/products/land/hms.html" }],
+      ["Calibración: monitores de ", { text: "EPA AirNow", href: "https://www.airnow.gov/" }, " (datos preliminares)"],
+      ["Condiciones actuales: ", { text: "Servicio Meteorológico Nacional (NWS)", href: "https://www.weather.gov/" }],
       ["Tractos: ", { text: "TIGER de la Oficina del Censo de EE. UU.", href: "https://www.census.gov/geographies/mapping-files/time-series/geo/tiger-line-file.html" }],
       [{ text: "EPA EJScreen", href: "https://www.epa.gov/ejscreen" }, " (solo contexto)"],
     ],
@@ -256,12 +279,13 @@ const TRANSLATIONS = {
       why_title: "Por qué importa PM2.5",
       why_body: "Partículas tan pequeñas evitan la nariz y la garganta y se alojan en el tejido pulmonar. La exposición a corto plazo causa tos e irritación. La exposición a largo plazo se relaciona con enfermedades cardíacas, accidente cerebrovascular, cáncer de pulmón y menor esperanza de vida.",
       about_title: "Sobre estas predicciones",
-      about_body: "Los valores combinan lecturas en vivo de sensores PurpleAir, datos meteorológicos y análisis satelital de humo de la NOAA. Ninguna variable demográfica o de justicia ambiental se usa como entrada del modelo. Los datos de PurpleAir se actualizan aproximadamente cada 15 minutos y las predicciones se recalculan después de cada actualización; los datos meteorológicos y de aerosoles se actualizan cada 6 horas y el análisis de humo cada hora. Los valores son concentraciones estimadas a nivel del suelo, promediadas en 24 horas, para cada tracto censal.",
+      about_body: "Los valores combinan lecturas en vivo de sensores PurpleAir, datos meteorológicos y análisis satelital de humo de la NOAA. Ninguna variable demográfica o de justicia ambiental se usa como entrada del modelo. Los datos de PurpleAir se actualizan aproximadamente cada 15 minutos y las predicciones se recalculan después de cada actualización; los datos meteorológicos y de aerosoles se actualizan cada 6 horas y el análisis de humo cada hora. Los valores son concentraciones estimadas a nivel del suelo, promediadas en 24 horas, para cada tracto censal, por lo que pueden diferir de los de aplicaciones que muestran la lectura de la hora actual.",
+      about_calib: "En cada ciclo de actualización, el mapa también se calibra con los monitores regulatorios EPA AirNow de Texas y estados vecinos para que coincida con las mediciones oficiales. Si no hay datos de monitores, se reutiliza la última calibración hasta por un día y el panel lateral lo indica; después, el mapa se muestra sin calibrar.",
       levels: {
         good: {
           name: "Bueno",
           range: "0 – 9 µg/m³",
-          description: "Dentro del estándar anual de PM2.5 de la EPA de EE. UU. (9 µg/m³). Sin preocupaciones de salud para nadie — ideal para actividades al aire libre.",
+          description: "Dentro del estándar anual de PM2.5 de la EPA de EE. UU. (9 µg/m³). Sin preocupaciones de salud para nadie; ideal para actividades al aire libre.",
           who: "Seguro para todos",
         },
         moderate: {
@@ -273,7 +297,7 @@ const TRANSLATIONS = {
         elevated: {
           name: "Elevado",
           range: "13 – 17 µg/m³",
-          description: "Por encima de la guía de 24 horas de la OMS (15 µg/m³). La exposición prolongada conlleva riesgo cardiovascular y respiratorio; común en zonas urbanas/industriales densas y durante eventos de humo o polvo.",
+          description: "Cerca o por encima de la guía de 24 horas de la OMS (15 µg/m³). La exposición prolongada conlleva riesgo cardiovascular y respiratorio; común en zonas urbanas/industriales densas y durante eventos de humo o polvo.",
           who: "Grupos sensibles (asma, enfermedades cardíacas, ancianos, niños): limitar el esfuerzo prolongado al aire libre.",
         },
         high: {
@@ -315,6 +339,21 @@ const TRANSLATIONS = {
     },
     aqi_equiv: (aqi) => `≈ AQI ${aqi} (EPA de EE. UU.)`,
     live_sensors_note: (n) => `${n} sensores PurpleAir`,
+    calib_applied: (n) => `Calibrado con ${n} monitores de la EPA`,
+    calib_accuracy: (mae) => `Comparado hoy con monitores de la EPA: error típico ±${mae} µg/m³ (validación excluyendo cada monitor)`,
+    calib_accuracy_title: "Diferencia media entre el mapa y cada monitor de la EPA, excluyendo ese monitor de la calibración con la que se compara",
+    calib_unavailable: "Sin calibrar: datos de monitores de la EPA no disponibles",
+    calib_reused: (time) => `Usando la última calibración de la EPA${time ? ` (de ${time})` : ""}; datos actuales de monitores no disponibles`,
+    before_calibration: (v) => `Antes de la calibración: ${v} µg/m³`,
+    weather_source: (station, time) => `NWS · ${station}${time ? ` · ${time}` : ""}`,
+    weather_source_title: "Observación más reciente de una estación del Servicio Meteorológico Nacional",
+    layer_monitors: "Monitores de la EPA",
+    layer_sensors: "Sensores PurpleAir",
+    sensor_tip_title: "Sensor PurpleAir",
+    sensor_tip_value: (v, raw) => `Media 24 h ${v} µg/m³${raw != null ? ` (sin corregir ${raw})` : ""}`,
+    monitor_tip_title: (name) => `Monitor de la EPA · ${name}`,
+    monitor_tip_value: (v, h) => `Media 24 h ${v} µg/m³${h != null ? ` (${h} h de datos)` : ""}`,
+    monitor_tip_map: (v) => `Mapa aquí: ${v} µg/m³`,
     legend_title: "PM2.5 µg/m³",
     census_tract_prefix: "Tracto censal",
     // Quantum Sensor Placement (Spanish)
@@ -402,16 +441,16 @@ const CATEGORY_MAP = {
 
 const HEALTH_MSG = {
   en: {
-    Good: "Air quality is good — within the U.S. EPA annual PM2.5 standard (9 µg/m³).",
-    Moderate: "Moderate — above the EPA annual standard. Unusually sensitive people may want to limit prolonged outdoor exertion.",
-    Elevated: "Elevated — above the WHO 24-hour guideline (15 µg/m³). Sensitive groups should limit prolonged outdoor activity.",
-    High: "⚠️ High — everyone may begin to feel effects; sensitive groups are at greater risk. Often driven by wildfire smoke or dust.",
+    Good: "Air quality is good: within the U.S. EPA annual PM2.5 standard (9 µg/m³).",
+    Moderate: "Moderate: above the EPA annual standard. Unusually sensitive people may want to limit prolonged outdoor exertion.",
+    Elevated: "Elevated: approaching or above the WHO 24-hour guideline (15 µg/m³). Sensitive groups should limit prolonged outdoor activity.",
+    High: "⚠️ High: everyone may begin to feel effects; sensitive groups are at greater risk. Often driven by wildfire smoke or dust.",
   },
   es: {
-    Good: "La calidad del aire es buena — dentro del estándar anual de PM2.5 de la EPA de EE. UU. (9 µg/m³).",
-    Moderate: "Moderado — por encima del estándar anual de la EPA. Las personas inusualmente sensibles podrían limitar el esfuerzo prolongado al aire libre.",
-    Elevated: "Elevado — por encima de la guía de 24 horas de la OMS (15 µg/m³). Los grupos sensibles deben limitar la actividad prolongada al aire libre.",
-    High: "⚠️ Alto — todos pueden empezar a sentir efectos; los grupos sensibles tienen mayor riesgo. A menudo por humo de incendios o polvo.",
+    Good: "La calidad del aire es buena: dentro del estándar anual de PM2.5 de la EPA de EE. UU. (9 µg/m³).",
+    Moderate: "Moderado: por encima del estándar anual de la EPA. Las personas inusualmente sensibles podrían limitar el esfuerzo prolongado al aire libre.",
+    Elevated: "Elevado: cerca o por encima de la guía de 24 horas de la OMS (15 µg/m³). Los grupos sensibles deben limitar la actividad prolongada al aire libre.",
+    High: "⚠️ Alto: todos pueden empezar a sentir efectos; los grupos sensibles tienen mayor riesgo. A menudo por humo de incendios o polvo.",
   }
 };
 
@@ -451,7 +490,7 @@ export function translateHealth(lang = 'en', cat) {
 }
 
 export function formatPercentile(lang = 'en', val) {
-  if (val == null || isNaN(val)) return "—";
+  if (val == null || isNaN(val)) return "N/A";
   return t(lang, "percentile", Math.round(val));
 }
 

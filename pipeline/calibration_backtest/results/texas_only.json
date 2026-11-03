@@ -1,0 +1,50 @@
+{
+ "P1": {
+  "n": 22860,
+  "folds_without_fit": 0,
+  "mae_bbox_monitors": 2.077,
+  "mae_texas_only": 2.1252,
+  "region_mae_texas_only": {
+   "Austin/San Antonio/Central": 1.58,
+   "DFW": 1.521,
+   "East Texas": 2.605,
+   "El Paso/far West": 4.428,
+   "Houston/Gulf": 1.852,
+   "Panhandle/South Plains": 2.81,
+   "South Texas/RGV": 2.266
+  },
+  "region_mae_bbox": {
+   "Austin/San Antonio/Central": 1.575,
+   "DFW": 1.494,
+   "East Texas": 2.423,
+   "El Paso/far West": 4.135,
+   "Houston/Gulf": 1.837,
+   "Panhandle/South Plains": 2.738,
+   "South Texas/RGV": 2.266
+  }
+ },
+ "P2": {
+  "n": 22860,
+  "folds_without_fit": 0,
+  "mae_bbox_monitors": 2.3628,
+  "mae_texas_only": 2.3925,
+  "region_mae_texas_only": {
+   "Austin/San Antonio/Central": 1.718,
+   "DFW": 1.597,
+   "East Texas": 2.605,
+   "El Paso/far West": 6.035,
+   "Houston/Gulf": 2.04,
+   "Panhandle/South Plains": 2.81,
+   "South Texas/RGV": 2.31
+  },
+  "region_mae_bbox": {
+   "Austin/San Antonio/Central": 1.711,
+   "DFW": 1.551,
+   "East Texas": 2.475,
+   "El Paso/far West": 5.871,
+   "Houston/Gulf": 2.049,
+   "Panhandle/South Plains": 2.738,
+   "South Texas/RGV": 2.31
+  }
+ }
+}

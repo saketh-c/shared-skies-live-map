@@ -145,7 +145,7 @@ export function getAQIInfo(pm25) {
       bg: "rgba(144, 238, 144, 0.12)",
       label: COLOR_SCALE.goodRange.label,
       aqi_range: "Good",
-      health_msg: "Air quality is good — within the U.S. EPA annual PM2.5 standard (9 µg/m³)."
+      health_msg: "Air quality is good: within the U.S. EPA annual PM2.5 standard (9 µg/m³)."
     };
   }
 
@@ -156,7 +156,7 @@ export function getAQIInfo(pm25) {
       bg: "rgba(255, 255, 153, 0.12)",
       label: COLOR_SCALE.moderateRange.label,
       aqi_range: "Moderate",
-      health_msg: "Moderate — above the EPA annual standard. Unusually sensitive people may want to limit prolonged outdoor exertion."
+      health_msg: "Moderate: above the EPA annual standard. Unusually sensitive people may want to limit prolonged outdoor exertion."
     };
   }
 
@@ -167,7 +167,7 @@ export function getAQIInfo(pm25) {
       bg: "rgba(232, 89, 12, 0.12)",
       label: COLOR_SCALE.elevatedRange.label,
       aqi_range: "Elevated",
-      health_msg: "Elevated — above the WHO 24-hour guideline (15 µg/m³). Sensitive groups should limit prolonged outdoor activity."
+      health_msg: "Elevated: approaching or above the WHO 24-hour guideline (15 µg/m³). Sensitive groups should limit prolonged outdoor activity."
     };
   }
 
@@ -178,7 +178,7 @@ export function getAQIInfo(pm25) {
     bg: "rgba(128, 0, 0, 0.12)",
     label: COLOR_SCALE.highRange.label,
     aqi_range: "High",
-    health_msg: "⚠️ High — everyone may begin to feel effects; sensitive groups are at greater risk. Often driven by wildfire smoke or dust."
+    health_msg: "⚠️ High: everyone may begin to feel effects; sensitive groups are at greater risk. Often driven by wildfire smoke or dust."
   };
 }
 

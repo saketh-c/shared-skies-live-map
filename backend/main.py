@@ -1,5 +1,5 @@
 """
-Shared Skies — FastAPI Backend
+Shared Skies: FastAPI Backend
 Serves model-predicted PM2.5 for every Texas census tract, plus per-county
 slices (Dallas, Austin, Houston, San Antonio) of the same statewide result.
 
@@ -91,8 +91,21 @@ PURPLEAIR_BACKOFF_MIN = 5
 DIST_TO_SENSOR_MAX_KM = 164.4
 # A disk snapshot of predictions older than this is not served at startup.
 TEXAS_SNAPSHOT_MAX_AGE_MIN = 24 * 60
+# When a cycle cannot fit the EPA monitor calibration (AirNow down, too few
+# monitors), the last good fit is reused while it is at most this old; after
+# that the map is served uncalibrated and says so.
+CALIBRATION_REUSE_MAX_H = 24
+AIRNOW_SNAPSHOT_PATH = os.path.join(SNAPSHOTS_DIR, "airnow_latest.json")
+CALIBRATION_SNAPSHOT_PATH = os.path.join(SNAPSHOTS_DIR, "calibration_latest.json")
+# Upper bound on one AirNow refresh before a compute. A cold start pulls the
+# sites file plus 30 hourly files (~26 MB); warm cycles pull 0-4 small files.
+# On a timeout the compute goes ahead with whatever hours are stored.
+AIRNOW_REFRESH_TIMEOUT_S = 90
+# An out-of-state AirNow monitor gets a map value in /api/live/sensors only
+# within this distance of a Texas tract centroid.
+MONITOR_ON_MAP_KM = 25.0
 
-# Upstash Redis REST — set these env vars in Render for persistent visit counts.
+# Upstash Redis REST: set these env vars in Render for persistent visit counts.
 # If not set, falls back to SQLite (resets on every server restart).
 UPSTASH_URL   = os.environ.get("UPSTASH_REDIS_REST_URL", "").rstrip("/")
 UPSTASH_TOKEN = os.environ.get("UPSTASH_REDIS_REST_TOKEN", "")
@@ -234,7 +247,7 @@ HMS_CACHE_TTL_MIN = 60  # HMS analysts publish daily and re-draw a few times/day
 # next_attempt drives the refresh loop's schedule and failure backoff.
 _purpleair_cache: dict = {"data": None, "next_attempt": _EPOCH, "failures": 0}
 
-# Open-Meteo grid caches (daily means — refreshing a few times a day is plenty).
+# Open-Meteo grid caches (daily means; refreshing a few times a day is plenty).
 # QUOTA: Open-Meteo's free tier is ~10,000 call-weights/day per API, and a
 # multi-location call weighs ~1 PER LOCATION. Refetching a 254-cell grid every
 # 30-min prediction cycle (48×/day ≈ 12k weights) exhausted the quota and 429'd
@@ -268,6 +281,9 @@ def _grid_recent(snap: dict | None, now: datetime) -> bool:
 # CURRENT-CONDITIONS grid (display-only): one batched 81-cell call per hour is
 # the always-available baseline for every tract/city/overview panel.
 CONDITIONS_TTL_MIN = int(os.environ.get("CONDITIONS_TTL_MIN", "60"))
+# How long a Texas compute waits on a conditions-grid fetch (normally ~2 s;
+# a hanging NWS would otherwise hold the PM2.5 publish for GRID_TIMEOUT_S).
+CONDITIONS_COMPUTE_WAIT_S = 30
 _conditions_cache: dict = {"data": None, "expires": _EPOCH}
 
 # EXACT-location current weather for a CLICKED tract (display only). The grid
@@ -283,6 +299,11 @@ CLICK_WEATHER_TTL_MIN = int(os.environ.get("CLICK_WEATHER_TTL_MIN", "60"))
 CLICK_WEATHER_CACHE_MAX = 2000
 _click_weather_cache = OrderedDict()       # "lat,lon" 0.1° key -> {weather, expires}
 _click_weather_cooldown = {"until": _EPOCH}
+
+# EPA AirNow hourly PM2.5 (backend/airnow.py): a rolling store of hourly files,
+# refreshed before each Texas compute; its 24-hour monitor means drive the map
+# calibration. Replaced by the snapshot hydrate at startup.
+_airnow_store = None
 
 
 # ── Spatial-context reference points (kept in sync with pipeline/03_train_enhanced.py) ──
@@ -328,11 +349,39 @@ def _load_training_sensors() -> list[dict]:
         return []
 
 
+# Training-sensor coordinates, filled by _enrich_tract_lookup_with_distances at
+# startup so point features (EPA monitor sites) use the exact same distances.
+_TRAINING_SENSOR_COORDS: dict = {"lats": None, "lons": None}
+
+# The climatological neighbor pool ({lat, lon, pm25} per sensor) behind the
+# fallback neighbor columns. Point features use it when a cycle has no live
+# PurpleAir, so monitor sites and tracts always share one sensor pool.
+_STATIC_NBR_SENSORS: list[dict] = []
+
+
+def _dist_to_training_sensors(lats, lons) -> np.ndarray:
+    """Haversine km from each point to the nearest training sensor, clipped to
+    the training-network max. Training computed sensor->nearest-OTHER-sensor
+    (max ~164km); tracts can be ~195km from any sensor. Clipping keeps rural
+    points in the tree models' training distribution instead of extrapolating
+    into never-seen feature space. Training max for every point if the sensor
+    list is missing."""
+    lats = np.asarray(lats, dtype=np.float64)
+    lons = np.asarray(lons, dtype=np.float64)
+    s_lats, s_lons = _TRAINING_SENSOR_COORDS["lats"], _TRAINING_SENSOR_COORDS["lons"]
+    if s_lats is None or len(s_lats) == 0:
+        return np.full(len(lats), DIST_TO_SENSOR_MAX_KM)
+    nearest = np.full(len(lats), np.inf)
+    for sl, slo in zip(s_lats, s_lons):
+        nearest = np.minimum(nearest, _haversine_km_np(lats, lons, sl, slo))
+    return np.clip(nearest, 0.0, DIST_TO_SENSOR_MAX_KM)
+
+
 def _enrich_tract_lookup_with_distances(df: pd.DataFrame) -> None:
     """Add dist_to_nearest_sensor, dist_to_coast, dist_to_urban to tract_lookup in place.
     The model uses these features at inference. Sensor locations come ONLY from
     models/training_sensors.json, the exact pre-QC set training used. Idempotent
-    — no-op if columns already exist."""
+    (a no-op if columns already exist)."""
     if {"dist_to_nearest_sensor", "dist_to_coast", "dist_to_urban"} <= set(df.columns):
         return
     lats = df["lat"].values
@@ -352,16 +401,9 @@ def _enrich_tract_lookup_with_distances(df: pd.DataFrame) -> None:
         print("!" * 70)
         df["dist_to_nearest_sensor"] = DIST_TO_SENSOR_MAX_KM
     else:
-        sensor_lats = np.array([s["lat"] for s in sensors])
-        sensor_lons = np.array([s["lon"] for s in sensors])
-        nearest = np.full(len(df), np.inf)
-        for sl, slo in zip(sensor_lats, sensor_lons):
-            nearest = np.minimum(nearest, _haversine_km_np(lats, lons, sl, slo))
-        # Clip to the training-network max. Training computed sensor->nearest-OTHER-
-        # sensor (max ~164km); tracts can be ~195km from any sensor. Clipping keeps
-        # rural tracts in the tree models' training distribution instead of
-        # extrapolating into never-seen feature space.
-        nearest = np.clip(nearest, 0.0, DIST_TO_SENSOR_MAX_KM)
+        _TRAINING_SENSOR_COORDS["lats"] = np.array([s["lat"] for s in sensors])
+        _TRAINING_SENSOR_COORDS["lons"] = np.array([s["lon"] for s in sensors])
+        nearest = _dist_to_training_sensors(lats, lons)
         df["dist_to_nearest_sensor"] = nearest
         print(f"  enriched lookup from {len(sensors)} training sensors: "
               f"dist_to_nearest_sensor median={np.median(nearest):.2f} km, "
@@ -389,6 +431,7 @@ def _enrich_tract_lookup_with_distances(df: pd.DataFrame) -> None:
             nbr_feats = compute_neighbor_features(lats, lons, static_sensors)
             if nbr_feats is None:
                 raise ValueError("too few sensors for neighbor features")
+            _STATIC_NBR_SENSORS[:] = static_sensors
             for fname, arr in nbr_feats.items():
                 df[fname] = arr
             print(f"  neighbor features (climatological fallback): nbr_pm25_50km "
@@ -401,7 +444,7 @@ def _enrich_tract_lookup_with_distances(df: pd.DataFrame) -> None:
                 df[f"nbr_count_{r_km}km"] = 0
             df["nbr_std_50km"] = 0.0
     else:
-        # Pre-v3 deployment — model doesn't use these features. Backend's
+        # Pre-v3 deployment: model doesn't use these features. Backend's
         # run_predictions_batch only picks features the bundle requests, so
         # leaving them off costs nothing.
         print(f"  no {os.path.basename(nbr_path)} (pre-v3 model); skipping neighbor features")
@@ -515,6 +558,7 @@ def _hydrate_from_snapshots() -> None:
     disk is ephemeral so this mostly helps local dev; it must never present
     old live data as current."""
     global _quantum_cache, _hms_cache, _purpleair_cache, _wgrid_cache, _aq_cache, _conditions_cache
+    global _airnow_store
     now = datetime.now(timezone.utc)
 
     texas_snap = _load_snapshot(TEXAS_SNAPSHOT_PATH)
@@ -528,6 +572,24 @@ def _hydrate_from_snapshots() -> None:
             print(f"Ignoring Texas predictions snapshot ({type(e).__name__}: {e})")
     elif texas_snap:
         print("Ignoring Texas predictions snapshot (too old or unreadable)")
+
+    # Last good monitor calibration: reusable while it is young enough, so a
+    # restart during an AirNow outage still serves a calibrated map.
+    cal_snap = _load_snapshot(CALIBRATION_SNAPSHOT_PATH)
+    cal_age = _age_min((cal_snap or {}).get("fitted_at"), now)
+    if cal_snap and cal_snap.get("calibration") and cal_age is not None \
+            and cal_age <= CALIBRATION_REUSE_MAX_H * 60:
+        state["last_calibration"] = cal_snap
+        print(f"Loaded calibration snapshot ({cal_age:.0f} min old)")
+
+    # AirNow hourly store: hours past the 30-hour window are ignored and then
+    # pruned, so an old snapshot only saves re-downloading the sites file.
+    from backend.airnow import AirNowStore
+    airnow_snap = _load_snapshot(AIRNOW_SNAPSHOT_PATH)
+    if airnow_snap:
+        _airnow_store = AirNowStore.from_snapshot(airnow_snap)
+        print(f"Loaded AirNow snapshot ({len(_airnow_store.sites)} sites, "
+              f"{len(_airnow_store.hours)} hours)")
 
     quantum_snap = _load_snapshot(QUANTUM_SNAPSHOT_PATH)
     q_ts = _parse_ts((quantum_snap or {}).get("generated_at"))
@@ -618,6 +680,8 @@ async def lifespan(app: FastAPI):
     state["cache_texas_by_geoid"] = {}
     state["texas_payload"] = None
     state["city_cache"] = {}
+    state["live_points"] = None
+    state["last_calibration"] = None
     state["texas_first_attempt"] = asyncio.Event()
     try:
         await asyncio.to_thread(_hydrate_from_snapshots)
@@ -637,7 +701,7 @@ async def lifespan(app: FastAPI):
 
     # Keepalive loop: pings an external URL every ~14 min so Render's free tier
     # never spins us down. Internal health() calls do NOT count as external traffic
-    # to Render — we must actually hit the public URL.
+    # to Render; we must actually hit the public URL.
     async def _keepalive_loop():
         # Prefer explicit override, otherwise auto-detect Render's public URL.
         url = (
@@ -652,7 +716,7 @@ async def lifespan(app: FastAPI):
             interval = 840
 
         if not url:
-            print("Keepalive: no KEEPALIVE_URL or RENDER_EXTERNAL_URL set — disabled. "
+            print("Keepalive: no KEEPALIVE_URL or RENDER_EXTERNAL_URL set; disabled. "
                   "Cold starts will happen after 15 min of inactivity.")
             return
 
@@ -712,7 +776,7 @@ app = FastAPI(title="Shared Skies API", lifespan=lifespan)
 # it down WITHOUT a code change, set ALLOWED_ORIGINS in the environment to a
 # comma-separated allowlist, e.g.
 #   ALLOWED_ORIGINS=https://sharedskiesinitiative.org,https://shared-skies-initiative.vercel.app
-# NOTE: CORS is a browser-enforced READ guard — it does NOT stop a script/curl
+# NOTE: CORS is a browser-enforced READ guard; it does NOT stop a script/curl
 # from POSTing /api/visit, so it is not what protects the visit counter (the
 # per-IP dedupe in record_visit does that). Methods are limited to the verbs the
 # API actually serves.
@@ -739,7 +803,7 @@ if os.path.exists(STATIC_DIR):
 # ── Utilities ─────────────────────────────────────────────────────────────────
 
 # Weather fallback = exact TRAINING MEDIANS (and training units: °C, %, surface
-# hPa, m/s, mm). The old fallback {72, 55, 1013, 8} was °F/MSL-shaped — values
+# hPa, m/s, mm). The old fallback {72, 55, 1013, 8} was °F/MSL-shaped: values
 # the model never saw in training (temperature median is 20.2 °C; pressure is
 # SURFACE pressure ~991 hPa, not sea-level 1013).
 WEATHER_FALLBACK = {
@@ -758,7 +822,7 @@ DISPLAY_WEATHER_FALLBACK = {
 
 def _weather_fallback() -> dict:
     """Model-unit fallback weather (training medians) WITH a converted display
-    dict. Display fallbacks must NEVER expose bare model units — that once
+    dict. Display fallbacks must NEVER expose bare model units; that once
     rendered the 20.2 °C training median as '20 °F' on every tract."""
     w = dict(WEATHER_FALLBACK)
     w["display"] = dict(DISPLAY_WEATHER_FALLBACK)
@@ -766,27 +830,42 @@ def _weather_fallback() -> dict:
 
 
 async def _fetch_conditions_grid() -> dict | None:
-    """One conditions-grid fetch (run single-flight by _get_conditions_grid)."""
+    """One conditions-grid fetch (run single-flight by _get_conditions_grid).
+    NWS station observations first (backend/nws.py); Open-Meteo, whose calls
+    fail from Render's shared egress IP, only as the fallback."""
     global _conditions_cache
     now = datetime.now(timezone.utc)
     cached = _conditions_cache.get("data")
     lookup = state.get("tract_lookup")
     if lookup is None:
         return cached if cached and cached.get("usable") else None
+    lats, lons = lookup["lat"].values, lookup["lon"].values
     try:
-        from backend.airquality import fetch_conditions_grid
-        snap = await fetch_conditions_grid(lookup["lat"].values, lookup["lon"].values)
+        from backend import nws
+        snap = await nws.fetch_conditions_grid(lats, lons)
     except Exception as e:
-        print(f"[conditions] fetch raised: {e}")
+        print(f"[conditions] NWS fetch raised: {e}")
         snap = None
+    if not (snap and snap.get("usable")):
+        try:
+            from backend.airquality import fetch_conditions_grid
+            snap = await fetch_conditions_grid(lats, lons)
+            if snap:
+                snap["source"] = "open-meteo"
+        except Exception as e:
+            print(f"[conditions] Open-Meteo fetch raised: {e}")
+            snap = None
     if snap and snap.get("usable"):
         _conditions_cache = {"data": snap, "expires": now + timedelta(minutes=CONDITIONS_TTL_MIN)}
         await _save_snapshot_async(CONDITIONS_SNAPSHOT_PATH, snap)
         return snap
+    # Back off 15 min either way, so an outage costs one attempt per backoff
+    # rather than one per caller (an NWS brownout takes the full grid timeout).
+    _conditions_cache["expires"] = now + timedelta(minutes=15)
     if cached and cached.get("usable"):
-        print("[conditions] refetch failed — serving stale conditions (backoff 15 min)")
-        _conditions_cache["expires"] = now + timedelta(minutes=15)
+        print("[conditions] refetch failed; serving stale conditions (backoff 15 min)")
         return cached
+    print("[conditions] fetch failed and nothing cached; display fallback (backoff 15 min)")
     return None
 
 
@@ -795,13 +874,12 @@ async def _get_conditions_grid(allow_fetch: bool = True) -> dict | None:
     snapshot, stale-on-failure with 15-min backoff). The ONLY source of
     'Current Conditions' shown in the UI. The refresh loop keeps it current
     through each Texas compute; request handlers pass allow_fetch=False so
-    traffic never triggers the fetch."""
+    traffic never triggers the fetch. Before `expires` (the TTL, or a failure
+    backoff) it returns what is cached, if anything, without fetching."""
     cached = _conditions_cache.get("data")
-    if cached and cached.get("usable") and (
-            not allow_fetch or datetime.now(timezone.utc) < _conditions_cache["expires"]):
-        return cached
-    if not allow_fetch:
-        return None
+    usable = cached if cached and cached.get("usable") else None
+    if not allow_fetch or datetime.now(timezone.utc) < _conditions_cache["expires"]:
+        return usable
     return await _single_flight("conditions", _fetch_conditions_grid)
 
 
@@ -815,7 +893,7 @@ async def get_display_weather(lat: float, lon: float, allow_fetch: bool = True) 
         by_key = grid["by_key"]
         v = by_key.get(conditions_cell_key(lat, lon))
         if v is None:
-            # Nearest occupied cell (e.g. coastal/border rounding) — ~81 keys.
+            # Nearest occupied cell (e.g. coastal/border rounding), ~81 keys.
             try:
                 best, best_d = None, float("inf")
                 for k, vals in by_key.items():
@@ -827,15 +905,29 @@ async def get_display_weather(lat: float, lon: float, allow_fetch: bool = True) 
             except Exception:
                 v = None
         if v is not None:
-            return dict(v)
-    return dict(DISPLAY_WEATHER_FALLBACK)
+            out = dict(v)
+            # Snapshots from before NWS carry no source: those were Open-Meteo.
+            out.setdefault("source", grid.get("source") or "open-meteo")
+            return out
+    return {**DISPLAY_WEATHER_FALLBACK, "source": "fallback"}
 
 
 async def get_click_weather(lat: float, lon: float) -> dict:
-    """EXACT-location current weather (display units) for a clicked tract, with
-    a per-0.1°-cell shared cache. On cooldown or any failure, falls back to the
-    coarse conditions grid (location-varying) — so a quota outage degrades to
-    'slightly coarse' instead of the old 'frozen statewide constant'."""
+    """EXACT-location current weather (display units) for a clicked tract.
+    First the nearest NWS station observation (backend/nws.py caches each
+    station for 20 min, so this is at most one call per station per 20 min).
+    Then an Open-Meteo point fetch with a per-0.1°-cell shared cache. On
+    cooldown or any failure, the coarse conditions grid (location-varying), so
+    an outage degrades to 'slightly coarse' instead of a frozen statewide
+    constant."""
+    try:
+        from backend import nws
+        obs = await nws.fetch_point_current(float(lat), float(lon))
+    except Exception as e:
+        print(f"[click-weather] NWS raised ({type(e).__name__}: {e})")
+        obs = None
+    if obs is not None:
+        return obs
     key = f"{round(float(lat), 1):.1f},{round(float(lon), 1):.1f}"
     now = datetime.now(timezone.utc)
     hit = _click_weather_cache.get(key)
@@ -864,6 +956,7 @@ async def get_click_weather(lat: float, lon: float) -> dict:
             "humidity":    round(float(cur.get("relative_humidity_2m") or 0), 1),
             "pressure":    round(float(cur.get("pressure_msl") or 1013.0), 1),
             "wind_speed":  round(float(cur.get("wind_speed_10m") or 0), 1),
+            "source":      "open-meteo",
         }
         _click_weather_cache[key] = {"weather": weather, "expires": now + timedelta(minutes=CLICK_WEATHER_TTL_MIN)}
         if len(_click_weather_cache) > CLICK_WEATHER_CACHE_MAX:
@@ -940,7 +1033,7 @@ def _compute_v3_shared(weather: dict, temporal: dict) -> dict:
     # The cold-start single-tract path reads these from `shared`;
     # without them the model would silently receive 0.0 → train/serve skew. The
     # three previously-computed extras (wind_x_season / humidity_x_season /
-    # precip_x_temp) were never model features — dead compute — so they stay gone.
+    # precip_x_temp) were never model features (dead compute), so they stay gone.
     shared["temp_x_humidity"] = temp * hum / 100.0
     shared["wind_x_temp"] = ws * temp / 100.0
     return shared
@@ -1021,8 +1114,8 @@ def hex_to_rgb(hex_color):
 
 
 def rgb_to_hex(rgb):
-    """Convert RGB tuple to hex color. Uses round-half-up (int(c+0.5)) — matching
-    JS Math.round for non-negative values — so the backend's per-tract `color`
+    """Convert RGB tuple to hex color. Uses round-half-up (int(c+0.5)), matching
+    JS Math.round for non-negative values, so the backend's per-tract `color`
     is BYTE-IDENTICAL to the frontend legend's pm25Color (avoids Python's
     banker's rounding diverging by 1 LSB at exact .5 midpoints)."""
     return '#{:02x}{:02x}{:02x}'.format(
@@ -1108,28 +1201,28 @@ def pm25_info(pm25: float) -> dict:
             "category": "Good",
             "color": color,
             "aqi_range": "0–9",
-            "health_msg": "Air quality is good — within the U.S. EPA annual PM2.5 standard (9 µg/m³).",
+            "health_msg": "Air quality is good: within the U.S. EPA annual PM2.5 standard (9 µg/m³).",
         }
     elif pm25 <= 13.0:
         return {
             "category": "Moderate",
             "color": color,
             "aqi_range": "9–13",
-            "health_msg": "Moderate — above the EPA annual standard. Unusually sensitive people may want to limit prolonged outdoor exertion.",
+            "health_msg": "Moderate: above the EPA annual standard. Unusually sensitive people may want to limit prolonged outdoor exertion.",
         }
     elif pm25 <= 17.0:
         return {
             "category": "Elevated",
             "color": color,
             "aqi_range": "13–17",
-            "health_msg": "Elevated — above the WHO 24-hour guideline (15 µg/m³). Sensitive groups should limit prolonged outdoor activity.",
+            "health_msg": "Elevated: approaching or above the WHO 24-hour guideline (15 µg/m³). Sensitive groups should limit prolonged outdoor activity.",
         }
     else:
         return {
             "category": "High",
             "color": color,
             "aqi_range": "17+",
-            "health_msg": "⚠️ High — everyone may begin to feel effects; sensitive groups are at greater risk. Often driven by wildfire smoke or dust.",
+            "health_msg": "⚠️ High: everyone may begin to feel effects; sensitive groups are at greater risk. Often driven by wildfire smoke or dust.",
         }
 
 
@@ -1165,7 +1258,7 @@ async def get_city_predictions(city: str):
     if not tracts:
         raise HTTPException(404, f"No tracts found for city: {city}")
 
-    # City-center CURRENT conditions (display only, from the cached cell grid —
+    # City-center CURRENT conditions (display only, from the cached cell grid,
     # no direct API call).
     weather_display = await get_display_weather(*city_config["center"], allow_fetch=False)
 
@@ -1259,7 +1352,7 @@ async def _get_public_visit_count() -> int:
     if cached_count is not None and expires_at is not None and now < expires_at:
         return cached_count
 
-    # Cache miss or expired — read the true count and refresh the cache.
+    # Cache miss or expired: read the true count and refresh the cache.
     try:
         if UPSTASH_URL and UPSTASH_TOKEN:
             count = await _upstash_get()
@@ -1287,7 +1380,7 @@ def _purpleair_key_configured() -> bool:
 async def health():
     """Health + live-data-source status. The data_sources block makes silent
     degradation visible: if PurpleAir/HMS/weather quietly fail, predictions
-    fall back to climatology/medians — operators need to SEE that. Reads
+    fall back to climatology/medians, and operators need to SEE that. Reads
     in-memory state only, so it is safe as Render's health check. HTTP status
     is always 200: a degraded map is still worth serving, and a non-200 would
     make Render restart the instance."""
@@ -1296,6 +1389,7 @@ async def health():
     texas = state.get("cache_texas", {}).get("data") or {}
     bundle = state.get("bundle")
     sources = texas.get("data_sources", {})
+    calibration = texas.get("calibration") or {}
     live_neighbors = bool(sources.get("using_live_neighbors"))
     predictions_age = _age_min(texas.get("generated_at"), now)
     purpleair_age = _age_min(pa.get("fetched_at"), now) if pa.get("usable") else None
@@ -1325,6 +1419,14 @@ async def health():
         "refresh_interval_min": PURPLEAIR_CACHE_TTL_MIN,
         "memory_rss_mb": _rss_mb(),
         "conditions_fetched_at": (_conditions_cache.get("data") or {}).get("fetched_at"),
+        "conditions_source": sources.get("conditions_source"),
+        "weather_grid_fetched_at": (_wgrid_cache.get("data") or {}).get("fetched_at"),
+        "airquality_fetched_at": (_aq_cache.get("data") or {}).get("fetched_at"),
+        # EPA monitor calibration of the map currently served.
+        "airnow_monitors": sources.get("airnow_monitors"),
+        "airnow_window_end": calibration.get("window_end"),
+        "calibration_applied": bool(calibration.get("applied")),
+        "calibration_mae_loo": (calibration.get("loo") or {}).get("mae"),
         "data_sources": sources,
     }
 
@@ -1410,17 +1512,17 @@ async def _fetch_weather_grid(lats, lons) -> dict | None:
     if _grid_matches(cached, len(lats), WEATHER_GRID_SCHEMA):
         _wgrid_cache["expires"] = now + timedelta(minutes=30)
         if _grid_recent(cached, now):
-            print("[weather-grid] refetch failed — serving stale cached grid (backoff 30 min)")
+            print("[weather-grid] refetch failed; serving stale cached grid (backoff 30 min)")
             return cached
         print(f"[weather-grid] refetch failed and the cached grid is over "
-              f"{OPENMETEO_STALE_MAX_H} h old — using training-median weather (backoff 30 min)")
+              f"{OPENMETEO_STALE_MAX_H} h old; using training-median weather (backoff 30 min)")
     return None
 
 
 async def _get_weather_grid(lats, lons) -> dict | None:
     """Cached per-tract daily weather grid (TTL 6h, capped at the UTC day, +
     disk snapshot). On refetch failure, serves the stale grid for up to a day
-    and backs off 30 min — never hammers a quota-exhausted API every cycle."""
+    and backs off 30 min, so it never hammers a quota-exhausted API every cycle."""
     from backend.airquality import WEATHER_GRID_SCHEMA
     cached = _wgrid_cache.get("data")
     now = datetime.now(timezone.utc)
@@ -1448,16 +1550,16 @@ async def _fetch_aq_snapshot(lats, lons, include_met: bool) -> dict | None:
     if _grid_matches(cached, len(lats)):
         _aq_cache["expires"] = now + timedelta(minutes=30)
         if _grid_recent(cached, now):
-            print("[airquality] refetch failed — serving stale cached snapshot (backoff 30 min)")
+            print("[airquality] refetch failed; serving stale cached snapshot (backoff 30 min)")
             return cached
         print(f"[airquality] refetch failed and the cached snapshot is over "
-              f"{OPENMETEO_STALE_MAX_H} h old — using training-median fill (backoff 30 min)")
+              f"{OPENMETEO_STALE_MAX_H} h old; using training-median fill (backoff 30 min)")
     return None
 
 
 async def _get_aq_snapshot(lats, lons, include_met: bool) -> dict | None:
     """Cached per-tract CAMS air-quality snapshot (TTL 6h, capped at the UTC
-    day, + disk snapshot, stale-on-failure). Was refetched EVERY 30-min cycle before — the main
+    day, + disk snapshot, stale-on-failure). Was refetched EVERY 30-min cycle before; the main
     Open-Meteo quota burner."""
     cached = _aq_cache.get("data")
     now = datetime.now(timezone.utc)
@@ -1478,6 +1580,51 @@ def _live_purpleair(now: datetime | None = None) -> dict | None:
     return snap
 
 
+def _get_airnow_store():
+    global _airnow_store
+    if _airnow_store is None:
+        from backend.airnow import AirNowStore
+        _airnow_store = AirNowStore()
+    return _airnow_store
+
+
+def _current_airnow_means(now: datetime) -> dict | None:
+    """This cycle's AirNow 24-hour monitor means, or None when the store has no
+    usable window (too few monitors, or the newest full window is too old).
+    Only regulatory monitors (numeric AQS ids) are kept: the calibration was
+    backtested on AQS data, which never includes the temporary US Forest
+    Service smoke monitors (ids like MMFS...) that AirNow lists during fires."""
+    m = _get_airnow_store().latest_means(now)
+    if not m.get("usable"):
+        if m.get("reason"):
+            print(f"[airnow] no usable 24-hour window: {m['reason']}")
+        return None
+    return {**m, "monitors": [mon for mon in m.get("monitors") or []
+                              if str(mon.get("id", "")).isdigit()]}
+
+
+async def _refresh_airnow() -> None:
+    """Bring the AirNow hourly store up to date (bounded by
+    AIRNOW_REFRESH_TIMEOUT_S; never raises) and snapshot it when it changed."""
+    store = _get_airnow_store()
+    try:
+        summary = await asyncio.wait_for(store.refresh(datetime.now(timezone.utc)),
+                                         timeout=AIRNOW_REFRESH_TIMEOUT_S)
+    except asyncio.TimeoutError:
+        print(f"[airnow] refresh timed out after {AIRNOW_REFRESH_TIMEOUT_S} s; "
+              f"computing with {len(store.hours)} stored hours")
+        return
+    except Exception as e:
+        print(f"[airnow] refresh raised: {type(e).__name__}: {e}")
+        return
+    fetched = len(summary.get("fetched", [])) + len(summary.get("refetched", []))
+    print(f"[airnow] refresh: {fetched} hourly files, {summary.get('bytes', 0)/1e6:.1f} MB, "
+          f"{summary.get('hours_stored', 0)} hours stored, {summary.get('seconds', 0)} s"
+          + (f"; errors: {summary['errors'][:3]}" if summary.get("errors") else ""))
+    if summary.get("changed"):
+        await _save_snapshot_async(AIRNOW_SNAPSHOT_PATH, store.to_snapshot())
+
+
 # Per-tract keys copied from the lookup into every tract dict (EJScreen
 # context for the UI and the sensor-placement solver, never model inputs).
 _TRACT_CONTEXT_COLS = (
@@ -1486,9 +1633,47 @@ _TRACT_CONTEXT_COLS = (
 )
 
 
-def _build_tracts(lookup: pd.DataFrame, pm25_array: np.ndarray) -> list[dict]:
-    """Per-tract response dicts, in lookup order. Column lists instead of
-    iterrows: same values, a fraction of the time."""
+def _point_feature_frame(lookup_reset: pd.DataFrame, lats, lons,
+                         nbr_sensors: list[dict], smoke_polys) -> pd.DataFrame:
+    """Model feature rows at arbitrary points (EPA monitor sites), built the
+    same way as the tract batch so a monitor's raw model value is what a tract
+    centroid at that spot would get. Computed AT the point: lat/lon, the
+    multi-radius neighbor PM2.5 from this cycle's sensor pool,
+    dist_to_nearest_sensor, dist_to_coast and HMS smoke. Per-cell inputs
+    (gridded daily weather and its interactions, CAMS aod/cams_pm25) are copied
+    from the nearest tract centroid, which shares the point's grid cell."""
+    from backend.purpleair import compute_neighbor_features
+    lats = np.asarray(lats, dtype=np.float64)
+    lons = np.asarray(lons, dtype=np.float64)
+    t_lat = lookup_reset["lat"].to_numpy(dtype=np.float64)
+    t_lon = lookup_reset["lon"].to_numpy(dtype=np.float64)
+    nearest = _haversine_km_np(lats[:, None], lons[:, None],
+                               t_lat[None, :], t_lon[None, :]).argmin(axis=1)
+    df = lookup_reset.iloc[nearest].reset_index(drop=True).copy()
+    df["lat"] = lats
+    df["lon"] = lons
+    nbr = compute_neighbor_features(lats, lons, nbr_sensors)
+    if nbr is not None:
+        for fname, arr in nbr.items():
+            df[fname] = arr
+    df["dist_to_nearest_sensor"] = _dist_to_training_sensors(lats, lons)
+    df["dist_to_coast"] = _min_dist_to_points(lats, lons, TX_COAST_POINTS)
+    df["dist_to_urban"] = _min_dist_to_points(lats, lons, TX_URBAN_POINTS)
+    if smoke_polys:
+        from backend.hms import smoke_density_at
+        df["hms_smoke"] = np.array([smoke_density_at(smoke_polys, float(lo), float(la))
+                                    for la, lo in zip(lats, lons)], dtype=np.int16)
+    elif "hms_smoke" in df.columns:
+        df["hms_smoke"] = 0
+    return df
+
+
+def _build_tracts(lookup: pd.DataFrame, pm25_array: np.ndarray,
+                  model_array: np.ndarray | None = None) -> list[dict]:
+    """Per-tract response dicts, in lookup order. `pm25_array` is the displayed
+    value (calibrated when calibration applied); `model_array` is the raw model
+    output, published as pm25_model. Column lists instead of iterrows: same
+    values, a fraction of the time."""
     n = len(lookup)
     geoids = lookup["GEOID"].tolist()
     lats = lookup["lat"].tolist()
@@ -1496,6 +1681,8 @@ def _build_tracts(lookup: pd.DataFrame, pm25_array: np.ndarray) -> list[dict]:
     ctx = {c: (lookup[c].tolist() if c in lookup.columns else [None] * n)
            for c in _TRACT_CONTEXT_COLS}
     counties = lookup["CNTY_NAME"].tolist() if "CNTY_NAME" in lookup.columns else ["Texas"] * n
+    if model_array is None:
+        model_array = pm25_array
     tracts = []
     for i in range(n):
         pm25 = round(float(pm25_array[i]), 2)
@@ -1505,6 +1692,7 @@ def _build_tracts(lookup: pd.DataFrame, pm25_array: np.ndarray) -> list[dict]:
             "lat":                 round(float(lats[i]), 6),
             "lon":                 round(float(lons[i]), 6),
             "pm25":                pm25,
+            "pm25_model":          round(float(model_array[i]), 2),
             "epa_aqi":             pm25_to_epa_aqi(pm25),
             "category":            info["category"],
             "color":               info["color"],
@@ -1542,12 +1730,113 @@ def _set_texas_result(result: dict, payload: dict) -> None:
     state["city_cache"] = {}
 
 
+def _round_or_none(val, nd: int = 1):
+    """Rounded float, or None for missing/NaN (JSON-safe)."""
+    try:
+        f = float(val)
+    except (TypeError, ValueError):
+        return None
+    return round(f, nd) if math.isfinite(f) else None
+
+
+def _calibrate(monitors: list[dict], mon_model: np.ndarray, airnow: dict | None,
+               last: dict | None, now: datetime):
+    """Fit this cycle's monitor calibration (backend/calibration.py, validated by
+    the multi-year backtest). Falls back to the last good fit while it is at
+    most CALIBRATION_REUSE_MAX_H old, else no calibration.
+
+    Returns (calibration object or None, public calibration block, leave-one-out
+    values at the monitors, the new last-good record or None)."""
+    from backend import calibration as C
+    n = len(monitors)
+    lat = np.array([m["lat"] for m in monitors], dtype=np.float64)
+    lon = np.array([m["lon"] for m in monitors], dtype=np.float64)
+    truth = np.array([m["pm25"] for m in monitors], dtype=np.float64)
+    model = np.asarray(mon_model, dtype=np.float64)
+
+    cal = C.fit(lat, lon, truth, model) if n else None
+    new_last = None
+    reused_from = None
+    fitted_at = now.isoformat()
+    if cal is not None:
+        new_last = {"calibration": cal.to_dict(), "fitted_at": fitted_at,
+                    "monitors_used": int(cal.n_monitors),
+                    "window_start": (airnow or {}).get("window_start"),
+                    "window_end": (airnow or {}).get("window_end")}
+    elif last:
+        age = _age_min(last.get("fitted_at"), now)
+        if age is not None and age <= CALIBRATION_REUSE_MAX_H * 60:
+            try:
+                cal = C.Calibration.from_dict(last["calibration"])
+                reused_from = last["fitted_at"]
+                fitted_at = last["fitted_at"]
+            except Exception as e:
+                print(f"[calibration] could not reuse the last fit ({type(e).__name__}: {e})")
+                cal = None
+
+    loo = np.full(n, np.nan)
+    if n and cal is not None and reused_from is None:
+        loo = np.asarray(C.loo_values(lat, lon, truth, model), dtype=np.float64)
+    used = last if reused_from else new_last
+    block = {
+        "applied":       cal is not None,
+        "method":        C.METHOD_ID,
+        "monitors_used": int((used or {}).get("monitors_used") or 0) if cal is not None else n,
+        "window_start":  (used or airnow or {}).get("window_start"),
+        "window_end":    (used or airnow or {}).get("window_end"),
+        "fitted_at":     fitted_at if cal is not None else None,
+        "reused_from":   reused_from,
+        # Held-out accuracy of the displayed map; only defined for a fit made
+        # from this cycle's monitors.
+        "loo":           (C.metrics(loo, truth) if n and cal is not None and reused_from is None
+                          and np.isfinite(loo).any() else None),
+        "uncalibrated":  C.metrics(model, truth) if n else None,
+    }
+    return cal, block, loo, new_last
+
+
 def _predict_and_package(lookup_reset: pd.DataFrame, weather: dict, temporal: dict,
-                         header: dict) -> tuple[dict, dict]:
-    """Worker-thread half of a compute: model predict, tract dicts, JSON +
-    gzip encoding. Nothing here touches the event loop."""
-    pm25_array = run_predictions_batch(lookup_reset, weather, temporal)
-    tracts = _build_tracts(lookup_reset, pm25_array)
+                         header: dict, points: dict | None = None):
+    """Worker-thread half of a compute: model predict (tracts, plus EPA monitor
+    sites when there are any), monitor calibration, tract dicts, the live-points
+    payload, JSON + gzip encoding. Nothing here touches the event loop.
+
+    `points` = {"monitors": [...], "mon_df": DataFrame | None, "sensors": [...],
+    "airnow": latest-means dict | None, "last_calibration": dict | None,
+    "now": datetime, "purpleair_fetched_at": ISO | None}.
+    Returns (result, payload, live_points, new_last_calibration)."""
+    points = points or {}
+    now = points.get("now") or datetime.now(timezone.utc)
+    model_array = run_predictions_batch(lookup_reset, weather, temporal)
+
+    monitors = points.get("monitors") or []
+    mon_df = points.get("mon_df")
+    cal, block, new_last = None, None, None
+    loo = mon_model = np.array([])
+    if monitors and mon_df is not None:
+        mon_model = run_predictions_batch(mon_df, weather, temporal)
+    if monitors or points.get("last_calibration"):
+        try:
+            cal, block, loo, new_last = _calibrate(
+                monitors, mon_model, points.get("airnow"), points.get("last_calibration"), now)
+        except Exception as e:
+            # A calibration bug must never cost the map: serve raw values.
+            print(f"[calibration] failed ({type(e).__name__}: {e}); serving uncalibrated values")
+            cal, block, new_last = None, None, None
+            loo = np.full(len(monitors), np.nan)
+    if block is None:
+        block = {"applied": False, "method": None, "monitors_used": len(monitors),
+                 "window_start": (points.get("airnow") or {}).get("window_start"),
+                 "window_end": (points.get("airnow") or {}).get("window_end"),
+                 "fitted_at": None, "reused_from": None, "loo": None,
+                 "uncalibrated": None}
+
+    if cal is not None:
+        pm25_array = cal.apply(lookup_reset["lat"].to_numpy(dtype=np.float64),
+                               lookup_reset["lon"].to_numpy(dtype=np.float64), model_array)
+    else:
+        pm25_array = model_array
+    tracts = _build_tracts(lookup_reset, pm25_array, model_array)
     avg_pm25 = round(float(np.mean([t["pm25"] for t in tracts])), 2)
     result = {
         **header,
@@ -1555,12 +1844,67 @@ def _predict_and_package(lookup_reset: pd.DataFrame, weather: dict, temporal: di
         "avg_epa_aqi":  pm25_to_epa_aqi(avg_pm25),
         "avg_info":     pm25_info(avg_pm25),
         "tract_count":  len(tracts),
+        "calibration":  block,
     }
+    if block["applied"]:
+        result["value_semantics"] = (
+            "Model-predicted 24-hour-average PM2.5 (µg/m³) per census tract, "
+            "calibrated to EPA AirNow monitors")
     # Keep the public key order: data_sources/value_semantics/tracts last.
     for k in ("data_sources", "value_semantics"):
         result[k] = result.pop(k)
     result["tracts"] = tracts
-    return result, _encode_payload(result)
+
+    # Live ground observations for the map layers, on the same scale as the map.
+    sensors = points.get("sensors") or []
+    s_raw = np.array([s["pm25"] for s in sensors], dtype=np.float64)
+    if cal is not None and len(sensors):
+        s_cal = cal.apply(np.array([s["lat"] for s in sensors], dtype=np.float64),
+                          np.array([s["lon"] for s in sensors], dtype=np.float64), s_raw)
+    else:
+        s_cal = s_raw
+    m_lat = np.array([m["lat"] for m in monitors], dtype=np.float64)
+    m_lon = np.array([m["lon"] for m in monitors], dtype=np.float64)
+    mapped = cal.apply(m_lat, m_lon, mon_model) if cal is not None and len(monitors) else mon_model
+    # The map draws Texas tracts only. Out-of-state monitors still anchor the
+    # calibration, but get a map value only when they sit next to Texas tracts
+    # (El Paso's New Mexico neighbors); elsewhere it would be an extrapolation
+    # the map never shows.
+    on_map = np.array([str(m.get("id", "")).startswith("48") for m in monitors], dtype=bool)
+    if len(monitors):
+        near_km = _haversine_km_np(
+            m_lat[:, None], m_lon[:, None],
+            lookup_reset["lat"].to_numpy(dtype=np.float64)[None, :],
+            lookup_reset["lon"].to_numpy(dtype=np.float64)[None, :]).min(axis=1)
+        on_map |= near_km <= MONITOR_ON_MAP_KM
+    airnow = points.get("airnow") or {}
+    live_points = {
+        "generated_at": header.get("generated_at"),
+        "calibration_applied": bool(block["applied"]),
+        "purpleair": {
+            "fetched_at": points.get("purpleair_fetched_at"),
+            "count": len(sensors),
+            "value_semantics": "PurpleAir 24-hour average (raw ATM channel)",
+            "sensors": [{"lat": round(float(s["lat"]), 3), "lon": round(float(s["lon"]), 3),
+                         "pm25_raw": _round_or_none(s_raw[i]), "pm25": _round_or_none(s_cal[i])}
+                        for i, s in enumerate(sensors)],
+        },
+        "monitors": {
+            "window_start": airnow.get("window_start"),
+            "window_end": airnow.get("window_end"),
+            "count": len(monitors),
+            "value_semantics": "EPA AirNow monitor 24-hour mean (preliminary data)",
+            "monitors": [{"id": m.get("id"), "name": m.get("name"),
+                          "lat": round(float(m["lat"]), 4), "lon": round(float(m["lon"]), 4),
+                          "pm25": _round_or_none(m["pm25"]), "hours": m.get("hours"),
+                          "map_pm25": (_round_or_none(mapped[i])
+                                       if len(mapped) and on_map[i] else None),
+                          "map_pm25_loo": _round_or_none(loo[i]) if len(loo) else None,
+                          "model_pm25": _round_or_none(mon_model[i]) if len(mon_model) else None}
+                         for i, m in enumerate(monitors)],
+        },
+    }
+    return result, _encode_payload(result), live_points, new_last
 
 
 async def _compute_texas_predictions() -> dict:
@@ -1601,7 +1945,7 @@ async def _compute_texas_predictions() -> dict:
                 # statewide scalar, then the training median.
                 lookup_reset[f] = pd.Series(vals, dtype="float64").values
                 # Statewide backfill scalar = today's median across the grid
-                # (model units) — better than the all-time training median.
+                # (model units), better than the all-time training median.
                 med = float(np.nanmedian(lookup_reset[f].values))
                 if np.isfinite(med):
                     weather[f] = med
@@ -1615,28 +1959,32 @@ async def _compute_texas_predictions() -> dict:
               f"T median={lookup_reset['temperature'].median():.1f}°C, "
               f"daily-max wind median={lookup_reset['wind_speed'].median():.1f} m/s")
     else:
-        print("Weather grid unavailable — training-median weather backfill in effect.")
+        print("Weather grid unavailable; training-median weather backfill in effect.")
 
     # ── Live neighbor-feature recompute (the fix for scrambled predictions) ──
     # The multi-radius neighbor PM features (~dominant model signal) MUST reflect
     # same-day air to match training. Recompute them from LIVE PurpleAir sensors
     # here, every prediction cycle. If live data is unavailable (no key / API
     # down / too old), we leave the static climatological columns from
-    # _enrich_tract_lookup_with_distances in place — stable and non-scrambled.
+    # _enrich_tract_lookup_with_distances in place (stable and non-scrambled).
     live_sensor_count = 0
+    live_sensors: list[dict] = []
+    nbr_pool = _STATIC_NBR_SENSORS  # the pool the tract neighbor columns came from
     pa_snap = _live_purpleair(now)
     try:
         if pa_snap is not None:
             from backend.purpleair import compute_neighbor_features
-            live_sensors = pa_snap["sensors"]
+            pool = pa_snap["sensors"]
             nbr_feats = await asyncio.to_thread(
                 compute_neighbor_features,
-                lookup_reset["lat"].values, lookup_reset["lon"].values, live_sensors,
+                lookup_reset["lat"].values, lookup_reset["lon"].values, pool,
             )
             if nbr_feats is not None:
                 lookup_reset = lookup_reset.copy()
                 for fname, arr in nbr_feats.items():
                     lookup_reset[fname] = arr
+                live_sensors = pool
+                nbr_pool = pool
                 live_sensor_count = len(live_sensors)
                 nbr_mean = nbr_feats["nbr_pm25_50km"]
                 nbr_count = nbr_feats["nbr_count_50km"]
@@ -1645,7 +1993,7 @@ async def _compute_texas_predictions() -> dict:
                       f"nbr_pm25_50km mean={float(np.mean(nbr_mean)):.2f}, "
                       f"50km coverage={(nbr_count>0).sum()/len(nbr_count)*100:.1f}%")
         else:
-            print("No live PurpleAir data — using static climatological neighbor features.")
+            print("No live PurpleAir data; using static climatological neighbor features.")
     except Exception as e:
         print(f"Live neighbor recompute failed ({e}); using static neighbor features.")
 
@@ -1660,6 +2008,7 @@ async def _compute_texas_predictions() -> dict:
     hms_usable, hms_is_proxy = hms_currency(hms_data, now)
     if not hms_usable:
         hms_data = {}
+    smoke_polys = []
     if "hms_smoke" in features_needed:
         try:
             polys = []
@@ -1675,6 +2024,7 @@ async def _compute_texas_predictions() -> dict:
                     _smoke_all, lookup_reset["lat"].values, lookup_reset["lon"].values)
                 lookup_reset = lookup_reset.copy()
                 lookup_reset["hms_smoke"] = hms_vals
+                smoke_polys = polys
                 print(f"HMS smoke feature applied ({hms_data.get('data_date')}"
                       f"{', proxy' if hms_is_proxy else ''}): {(hms_vals>0).sum()} tracts "
                       f"under smoke (max tier {int(hms_vals.max()) if len(hms_vals) else 0})")
@@ -1689,7 +2039,7 @@ async def _compute_texas_predictions() -> dict:
     # ── Live CAMS air-quality (+ met PBL proxies only if the model uses them) ──
     # aod/cams_pm25 per tract, computed the SAME way as training (daily-mean of
     # today's hourly AOD), CACHED 6h + disk snapshot. The met call (shortwave/
-    # et0/cloud_cover) is skipped for v6 — those features were dropped, and the
+    # et0/cloud_cover) is skipped for v6: those features were dropped, and the
     # 254-location met call every cycle was the main api.open-meteo.com quota
     # burner. Missing values fall back to the training median fill.
     aq_feats = {"aod", "cams_pm25", "dust", "shortwave", "et0", "cloud_cover"}
@@ -1709,8 +2059,32 @@ async def _compute_texas_predictions() -> dict:
                     applied.append(f)
             print(f"Air-quality features applied ({snap['n_cells']} cells): {applied}")
         else:
-            print("No usable live air-quality data — features will use training-median fill.")
+            print("No usable live air-quality data; features will use training-median fill.")
 
+    # Overview weather = current conditions in Austin. The grid call also keeps
+    # the conditions grid fresh; the point observation then replaces its cell
+    # value, whose nearest station can be another town (San Marcos). Display
+    # weather must not hold up the PM2.5 publish: the grid fetch is waited on
+    # for at most CONDITIONS_COMPUTE_WAIT_S (it keeps running single-flight and
+    # fills the cache for the next cycle), and the point lookup is skipped then.
+    try:
+        statewide_weather = await asyncio.wait_for(
+            get_display_weather(30.2672, -97.7431), CONDITIONS_COMPUTE_WAIT_S)
+        grid_answered = True
+    except asyncio.TimeoutError:
+        print(f"[conditions] grid still loading after {CONDITIONS_COMPUTE_WAIT_S} s; "
+              "this cycle uses the cached or fallback display weather")
+        statewide_weather = await get_display_weather(30.2672, -97.7431, allow_fetch=False)
+        grid_answered = False
+    if grid_answered:
+        try:
+            from backend import nws
+            austin_obs = await nws.fetch_point_current(30.2672, -97.7431)
+        except Exception as e:
+            print(f"[conditions] Austin observation raised: {e}")
+            austin_obs = None
+        if austin_obs is not None:
+            statewide_weather = austin_obs
     header = {
         "region":       "texas",
         "display_name": "All of Texas",
@@ -1720,7 +2094,7 @@ async def _compute_texas_predictions() -> dict:
         # Display weather (current conditions at Austin, °F/mph/MSL) for the
         # statewide overview panel; the model consumed per-tract gridded daily
         # values in training units.
-        "weather":      await get_display_weather(30.2672, -97.7431),
+        "weather":      statewide_weather,
         # Data-source transparency: lets the UI (and operators) see whether the
         # dominant live signals were actually live for THIS prediction cycle.
         "data_sources": {
@@ -1733,18 +2107,56 @@ async def _compute_texas_predictions() -> dict:
             "purpleair_key_configured": _purpleair_key_configured(),
             "hms_is_proxy":             hms_is_proxy,
             "refresh_interval_min":     PURPLEAIR_CACHE_TTL_MIN,
+            # Display weather only ("nws" | "open-meteo" | "fallback").
+            "conditions_source":        statewide_weather.get("source", "fallback"),
         },
         "value_semantics": "Model-predicted 24-hour-average PM2.5 (µg/m³) per census tract",
     }
 
-    # Vectorized batch prediction, tract dicts and the JSON/gzip encoding all
-    # run in one worker thread; the event loop only swaps references.
-    result, payload = await asyncio.to_thread(
-        _predict_and_package, lookup_reset, weather, temporal, header)
-    del lookup_reset
+    # ── EPA monitor sites for the calibration ───────────────────────────────
+    # Raw model values at each AirNow monitor's exact coordinates, from the
+    # same inputs this cycle's tracts used (sensor pool, smoke, grids).
+    airnow = _current_airnow_means(now)
+    monitors = (airnow or {}).get("monitors") or []
+    mon_df = None
+    if monitors:
+        try:
+            mon_df = await asyncio.to_thread(
+                _point_feature_frame, lookup_reset,
+                [m["lat"] for m in monitors], [m["lon"] for m in monitors],
+                nbr_pool, smoke_polys)
+        except Exception as e:
+            print(f"[calibration] monitor features failed ({type(e).__name__}: {e}); "
+                  "this cycle is not freshly calibrated")
+            monitors, mon_df = [], None
+    header["data_sources"]["airnow_monitors"] = len(monitors)
+    points = {
+        "monitors": monitors, "mon_df": mon_df, "sensors": live_sensors, "airnow": airnow,
+        "last_calibration": state.get("last_calibration"), "now": now,
+        "purpleair_fetched_at": pa_snap["fetched_at"] if live_sensor_count else None,
+    }
 
+    # Vectorized batch prediction, calibration, tract dicts and the JSON/gzip
+    # encoding all run in one worker thread; the event loop only swaps references.
+    result, payload, live_points, new_cal = await asyncio.to_thread(
+        _predict_and_package, lookup_reset, weather, temporal, header, points)
+    del lookup_reset, mon_df, points
+
+    if new_cal is not None:
+        state["last_calibration"] = new_cal
+        await _save_snapshot_async(CALIBRATION_SNAPSHOT_PATH, new_cal)
+    state["live_points"] = live_points
     _set_texas_result(result, payload)
     await _save_snapshot_async(TEXAS_SNAPSHOT_PATH, payload["raw"])
+    cal = result.get("calibration") or {}
+    if cal.get("applied"):
+        loo = cal.get("loo") or {}
+        print(f"Calibration applied ({cal.get('method')}, {cal.get('monitors_used')} monitors"
+              + (f", reused fit from {cal['reused_from']}" if cal.get("reused_from") else "")
+              + (f", held-out MAE {loo.get('mae')} vs uncalibrated "
+                 f"{(cal.get('uncalibrated') or {}).get('mae')}" if loo else "") + ")")
+    else:
+        print(f"Calibration NOT applied ({len(monitors)} monitors available)")
     await asyncio.to_thread(_malloc_trim)
     print(f"✓ Texas predictions complete in {time.monotonic() - t0:.1f}s: "
           f"{result['tract_count']} tracts (live sensors={live_sensor_count}, "
@@ -1883,10 +2295,10 @@ async def get_tract(geoid: str, request: Request):
     if t is None:
         raise HTTPException(503, "Prediction not available yet.", headers={"Retry-After": "30"})
 
-    # Local CURRENT conditions — display only (°F/mph). A clicked tract gets an
+    # Local CURRENT conditions, display only (°F/mph). A clicked tract gets an
     # EXACT-location fetch (cached per ~11km, shared) so it matches the user's
     # local weather closely; on any failure it falls back to the coarse hourly
-    # conditions grid (location-varying — never the old frozen statewide value).
+    # conditions grid (location-varying, never the old frozen statewide value).
     display_weather = await get_click_weather(float(t["lat"]), float(t["lon"]))
 
     return {
@@ -1894,6 +2306,7 @@ async def get_tract(geoid: str, request: Request):
         "lat":                 t["lat"],
         "lon":                 t["lon"],
         "pm25":                t["pm25"],
+        "pm25_model":          t.get("pm25_model", t["pm25"]),
         "epa_aqi":             t["epa_aqi"],
         "category":            t["category"],
         "color":               t["color"],
@@ -1910,7 +2323,7 @@ async def get_tract(geoid: str, request: Request):
 async def texas_tracts_geojson(request: Request):
     """Serve all Texas census tract GeoJSON. MUST be before /{city}/ route.
 
-    The raw file is ~24.6 MB — far too heavy to re-send uncompressed (or to
+    The raw file is ~24.6 MB, far too heavy to re-send uncompressed (or to
     re-gzip per request) over a residential uplink. We gzip it ONCE into
     memory (~3 MB) and serve those bytes directly with Content-Encoding: gzip,
     plus a 1-day browser cache (tract geometry only changes when the pipeline
@@ -1926,7 +2339,7 @@ async def texas_tracts_geojson(request: Request):
                 media_type="application/geo+json",
                 headers={"Content-Encoding": "gzip", **cache_headers},
             )
-    # Client doesn't accept gzip (rare) or compression failed — plain file.
+    # Client doesn't accept gzip (rare) or compression failed: plain file.
     return FileResponse(TEXAS_GEOJSON_PATH, media_type="application/geo+json",
                         headers=cache_headers)
 
@@ -2065,7 +2478,7 @@ async def _run_quantum_placement():
         if state.get("bundle") and state.get("tract_lookup") is not None:
             try:
                 # Model-unit fallback (the payload's `weather` is the DISPLAY
-                # dict in °F/mph — never feed that to the model).
+                # dict in °F/mph; never feed that to the model).
                 weather = dict(WEATHER_FALLBACK)
                 temporal = get_temporal()
                 model_disagreement = await asyncio.to_thread(
@@ -2247,7 +2660,7 @@ async def hms_smoke():
     except Exception as e:
         print(f"HMS endpoint error: {type(e).__name__}: {e}")
         error = "unavailable"
-    # Don't 500 the frontend just because NOAA is down — return empty FC.
+    # Don't 500 the frontend just because NOAA is down: return empty FC.
     empty = {
         "type": "FeatureCollection",
         "features": [],
@@ -2260,6 +2673,21 @@ async def hms_smoke():
     if error:
         empty["error"] = error
     return empty
+
+
+@app.get("/api/live/sensors")
+async def live_sensors():
+    """The ground observations behind the current map cycle: the QC'd PurpleAir
+    sensors the neighbor features were built from (raw 24-hour average and the
+    same calibration the map applies) and the EPA AirNow monitors the map is
+    calibrated to (measured 24-hour mean, the map's value there, and its
+    leave-one-out value). Built once per Texas compute, so it always matches
+    the map; this handler only reads it."""
+    await _current_texas()
+    points = state.get("live_points")
+    if points is None:
+        raise HTTPException(503, "Sensor data not available yet.", headers={"Retry-After": "30"})
+    return points
 
 
 # ── Live PurpleAir layer (feeds the model's nbr_pm25_* features) ──────────────
@@ -2338,6 +2766,8 @@ async def _startup_refresh() -> None:
         print("Startup: fetching NOAA HMS smoke polygons...")
         await _refresh_hms()
     if state.get("bundle") is not None and state.get("tract_lookup") is not None:
+        print("Startup: fetching EPA AirNow monitor data...")
+        await _refresh_airnow()
         print("Startup: computing Texas predictions...")
         try:
             await _refresh_texas()
@@ -2361,6 +2791,9 @@ async def _refresh_cycle() -> None:
             print(f"HMS refresh error: {type(e).__name__}: {e}")
     if state.get("bundle") is not None and state.get("tract_lookup") is not None:
         if pa_refreshed or now >= state.get("texas_next_due", _EPOCH):
+            # Monitor means for this compute's calibration; the store only
+            # downloads hours it lacks or that are due a late-report re-fetch.
+            await _refresh_airnow()
             try:
                 await _refresh_texas()
             except Exception as e:
@@ -2404,11 +2837,11 @@ async def _refresh_loop() -> None:
 
 
 # ── Geocoding (typo-tolerant autocomplete) ───────────────────────────────────
-# Primary: Photon (photon.komoot.io) — fuzzy/typo-tolerant, built for
+# Primary: Photon (photon.komoot.io): fuzzy/typo-tolerant, built for
 # search-as-you-type ("hueston" still finds Houston). Results are biased to the
 # Texas centroid and HARD-filtered to a Texas bounding box.
 # Fallback: Nominatim (exact-match), only for an explicit search (mode=submit)
-# that Photon found nothing for — scoped to Texas via viewbox+bounded instead
+# that Photon found nothing for, scoped to Texas via viewbox+bounded instead
 # of appending ", Texas" to the query text. Nominatim's usage policy allows at
 # most 1 request/second and forbids autocomplete use, so it is never called
 # while typing and is globally throttled.
@@ -2441,7 +2874,7 @@ _click_weather_budget = FixedWindowLimiter(200, 3600.0, max_keys=1)
 # "Did you mean" spell-correction layer: Photon's fuzziness handles swapped /
 # extra letters but misses dropped letters mid-word ("corpus cristi"). We
 # correct the query against the big Texas place names with stdlib difflib and
-# re-query. Names only — coordinates always come from the geocoder.
+# re-query. Names only; coordinates always come from the geocoder.
 _TX_CITIES = [
     "Houston", "San Antonio", "Dallas", "Austin", "Fort Worth", "El Paso",
     "Arlington", "Corpus Christi", "Plano", "Laredo", "Lubbock", "Garland",
@@ -2491,7 +2924,7 @@ def _photon_to_result(feat: dict) -> dict | None:
     """Normalize one Photon GeoJSON feature to the frontend's result shape."""
     try:
         p = feat.get("properties", {})
-        # The TX bbox has margin that clips border-state slivers — hard-reject
+        # The TX bbox has margin that clips border-state slivers, so hard-reject
         # anything Photon labels with a non-Texas state.
         st = p.get("state")
         if st and st not in ("Texas", "TX"):
@@ -2645,7 +3078,7 @@ async def proxy_geocode(
                     return out
         return out
 
-    # 1) Photon as typed — typo-tolerant, autocomplete-grade.
+    # 1) Photon as typed: typo-tolerant, autocomplete-grade.
     raw = await _photon_search(query)
 
     # 2) "Did you mean": if the query looks like a misspelled Texas place,

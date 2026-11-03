@@ -4,15 +4,27 @@ Real-time PM2.5 air quality predictions for every census tract in Texas.
 
 ## What it does
 
-The app displays a live map of model-estimated ground-level PM2.5 (24-hour average) across all 6,896 Texas census tracts. A background loop on the server refreshes the PurpleAir sensor feed every 15 minutes, whether or not anyone is viewing the map, and recomputes every tract's prediction right after each refresh, from those readings plus current weather, CAMS aerosol data and NOAA smoke polygons. The page polls for new predictions every 5 minutes while its tab is visible and shows how old the data is ("Updated N min ago"). A second tab proposes sites for 25 new low-cost sensors, chosen by a quantum-inspired optimizer that runs classical simulated annealing (see Sensor placement).
+The app displays a live map of model-estimated ground-level PM2.5 (24-hour average) across all 6,896 Texas census tracts. A background loop on the server refreshes the PurpleAir sensor feed every 15 minutes, whether or not anyone is viewing the map, and recomputes every tract's prediction right after each refresh, from those readings plus current weather, CAMS aerosol data and NOAA smoke polygons. Each cycle the raw model output is then calibrated to the EPA AirNow regulatory monitors in and around Texas (see Calibration to EPA monitors), and the map can overlay those monitors and the PurpleAir sensors themselves. The page polls for new predictions every 5 minutes while its tab is visible and shows how old the data is ("Updated N min ago"). A second tab proposes sites for 25 new low-cost sensors, chosen by a quantum-inspired optimizer that runs classical simulated annealing (see Sensor placement).
 
 ## How it works
 
-**Model:** A 4-model ML ensemble (Random Forest, LightGBM, XGBoost, CatBoost) trained on 285,798 daily readings from 310 in-Texas PurpleAir sensors (2021-01-01 to 2026-05-01). Blend weights are simplex-optimized via GroupKFold-over-sensors cross-validation; XGBoost ends up with zero weight, so the deployed blend is RF / LightGBM / CatBoost. Honest leave-one-sensor-out (LOSO) CV R² = **0.7134** over all 310 in-Texas sensors (see Known limitations for why accuracy away from sensors is likely lower). (The RMSE/MAE quoted in the ablation table below come from the 10-fold GroupKFold protocol and are not interchangeable with this figure — see Methodology.)
+**Model:** A 4-model ML ensemble (Random Forest, LightGBM, XGBoost, CatBoost) trained on 285,798 daily readings from 310 in-Texas PurpleAir sensors (2021-01-01 to 2026-05-01). Blend weights are simplex-optimized via GroupKFold-over-sensors cross-validation; XGBoost ends up with zero weight, so the deployed blend is RF / LightGBM / CatBoost. Honest leave-one-sensor-out (LOSO) CV R² = **0.7134** over all 310 in-Texas sensors (see Known limitations for why accuracy away from sensors is likely lower). (The RMSE/MAE quoted in the ablation table below come from the 10-fold GroupKFold protocol and are not interchangeable with this figure; see Methodology.)
 
-**Features (30 total):** same-day PurpleAir neighbor averages within 25, 50 and 100 km (the dominant inputs), daily weather (temperature, humidity, daily-max wind, surface pressure, precipitation; Open-Meteo or NASA POWER in training, Open-Meteo live), NOAA HMS smoke, CAMS aerosol optical depth and PM2.5, geographic features (latitude/longitude, distance to coast, distance to nearest training sensor), and calendar encodings on the UTC day. No EPA EJScreen variable is a model input — see Methodology.
+**Features (30 total):** same-day PurpleAir neighbor averages within 25, 50 and 100 km (the dominant inputs), daily weather (temperature, humidity, daily-max wind, surface pressure, precipitation; Open-Meteo or NASA POWER in training, Open-Meteo live), NOAA HMS smoke, CAMS aerosol optical depth and PM2.5, geographic features (latitude/longitude, distance to coast, distance to nearest training sensor), and calendar encodings on the UTC day. No EPA EJScreen variable is a model input; see Methodology.
 
 **Live inference:** Each cycle takes the latest PurpleAir readings (the 24-hour rolling `pm2.5_24hour` value per sensor), rebuilds the neighbor features with the same BallTree code and radii as training, adds the cached weather, CAMS and smoke inputs, and runs the ensemble over all tracts. Serving follows the training pipeline closely but not exactly: weather is sampled on a 1° grid rather than at each point, and the PurpleAir value is a trailing 24 hours rather than a UTC calendar day.
+
+**Calibration to EPA monitors:** Raw PurpleAir sensors read high (humidity inflates them further), and the model passes their scale straight through: on 2026-10-29 the uncalibrated map read +2.6 µg/m³ above 46 EPA monitors (MAE 3.15). So every cycle, after the model runs, `backend/calibration.py` fits a correction to the latest 24-hour means of the EPA AirNow monitors (`backend/airnow.py`, public hourly files, about 70 reporting sites in the PurpleAir bounding box) and applies it to every tract and to the PurpleAir dots. The model itself and its inputs are unchanged; this is post-processing only. The method (`fixslope+kernel_v1`) is `max(a + 0.30 × model + c(p), 0)`: the slope 0.30 is fixed, the intercept `a` is the median of `truth − 0.30 × model` over the monitors (the only parameter fitted each cycle), and `c(p)` is a Gaussian-kernel surface of the monitor residuals (length 200 km, shrinkage 0.5) that fades to the statewide line far from any monitor. It needs at least 10 monitors and an intercept between 0.5 and 30 µg/m³; when a cycle cannot fit, the last good fit is reused for up to 24 hours, after which the map is served uncalibrated and says so (`calibration.applied: false`). Each response carries a `calibration` block with the fit's leave-one-out accuracy at the monitors, and every tract keeps the raw model value as `pm25_model`. `GET /api/live/sensors` returns the PurpleAir sensors (raw and calibrated) and the AirNow monitors (measured mean, map value, leave-one-out map value, raw model value; the map value is null for out-of-state monitors more than 25 km from any Texas tract, where the map draws nothing) behind the current cycle.
+
+The method was chosen by a backtest against EPA AQS final data: 1,247 days (2023-01-01 to 2026-05-31) of the production model's raw output at every monitor site, with the slope, kernel length and shrinkage tuned on 2023-2024 only and every candidate fit per day on that day's monitors. On the held-out 2025-01 to 2026-03 period (22,860 Texas monitor-days at 58 sites):
+
+| | MAE (µg/m³) | Bias | r |
+|---|---|---|---|
+| Raw model | 4.11 | +0.89 | 0.43 |
+| Calibrated, each monitor left out of its own fit | 2.08 | −0.10 | 0.80 |
+| Calibrated, every monitor within 50 km left out | 2.36 | −0.48 | 0.61 |
+
+It beat per-day fitted lines (Theil-Sen, Huber), the EPA PurpleAir humidity correction (the AirNow Fire and Smoke piecewise form, which is Barkjohn 2021 below 30 µg/m³) alone or combined with the same residual surface, and interpolating the monitors alone (MAE 2.18 / 2.50 in the two protocols), though its edge over the other line-plus-residual-surface variants is within site-clustered bootstrap noise. The scripts, the full report and every number are in `pipeline/calibration_backtest/`; the limitations are listed under Known limitations.
 
 **Refresh schedule** (server side, one background loop, independent of traffic):
 
@@ -20,7 +32,9 @@ The app displays a live map of model-estimated ground-level PM2.5 (24-hour avera
 |---|---|---|
 | PurpleAir sensors | 15 min (`PURPLEAIR_CACHE_TTL_MIN`) | On failure, retries after 5 and 10 min, then every 15 min. Readings older than 180 min (`PURPLEAIR_MAX_AGE_MIN`) stop counting as live and predictions fall back to per-sensor climatology. |
 | Tract predictions | right after each PurpleAir refresh, and at least every 15 min | Encoded once per compute and served with an ETag, so unchanged polls get a 304. |
-| Open-Meteo weather grid and CAMS air-quality grid | 6 h | |
+| Open-Meteo weather grid and CAMS air-quality grid | 6 h | Model inputs. |
+| EPA AirNow hourly files | before each tract compute | A rolling 30-hour store; only new hours, and hours still filling in with late reports, are downloaded (unchanged files come back as 304s). Most Texas (TCEQ) monitors report in one batch over an hour late, so the newest hour in the 24-hour window is usually 2 to 3 hours old. |
+| Current conditions shown in the UI | 60 min (`CONDITIONS_TTL_MIN`) | National Weather Service station observations (api.weather.gov), Open-Meteo as the fallback. Display only, never a model input. A clicked tract gets its nearest station's latest observation. |
 | NOAA HMS smoke | 60 min | Today's UTC file; yesterday's stands in (flagged `hms_is_proxy`) until today's is published; never older. |
 | Sensor placement | 6 h (`QUANTUM_CACHE_TTL_MIN`) | |
 | Browser poll | 5 min while the tab is visible | Paused while hidden; refetches on return if the data is older than 5 min. |
@@ -29,23 +43,23 @@ The app displays a live map of model-estimated ground-level PM2.5 (24-hour avera
 
 ## Methodology
 
-**No EJScreen-derived variable is used as a prediction input.** Earlier versions of the model took eight EPA EJScreen features — four demographic (EJF score, % people of color, % low income, % linguistically isolated) and four physical source-proximity (traffic, Superfund, RMP, diesel PM) — for 11.1% of total blended importance. All eight were removed.
+**No EJScreen-derived variable is used as a prediction input.** Earlier versions of the model took eight EPA EJScreen features (four demographic: EJF score, % people of color, % low income, % linguistically isolated; and four physical source-proximity: traffic, Superfund, RMP, diesel PM), for 11.1% of total blended importance. All eight were removed.
 
 The reason is that this model is used to study PM2.5 disparities across demographic groups. If a demographic variable is a model input, any disparity the model reproduces is partly an artifact of its own inputs rather than a property of the atmosphere, and feature-attribution (SHAP) results on it are not interpretable as physical findings. The four physical proximity features were dropped as well, even though they are not circular, so that no EJScreen product enters the prediction path at all.
 
-The accuracy cost was measured, not assumed. Three arms were run on frozen folds — identical data, folds, seed, models and blend weights, varying only the feature list — under 10-fold GroupKFold over sensors on 285,798 rows / 310 sensors, with 95% CIs from a 2000-repetition per-sensor cluster bootstrap on the paired delta:
+The accuracy cost was measured, not assumed. Three arms were run on frozen folds (identical data, folds, seed, models and blend weights, varying only the feature list) under 10-fold GroupKFold over sensors on 285,798 rows / 310 sensors, with 95% CIs from a 2000-repetition per-sensor cluster bootstrap on the paired delta:
 
 | Arm | Features | 10-fold GroupKFold R² | RMSE | MAE | ΔR² vs production | 95% CI |
 |---|---|---|---|---|---|---|
-| A — production | 38 | 0.71359 | 4.2146 | 2.6204 | — | — |
-| B — no demographic | 34 | 0.71141 | 4.2307 | 2.6295 | +0.00218 | [−0.00315, +0.00833] |
-| C — no EJScreen | 30 | 0.71407 | 4.2111 | 2.6149 | −0.00048 | [−0.00704, +0.00662] |
+| A: production | 38 | 0.71359 | 4.2146 | 2.6204 | n/a | n/a |
+| B: no demographic | 34 | 0.71141 | 4.2307 | 2.6295 | +0.00218 | [−0.00315, +0.00833] |
+| C: no EJScreen | 30 | 0.71407 | 4.2111 | 2.6149 | −0.00048 | [−0.00704, +0.00662] |
 
-Both confidence intervals include zero, so neither removal is distinguishable from noise. (The absolute scores in this table are optimistic and only the deltas between arms should be compared; see Known limitations.) Arm C — the deployed configuration — has a slightly *better* point estimate than the 38-feature model and lower RMSE and MAE, and beats it in 7 of 10 folds. Removing all eight EJScreen features carries no measurable accuracy cost.
+Both confidence intervals include zero, so neither removal is distinguishable from noise. (The absolute scores in this table are optimistic and only the deltas between arms should be compared; see Known limitations.) Arm C (the deployed configuration) has a slightly *better* point estimate than the 38-feature model and lower RMSE and MAE, and beats it in 7 of 10 folds. Removing all eight EJScreen features carries no measurable accuracy cost.
 
 These three arms hold the blend weights **frozen** at the previous deployment's values (rf 0.6827 / lgbm 0.0079 / xgb 0 / cat 0.3094) so that the only thing varying is the feature list. That is why arm C's 0.71407 is not the same number as the deployed model's 0.7134: the deployed retrain re-optimizes its own simplex weights (rf 0.79352 / lgbm 0.070187 / xgb 0 / cat 0.136293) on the new out-of-fold predictions, and is evaluated under the 310-site LOSO protocol rather than 10-fold GroupKFold. Both protocols agree on the conclusion: the deployed 30-feature model scores **0.7134** against the previous 38-feature model's **0.7136**, a difference of −0.0002.
 
-**Loss function.** The same retrain also switched LightGBM to `objective="huber"` and XGBoost to `objective="reg:pseudohubererror"`. PM2.5 is heavy-tailed and a squared-error objective lets a handful of smoke and dust days dominate the fit; the Huber losses bound that influence. This is disclosed here because it means the deployed model differs from its predecessor in **two** ways — feature set and loss — not one. The ablation above isolates the feature effect correctly (all three arms use the same models), but it should not be read as a full accounting of the change from the 38-feature deployment.
+**Loss function.** The same retrain also switched LightGBM to `objective="huber"` and XGBoost to `objective="reg:pseudohubererror"`. PM2.5 is heavy-tailed and a squared-error objective lets a handful of smoke and dust days dominate the fit; the Huber losses bound that influence. This is disclosed here because it means the deployed model differs from its predecessor in **two** ways (feature set and loss), not one. The ablation above isolates the feature effect correctly (all three arms use the same models), but it should not be read as a full accounting of the change from the 38-feature deployment.
 
 **Post-hoc environmental-justice analysis.** Because the model never receives a demographic variable, any disparity in its output is inferred from atmospheric measurements and geography alone. Predicting all 6,896 tracts across 365 days (2025-05-02 → 2026-05-01, mean field 8.92 µg/m³) and correlating against tract demographics afterwards:
 
@@ -56,7 +70,7 @@ These three arms hold the blend weights **frozen** at the previous deployment's 
 | % people of color | +0.029 | +0.370 (+4.1%) | [+0.216, +0.526] |
 | % linguistically isolated | +0.003 | +0.122 (+1.4%) | [−0.043, +0.282] |
 
-Low income shows the clearest monotonic gradient. The % people-of-color relationship is **not monotonic** — the least-POC quintile (9.01) is also elevated relative to the middle quintiles (8.67–8.75) before the most-POC quintile rises to 9.38 — so Spearman (+0.124) exceeds Pearson (+0.029) by four-fold. The linguistic-isolation interval includes zero and should not be reported as a disparity. Full results: `xai/outputs/posthoc_ej/`.
+Low income shows the clearest monotonic gradient. The % people-of-color relationship is **not monotonic**: the least-POC quintile (9.01) is also elevated relative to the middle quintiles (8.67–8.75) before the most-POC quintile rises to 9.38, so Spearman (+0.124) exceeds Pearson (+0.029) by four-fold. The linguistic-isolation interval includes zero and should not be reported as a disparity. Full results: `xai/outputs/posthoc_ej/`.
 
 EJScreen data is still used in two places that are not model inputs: the post-hoc environmental-justice analysis (which correlates predictions against demographics *after* the fact), and the quantum sensor-placement optimizer, where prioritizing under-monitored overburdened communities is a deliberate policy choice applied downstream of the model.
 
@@ -69,13 +83,14 @@ Full results: `models/ablation_ejscreen.json`, per-fold log in `models/ablation_
 | Frontend | React + Vite, Leaflet, i18n (EN/ES) |
 | Backend | FastAPI (Python), served on Render |
 | Hosting | Vercel (frontend) + Render (backend) |
-| Data | PurpleAir API, Open-Meteo (weather, CC BY 4.0), Copernicus Atmosphere Monitoring Service via Open-Meteo Air Quality, NASA POWER (training weather), NOAA HMS, U.S. Census TIGER (EPA EJScreen: post-hoc analysis and sensor placement only, never a model input) |
+| Data | PurpleAir API, EPA AirNow (calibration) and EPA AQS (backtest), National Weather Service api.weather.gov (displayed current conditions), Open-Meteo (weather, CC BY 4.0), Copernicus Atmosphere Monitoring Service via Open-Meteo Air Quality, NASA POWER (training weather), NOAA HMS, U.S. Census TIGER (EPA EJScreen: post-hoc analysis and sensor placement only, never a model input) |
 | Maps and search | Stadia Maps basemap (Esri fallback), OpenStreetMap data, Photon and Nominatim geocoding |
 | ML | scikit-learn, LightGBM, XGBoost, CatBoost, scipy; dimod + dwave-neal for sensor placement |
 
 ## Data notes
 
-- PM2.5 values are raw PurpleAir ATM-channel concentrations, with no EPA correction applied. Live inference uses the same channel as most training targets; see Known limitations for the exception.
+- The model's inputs and its raw output (`pm25_model`) are on the raw PurpleAir ATM-channel scale, the same channel as most training targets (see Known limitations for the exception). The displayed `pm25`, colors, AQI and averages use the value calibrated to EPA monitors whenever `calibration.applied` is true.
+- AirNow data are preliminary and can be revised later; the backtest used final AQS data.
 - Color scale: Good 0–9 µg/m³ / Moderate 9–13 / Elevated 13–17 / High 17+. The 9 µg/m³ break matches the U.S. EPA annual NAAQS (2024).
 - Training sensors: 310 in-Texas PurpleAir sensors. 117 additional border-state sensors are used as same-day neighbors but excluded from training targets.
 
@@ -84,7 +99,9 @@ Full results: `models/ablation_ejscreen.json`, per-fold log in `models/ablation_
 - **Mixed PM2.5 basis in the training targets.** 61,224 of the 412,507 rows in the training dataset (14.8%; 59,640 of the 285,798 in-Texas rows used as training targets, about 21%) are the 2025 legacy rows copied from `p2_processed.xls`. Their PM2.5 is not raw `pm2.5_atm`: against the cached ATM history for the same sensor-days they fit about 0.54 × ATM + 1.6. Fixing this means replacing those rows with the cached ATM values and retraining, which has not been done yet. The 8-8-26 retrain still contains 39,105 of these rows.
 - **The EJScreen ablation's absolute scores are optimistic.** `pipeline/13_ablation_ejscreen.py` uses neighbor features computed once from the full sensor pool rather than recomputed per fold, so a held-out sensor's features still include other held-out sensors' same-day readings. The R², RMSE and MAE in the ablation table are therefore higher than an honest held-out score. The deltas between arms remain comparable, because all three arms share the same features and folds.
 - **LOSO has no spatial buffer.** Leave-one-sensor-out keeps every other sensor, however close, in training and in the neighbor features. A training sensor's nearest other sensor is a median 3.6 km away, while a tract's nearest training sensor is a median 7.8 km away (90th percentile 54 km). Accuracy at unmonitored tracts, especially rural ones, is therefore likely lower than the 0.7134 LOSO score.
-- **No EPA correction.** Raw PurpleAir ATM values usually read higher than regulatory reference monitors, while the color bands are anchored to the EPA annual standard, which is defined for reference-monitor annual means. A tract shown above 9 µg/m³ on a given day is not an exceedance of that standard.
+- **The calibration compresses local contrast.** Its fixed slope of 0.30 is what the monitors support, but monitors are a mostly urban, non-random sample, so neighborhood-scale differences seen only by PurpleAir are shrunk to 30% of their raw size on the map and on the sensor dots, and cannot be validated.
+- **Calibration away from monitors and on smoky days.** Far from any monitor (more than 50 km) the calibrated map catches fewer true High days than the raw model (hit rate 0.40 vs 0.49), with far fewer false alarms (precision 0.77 vs 0.24); above 25 µg/m³ both read about 21-22 µg/m³ low (raw −22.3, calibrated −21.5). In the Panhandle and South Plains the calibration lowers MAE (3.26 to 2.74) but leaves a positive bias (+2.30), because the statewide intercept is high for those cleaner cities. The 30 µg/m³ intercept rail trips when the median of (monitor − 0.30 × model) exceeds 30, which in the backtest's dust and smoke days corresponds to a median monitor of roughly 34-41 µg/m³; such a regional event would fall back to an older fit or to raw values.
+- **The color bands are not a standards test.** The bands are anchored to the EPA annual standard, which is defined for reference-monitor annual means. A tract shown above 9 µg/m³ on a given day is not an exceedance of that standard.
 
 ## Deployment
 
@@ -105,7 +122,7 @@ The backend runs on Render's free tier (one uvicorn process, 512 MB RAM, ephemer
 
 **PurpleAir cost.** Measured on 2026-10-20, one statewide pull returned 497 sensors and cost 3,484 points. At a 15-minute refresh that is about 335,000 points a day, or about 10M points a month; the organization balance was about 400M at the time. Raising `PURPLEAIR_CACHE_TTL_MIN` lowers the cost proportionally. Each Render restart also makes one extra pull (the snapshot disk is wiped), and a local server run with the key spends points the same way.
 
-**Health.** `GET /api/health` reads only in-memory state, so it is safe as the health check, and always returns HTTP 200. `status` is `degraded` when the model is not loaded, live neighbor features are not in use, or predictions are older than three refresh intervals. It also reports `purpleair_key_configured`, `live_neighbors`, `predictions_age_min`, `purpleair_age_min`, `refresh_interval_min`, `memory_rss_mb` and the per-source `data_sources` block.
+**Health.** `GET /api/health` reads only in-memory state, so it is safe as the health check, and always returns HTTP 200. `status` is `degraded` when the model is not loaded, live neighbor features are not in use, or predictions are older than three refresh intervals. It also reports `purpleair_key_configured`, `live_neighbors`, `predictions_age_min`, `purpleair_age_min`, `refresh_interval_min`, `memory_rss_mb`, the calibration state (`calibration_applied`, `calibration_mae_loo`, `airnow_monitors`, `airnow_window_end`), where the displayed weather came from (`conditions_source`: `nws`, `open-meteo` or `fallback`), the model-input grid times (`weather_grid_fetched_at`, `airquality_fetched_at`) and the per-source `data_sources` block.
 
 ## Running locally
 
@@ -140,7 +157,7 @@ python -m pytest
 
 The suite is offline: it needs no PurpleAir key and mocks every outbound call. CI (`.github/workflows/ci.yml`) runs it on Python 3.11 and 3.12 and builds the frontend.
 
-The frontend has its own unit tests (Vitest, in `frontend/src/**/*.test.js`), currently covering the AQI helpers in `utils/aqi.js`:
+The frontend has its own unit tests (Vitest, in `frontend/src/**/*.test.js`), currently covering the AQI helpers in `utils/aqi.js` and the English/Spanish UI strings in `i18n.js` (`i18n.test.js`):
 
 ```
 cd frontend && npm ci && npm test
@@ -156,6 +173,18 @@ Some tests pin values that are expected to change when the model or its inputs c
 
 If the median or 90th percentile changes, update the figures in Known limitations too.
 
+## Prediction log
+
+Render's disk is wiped on every restart, so the backend keeps no history. Instead, `.github/workflows/prediction-log.yml` runs every 3 hours (minute 17, or by hand from the Actions tab) and saves what the live map is serving. `scripts/log_snapshot.py` (Python standard library only) fetches `/api/health`, `/api/texas/predictions` and `/api/live/sensors`, retrying for up to 8 minutes while a free instance wakes, and uploads one `snapshot_<YYYYMMDDTHHMMZ>.tar.gz` (named for the predictions' `generated_at`, UTC) to the monthly prerelease `prediction-log-YYYY-MM` on this repo's Releases page. Each tarball holds `tracts.csv` (displayed `pm25`, raw `pm25_model`, category), `monitors.csv` (EPA AirNow 24-h means with the calibrated, leave-one-out and raw map values at each monitor), `sensors.csv` (PurpleAir raw and calibrated) and `meta.json` (calibration block, data sources, health). Snapshots from before `/api/live/sensors` existed have tracts only. If the backend has not recomputed since the last run, the run skips the upload; a degraded backend is still logged, and the job fails only when the backend never answered or the upload failed. The release tags are made with `GITHUB_TOKEN`, so they start no other workflow and no deploy. GitHub turns off scheduled workflows in a public repo after 60 days without repository activity, so re-enable the workflow from the Actions tab if the log goes quiet.
+
+To merge every snapshot into analysis-ready CSVs, each with a `snapshot_time` column, plus a per-snapshot `snapshots.csv` with the live calibration accuracy:
+
+```
+python3 scripts/fetch_prediction_log.py --out-dir prediction_log      # --list to only list
+```
+
+It lists releases with the public GitHub API and downloads from the public release URLs, so no token is needed (with `GITHUB_TOKEN` set it downloads through the API instead). Downloads are cached in `prediction_log/snapshots/`, and the script exits 1 if any download failed. Keep `prediction_log/` out of git: a month of snapshots is roughly 1.7 million tract rows. For example, comparing `map_pm25_loo` and `model_pm25` with `pm25` in `monitors.csv` tracks the calibrated map's accuracy against monitors over weeks. To test the logger locally without uploading: `python3 scripts/log_snapshot.py --dry-run --out-dir /tmp/snap`.
+
 ## Structure
 
 ```
@@ -167,4 +196,4 @@ models/       Trained ensemble bundle + metrics
 
 ## Author
 
-Saketh Chebrolu — [Shared Skies Initiative](https://sharedskiesinitiative.org/real-time-map)
+Saketh Chebrolu, [Shared Skies Initiative](https://sharedskiesinitiative.org/real-time-map)
